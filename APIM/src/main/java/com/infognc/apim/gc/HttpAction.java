@@ -8,18 +8,27 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Arrays;
+
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 
-public class HttpAction {
+import com.infognc.apim.utl.Configure;
 
-	private String HTTP_URL = "https://api.apne2.pure.cloud";
+@Component
+public class HttpAction {
+	private static final Logger logger = LoggerFactory.getLogger(HttpAction.class);
+	private RestTemplate restTemplate;
 	
 	private HttpAction() {}
 
@@ -31,62 +40,142 @@ public class HttpAction {
 	private static class LazyHolder{
         private static final HttpAction INSTANCE = new HttpAction();
     }
-
-	public void test(String url) {
-		this.HTTP_URL = url;
-		System.out.println("## HTTP_URL :: " + HTTP_URL + " ||");
-	}
 	
+	/**
+	 * 
+	 * [GET] G.C API 호출 restTemplate
+	 * 
+	 * @param uriBuilder
+	 * @param token
+	 * @return
+	 */
 	public String restTemplateService(UriComponents uriBuilder, String token) {
-
-		// header 세팅
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(new MediaType[] { MediaType.APPLICATION_JSON }));
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("authorization", "bearer " + token);
+		String result = "";
+		try {
+			// header 세팅
+			HttpHeaders headers = new HttpHeaders();
+			headers.setAccept(Arrays.asList(new MediaType[] { MediaType.APPLICATION_JSON }));
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			headers.set("authorization", "bearer " + token);
+			
+			HttpEntity<String> entity = new HttpEntity<String>(headers);
+			
+			ResponseEntity<String> res = restTemplate.exchange(
+											uriBuilder.toUriString(), 
+											HttpMethod.GET, 
+											entity, 
+											String.class
+											);
+			
+			result = res.toString();
+			
+		}catch(HttpClientErrorException hce) {
+			hce.printStackTrace();
+			logger.error(hce.toString());
+			return null;
+		}catch(HttpServerErrorException hse) {
+			hse.printStackTrace();
+			logger.error(hse.toString());
+			return null;
+		}catch(Exception e) {
+			e.printStackTrace();
+			logger.error(e.toString());
+			return null;
+		}
 		
-		HttpEntity<String> entity = new HttpEntity<String>(headers);
-		
-		RestTemplate restTemplate = new RestTemplate();
-		
-		ResponseEntity<String> result = restTemplate.exchange(
-										uriBuilder.toUriString(), 
-										HttpMethod.GET, 
-										entity, 
-										String.class
-										);
-		
-		System.out.println(result.getStatusCodeValue());
-		System.out.println(result.getStatusCode().value());
-		
-		
-		return result.getBody();
+		return result;
 	}
 	
+	/**
+	 * 
+	 * [POST] G.C API 호출 restTemplate
+	 * 
+	 * @param uriBuilder
+	 * @param token
+	 * @param reqBody
+	 * @return
+	 */
 	public String restTemplateService(UriComponents uriBuilder, String token, JSONObject reqBody) {
+		String result = "";
+		try {
+			// header 세팅
+			HttpHeaders headers = new HttpHeaders();
+			headers.setAccept(Arrays.asList(new MediaType[] { MediaType.APPLICATION_JSON }));
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			headers.set("authorization", "bearer " + token);
+			
+			HttpEntity<String> entity = new HttpEntity<String>(reqBody.toString(), headers);
+			
+			ResponseEntity<String> res = restTemplate.exchange(
+											uriBuilder.toUriString(), 
+											HttpMethod.POST, 
+											entity, 
+											String.class
+											);
+			result = res.toString();
+			
+		}catch(HttpClientErrorException hce) {
+			hce.printStackTrace();
+			logger.error(hce.toString());
+			return null;
+		}catch(HttpServerErrorException hse) {
+			hse.printStackTrace();
+			logger.error(hse.toString());
+			return null;
+		}catch(Exception e) {
+			e.printStackTrace();
+			logger.error(e.toString());
+			return null;
+		}
 
-		// header 세팅
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(new MediaType[] { MediaType.APPLICATION_JSON }));
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("authorization", "bearer " + token);
-		
-		HttpEntity<String> entity = new HttpEntity<String>(reqBody.toString(), headers);
-		
-		RestTemplate restTemplate = new RestTemplate();
-		
-		ResponseEntity<String> result = restTemplate.exchange(
-										uriBuilder.toUriString(), 
-										HttpMethod.POST, 
-										entity, 
-										String.class
-										);
-		
-		return result.getBody();
+		return result;
 	}
 	
 	
+	public String restTemplateService(UriComponents uriBuilder, HttpHeaders headers, String type) {
+		String result = "";
+		HttpMethod method = null;
+		try {
+
+			if("POST".equals(type))	method = HttpMethod.POST;
+			else					method = HttpMethod.GET;
+			
+			HttpEntity<String> entity = new HttpEntity<String>(headers);
+			
+			ResponseEntity<String> res = restTemplate.exchange(
+											uriBuilder.toUriString(), 
+											method, 
+											entity, 
+											String.class
+											);
+			
+			result = res.toString();
+			
+		}catch(HttpClientErrorException hce) {
+			hce.printStackTrace();
+			logger.error(hce.toString());
+			return null;
+		}catch(HttpServerErrorException hse) {
+			hse.printStackTrace();
+			logger.error(hse.toString());
+			return null;
+		}catch(Exception e) {
+			e.printStackTrace();
+			logger.error(e.toString());
+			return null;
+		}
+		
+		return result;
+	}
 	
+	
+
+	
+	
+//==========================[ OLD CODE ] =====================================================	
+	
+	
+/*	
 	
 	/**
 	 * REST API 통신 (HTTP URL Connection 사용)
@@ -160,6 +249,6 @@ public class HttpAction {
 		return sb.toString();
 		
 	}
-	
+
 	
 }

@@ -21,6 +21,7 @@ public class ClientAction {
 	private static HttpAction httpAction = HttpAction.getInstance();
 	private ApiClient apiClient = null;
 	private ApiResponse<AuthResponse> authResponse = null;
+	private String apiUrl = "";
 	private String clientId = "";
 	private String clientSecret = "";
 	private String accessToken = "";
@@ -28,6 +29,7 @@ public class ClientAction {
 	
 	
 	public ClientAction() throws IOException, ApiException{
+		this.apiUrl			= Configure.get("gc.api.url");
 		this.clientId 		= Configure.get("gc.client.id");
 		this.clientSecret 	= Configure.get("gc.client.secret");
 		this.accessToken	= Configure.get("gc.auth.token");
@@ -66,7 +68,7 @@ public class ClientAction {
 	 * @param url
 	 */
 	public JSONObject callApiRestTemplate_GET(String url) {
-		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(url)
+		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 									.build(true);
 
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
@@ -85,7 +87,7 @@ public class ClientAction {
 	 */
 	public JSONObject callApiRestTemplate_GET(String url, String path) {
 		
-		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(url)
+		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 									.buildAndExpand(path)
 									;
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
@@ -105,7 +107,7 @@ public class ClientAction {
 	 */
 	public JSONObject callApiRestTemplate_GET(String url, MultiValueMap<String, String> params) {
 
-		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(url)
+		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 									.queryParams(params)
 									.build(true);
 				
@@ -130,7 +132,7 @@ public class ClientAction {
 		
 		UriComponents uriBuilder = null;
 		
-		uriBuilder = UriComponentsBuilder.fromUriString(url)
+		uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 					.queryParams(params)
 					.buildAndExpand(path)
 					;
@@ -154,7 +156,7 @@ public class ClientAction {
 	 * @param url
 	 */
 	public JSONObject callApiRestTemplate_POST(String url, JSONObject reqBody) {
-		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(url)
+		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 									.build(true);
 
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
@@ -174,7 +176,7 @@ public class ClientAction {
 	 */
 	public JSONObject callApiRestTemplate_POST(String url, String path, JSONObject reqBody) {
 		
-		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(url)
+		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 									.buildAndExpand(path)
 									;
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
@@ -194,7 +196,7 @@ public class ClientAction {
 	 */
 	public JSONObject callApiRestTemplate_POST(String url, MultiValueMap<String, String> params, JSONObject reqBody) {
 
-		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(url)
+		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 									.queryParams(params)
 									.build(true);
 				
@@ -218,7 +220,7 @@ public class ClientAction {
 		
 		UriComponents uriBuilder = null;
 		
-		uriBuilder = UriComponentsBuilder.fromUriString(url)
+		uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 					.queryParams(params)
 					.buildAndExpand(path)
 					;

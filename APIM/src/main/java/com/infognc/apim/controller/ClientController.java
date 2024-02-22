@@ -50,22 +50,14 @@ public class ClientController {
 		return dsHsRsltInfoMap;
 	}
 	
+	
+	
 	// IF-API-003704 (IF-CCS-100) - 매장상담원관리
 	// IF-API-050604 (IF-CCS-101) - 매장상담원관리
-	// IF-API-026501 (IF-CCS-102) - 상담매장관리
-	// IF-API-027201 (IF-CCS-103) - 상담매장관리
-	
 	// IF-API-033701 (IF-CCS-853) - ARS 만족도 결과 실시간 자료전송
-	// IF-API-024201 (IF-CCS-854) - 모바일 고개센터 상담사 FAX 번호 전송
-	// IF-API-024201 (IF-CCS-855) - 홈/기업 고객센터 상담사 FAX 번호 전송
 	// IF-API-033701 (IF-CCSN-002)- BS 고객만족도 결과 수신
 
 	
-	
-	
-	// IF-API-035101 (IF-CCS-103)
-	// IF-API-035101 (IF-CCS-103)
-	// IF-API-035101 (IF-CCS-103)
 	
 	
 }
