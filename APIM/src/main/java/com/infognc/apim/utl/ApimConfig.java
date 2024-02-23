@@ -13,7 +13,12 @@ public class ApimConfig {
 	
 	@Bean
 	public Configure configure() throws Exception {
-		String propertiesPath = "classpath:config/prop_" + ENV_SYSTEM + ".properties";
+		String propertiesPath = "";
+		if(ENV_SYSTEM==null)
+			propertiesPath = "classpath:config/prop_dev.properties";
+		else
+			propertiesPath = "classpath:config/prop_" + ENV_SYSTEM + ".properties";
+		
 		
 		Configure configure = new Configure();
 		ResourcePropertySource res = new ResourcePropertySource(propertiesPath);

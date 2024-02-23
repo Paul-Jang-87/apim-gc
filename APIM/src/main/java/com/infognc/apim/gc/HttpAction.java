@@ -12,26 +12,33 @@ import java.util.Arrays;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 
-import com.infognc.apim.utl.Configure;
-
 @Component
 public class HttpAction {
 	private static final Logger logger = LoggerFactory.getLogger(HttpAction.class);
-	private RestTemplate restTemplate;
 	
-	private HttpAction() {}
+	private final RestTemplate restTemplate;
+	
+	@Autowired
+	public HttpAction(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+		System.out.println(">>>> HTTP Action :: ");
+	}
 
+	/*
 	// Multi Thread Singleton 구성을 위한 LazyHolder
 	public static HttpAction getInstance() {
 		return LazyHolder.INSTANCE;
@@ -40,6 +47,7 @@ public class HttpAction {
 	private static class LazyHolder{
         private static final HttpAction INSTANCE = new HttpAction();
     }
+	*/
 	
 	/**
 	 * 

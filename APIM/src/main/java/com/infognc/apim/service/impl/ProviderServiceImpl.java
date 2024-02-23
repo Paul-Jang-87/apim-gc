@@ -9,15 +9,24 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.infognc.apim.gc.ClientAction;
 import com.infognc.apim.service.PostgreService;
 import com.infognc.apim.service.ProviderService;
 
+@Service	
 public class ProviderServiceImpl implements ProviderService{
 	private static final Logger logger = LoggerFactory.getLogger(ProviderServiceImpl.class);
-	private PostgreService postgreService;
-	private ClientAction clientAction;	
+	private final PostgreService postgreService;
+	private final ClientAction clientAction;	
+	
+	@Autowired
+	public ProviderServiceImpl(PostgreService postgreService, ClientAction clientAction) {
+		this.postgreService = postgreService;
+		this.clientAction = clientAction;
+	}
 	
 	@Override
 	public Integer sendCampListToGc(List<Map<String,String>> inParamList) throws Exception {
@@ -42,7 +51,6 @@ public class ProviderServiceImpl implements ProviderService{
 			
 			
 			// GC API 호출
-			clientAction 	= new ClientAction();
 			reqBody 		= new JSONObject();
 			String gcUrl 	= "/api/v2/outbound/campaigns/{campaignId}";	 
 			// CampID로 ContactListId 가져온다.

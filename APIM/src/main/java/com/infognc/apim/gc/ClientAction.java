@@ -3,8 +3,11 @@ package com.infognc.apim.gc;
 import java.io.IOException;
 
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -16,9 +19,10 @@ import com.mypurecloud.sdk.v2.Configuration;
 import com.mypurecloud.sdk.v2.PureCloudRegionHosts;
 import com.mypurecloud.sdk.v2.extensions.AuthResponse;
 
+@Component
 public class ClientAction {
 	private static final PureCloudRegionHosts REGION = PureCloudRegionHosts.ap_northeast_2;
-	private static HttpAction httpAction = HttpAction.getInstance();
+	private final HttpAction httpAction;
 	private ApiClient apiClient = null;
 	private ApiResponse<AuthResponse> authResponse = null;
 	private String apiUrl = "";
@@ -26,17 +30,26 @@ public class ClientAction {
 	private String clientSecret = "";
 	private String accessToken = "";
 	
-	
-	
-	public ClientAction() throws IOException, ApiException{
-		this.apiUrl			= Configure.get("gc.api.url");
-		this.clientId 		= Configure.get("gc.client.id");
-		this.clientSecret 	= Configure.get("gc.client.secret");
-		this.accessToken	= Configure.get("gc.auth.token");
+	@Autowired
+	public ClientAction(HttpAction httpAction) throws IOException, ApiException{
+
+//		httpAction = HttpAction.getInstance();
+		this.httpAction = httpAction;
+		
+		apiUrl			= Configure.get("gc.api.url");
+		clientId 		= Configure.get("gc.client.id");
+		clientSecret 	= Configure.get("gc.client.secret");
+		accessToken		= Configure.get("gc.auth.token");
+		
+		System.out.println(apiUrl);
+		System.out.println(clientId);
+		System.out.println(clientSecret);
+		
 		credentialsAuth();
 		
 		if("".equals(accessToken) || accessToken == null || accessToken.isEmpty()) {
 			accessToken = getAccessToken();
+			System.out.println(accessToken);
 		}
 	}
 	
@@ -52,12 +65,10 @@ public class ClientAction {
 		Configuration.setDefaultApiClient(apiClient);
 	}
 	
-	
 	@Scheduled(fixedDelay=86400*1000)
 	public String getAccessToken() {
 		return authResponse.getBody().getAccess_token();
 	}
-	
 	
 	/*
 	 * [GET]
@@ -91,6 +102,7 @@ public class ClientAction {
 									.buildAndExpand(path)
 									;
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
+		System.out.println("## accessToken :: " + accessToken);
 		
 		String res = httpAction.restTemplateService(uriBuilder, accessToken);
 		

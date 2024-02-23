@@ -3,8 +3,11 @@ package com.infognc.apim.service.impl;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.stereotype.Service;
+
 import com.infognc.apim.service.PostgreService;
 
+@Service
 public class PostgreServiceImpl implements PostgreService{
 
 	@Override

@@ -5,11 +5,11 @@ import java.util.HashMap;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -17,12 +17,14 @@ import com.infognc.apim.gc.HttpAction;
 import com.infognc.apim.utl.ApimCode;
 import com.infognc.apim.utl.Configure;
 
+@Configuration
 public class ApimMakeToken {
 	private static final Logger logger = LoggerFactory.getLogger(ApimMakeToken.class);
-	private static HttpAction httpAction;
+	private final HttpAction httpAction;
 	
-	public ApimMakeToken() {
-		httpAction = HttpAction.getInstance();
+	public ApimMakeToken(HttpAction httpAction) {
+//		httpAction = HttpAction.getInstance();
+		this.httpAction = httpAction;
 	}
 	
 	@Scheduled(fixedDelay=86400*1000)
