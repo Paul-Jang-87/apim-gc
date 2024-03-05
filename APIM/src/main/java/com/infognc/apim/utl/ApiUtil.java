@@ -37,8 +37,8 @@ public class ApiUtil {
 	}
 	
 	public String decode(String targetString) {
-		byte[] sourceBytes = targetString.getBytes();
-		targetString = new String( base64decoder.decode(targetString) );
+		byte[] targetBytes = targetString.getBytes();
+		targetString = new String( base64decoder.decode(targetBytes) );
 		return targetString;
 	}
 	

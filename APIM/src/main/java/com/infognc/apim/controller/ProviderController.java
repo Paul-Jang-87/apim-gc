@@ -7,14 +7,11 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.infognc.apim.gc.ClientAction;
 import com.infognc.apim.service.ProviderService;
 import com.infognc.apim.utl.ApiUtil;
 import com.infognc.apim.utl.ApimCode;
@@ -28,6 +25,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ProviderController {
 	private static final Logger logger = LoggerFactory.getLogger(ProviderController.class);
 	private final ProviderService pvService;
+	private final String END_POINT_CRM = "/ars/hs/v1/luncRsvCallTsms";
+	private final String END_POINT_CCS = "/ars/hs/v1/hmArsStafDatRtmTsms";
+	
 	
 	public ProviderController(ProviderService pvService) {
 		this.pvService = pvService;
@@ -35,11 +35,11 @@ public class ProviderController {
 	
 	/*
 	 * 
-	 * [ARS 고객만족도 실시간 자료전송]
-	 * IF-API-039301
+	 * [유큐브 캠패인 대상자 전송]
+	 * IF-API-039302 (IF-CRM-010)
 	 * 
 	 */
-	@PostMapping(value="/ars/hs/v1/hmArsStafDatRtmTsms")
+	@PostMapping(value="/ars/hs/v1/luncRsvCallTsms")
 	public Map<String, Object> saveStafDat(
 			HttpServletRequest req, HttpServletResponse res,
 			@RequestHeader(value="X-APP-NAME")String appName,
@@ -49,7 +49,7 @@ public class ProviderController {
 			@RequestBody(required=false) List<Map<String, String>> inParamList
 			) throws Exception {
 		
-		logger.info("## IF-API-039301 START ");
+		logger.info("## IF-API-039302 START ");
 		ApiUtil apiUtil = new ApiUtil();
 		HashMap<String, Object> dsRsltInfoMap = new HashMap<String, Object>();	
 		
@@ -87,8 +87,6 @@ public class ProviderController {
 			
 			return dsRsltInfoMap;
 		}
-		
-		
 		
 		HashMap<String, String> paramChkMap = new HashMap<String, String>();
 		logger.info("## IF-API-039302 inParamMap :: " + inParamList.size());
@@ -143,7 +141,7 @@ public class ProviderController {
 			res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
 			
 			rtnMap.put("serverName", "uplus-ars");
-			rtnMap.put("url", "/ars/hs/v1/luncRsvCallTsms");
+			rtnMap.put("url", END_POINT_CRM);
 			rtnMap.put("method", "POST");
 			rtnMap.put("errorStack", ex.getMessage());
 			rtnMap.put("errorServer", "uplus_ars");
@@ -157,31 +155,29 @@ public class ProviderController {
 		}
 		
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		return dsRsltInfoMap;
 	}
 	
 	
 	
-	
 	/*
 	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * **** 사용여부 확인 필요! *******
+	 *    * TB_CALL_PDS_UCUBE, TB_CALL_PDS_PCUBE 데이터 insert가 필요하면 DB table 생성 요청
+	 *    * insert Data를 어디에 쓰는지? (사용처 불분명)
+	 *    * IVR에서 ARS 만족도 조사 데이터 insert는 TB_IVR_SURVEY_UCUBE, TB_IVR_SURVEY_PCUBE table 사용
+	 * 
+	 * 
+	 * 
+	 * 
+	 * [ARS 고객만족도 실시간 자료전송, BS고객만족도 조사수행]
+	 * IF-API-039301 (IF-CCS-852, IF-CCSN-001)
 	 */
-	@PostMapping(value="/ars/hs/v1/luncRsvCallTsms")
+	@PostMapping(value=END_POINT_CCS)
 	public Map<String, Object> saveRsvCallDat(
 			HttpServletRequest req, HttpServletResponse res,
 			@RequestHeader(value="X-APP-NAME")String appName,
@@ -191,20 +187,132 @@ public class ProviderController {
 			@RequestBody(required=false) List<Map<String, String>> inParamList
 			) throws Exception {
 		
-		logger.info("## IF-API-039302 START ");
+		logger.info("## IF-API-039301 START ");
 		ApiUtil apiUtil = new ApiUtil();
 		HashMap<String, Object> dsRsltInfoMap = new HashMap<String, Object>();	
 		
+		try {
+			// Request Header Check!!
+			// 요청 헤더 인증 확인 : HMAC 인증 (req/res 위변조 체크)
+			// Exception 처리
+			apiUtil.checkHmacAuth(appName, headerAuth, authTime, gtid);
+			
+		}catch(HmacSha512Exception e) {
+			dsRsltInfoMap.put("rsltCd", ApimCode.RESULT_CODE_01);
+			dsRsltInfoMap.put("rsltMsg", e.getMessage());
+			res.setHeader("BizError", ApimCode.HEADER_BIZ_ERR_N);
+			res.setStatus(417);
+			
+			return dsRsltInfoMap;
+		}catch(HmacTimeoutException e) {
+			dsRsltInfoMap.put("rsltCd", ApimCode.RESULT_CODE_02);
+			dsRsltInfoMap.put("rsltMsg", e.getMessage());
+			res.setHeader("BizError", ApimCode.HEADER_BIZ_ERR_N);
+			res.setStatus(417);
+			
+			return dsRsltInfoMap;
+		}catch(Exception e){
+			// APIM 가이드에 맞춰서 
+			// response body(dsRsltInfoMap)에 "rsltCd" : 02, "rsltMsg" : e.getMessage 세팅
+			dsRsltInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N); 
+			dsRsltInfoMap.put("rsltMsg", e.getMessage()); 
+			// 강제 status 발생
+			// response header에 "bizError" : "N" 세팅
+			// response status에 417 세팅
+			res.setHeader("BizError", ApimCode.HEADER_BIZ_ERR_N);
+			res.setStatus(417);
+			
+			return dsRsltInfoMap;
+		}
+		
+		HashMap<String, String> paramChkMap = new HashMap<String, String>();
+		logger.info("## IF-API-039301 inParamMap :: " + inParamList.size());
 		
 		
+		List<Map<String, String>> paramMaps = new ArrayList<Map<String,String>>();
+		HashMap<String,Object> rtnMap = new HashMap<String, Object>();
+		String rtnStr = "";
+		try {
+			for(int i=0; i<inParamList.size(); i++) {
+				paramChkMap = new HashMap<String,String>();
+				paramChkMap.put("seqNo", inParamList.get(i).get("seqNo"));
+				paramChkMap.put("surAni", inParamList.get(i).get("surAni"));
+				paramChkMap.put("surGubun", inParamList.get(i).get("surGubun"));
+				apiUtil.hasValue(paramChkMap, new String[] {"seqNo", "surAni", "surGubun"});
+				
+				if(!inParamList.get(i).get("surGubun").equals("BS") && !inParamList.get(i).get("surGubun").equals("C")) {
+					// 강제 status 발생
+					res.setStatus(200);
+					res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
+					
+					rtnMap.put("serverName", "uplus-ars");
+					rtnMap.put("url", END_POINT_CCS);
+					rtnMap.put("method", "POST");
+					rtnMap.put("errorStack", "잘못된 구분값입니다.");
+					rtnMap.put("errorServer", "uplus_ars");
+					rtnMap.put("xForwardService", "uplus-ars");
+					rtnMap.put("errorCode", "400");
+					rtnMap.put("errorDetail", "BizException [code=400,message="+"잘못된 구분값입니다."+"]");
+					rtnMap.put("hasErrorDetail", true);
+					rtnMap.put("version", "wafful-3.0");
+					rtnMap.put("errorMsg", "잘못된 구분값입니다.");
+					dsRsltInfoMap.put("moreInfomation", rtnMap);
+					return dsRsltInfoMap;
+				} else {
+					
+				}
+			}
+		}catch(Exception ex) {
+			// 강제 status 발생
+			res.setStatus(200);
+			res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
+			
+			rtnMap.put("serverName", "uplus-ars");
+			rtnMap.put("url", END_POINT_CCS);
+			rtnMap.put("method", "POST");
+			rtnMap.put("errorStack", ex.getMessage());
+			rtnMap.put("errorServer", "uplus_ars");
+			rtnMap.put("xForwardService", "uplus-ars");
+			rtnMap.put("errorCode", "400");
+			rtnMap.put("errorDetail", "BizException [code=400,message="+rtnStr+"]");
+			rtnMap.put("hasErrorDetail", true);
+			rtnMap.put("version", "wafful-3.0");
+			rtnMap.put("errorMsg", "누적번호는(은) 필수입력 항목입니다.");
+			dsRsltInfoMap.put("moreInfomation", rtnMap);
+			return dsRsltInfoMap;
+		}
 		
-		
-		
-		
-		
-		
+		Integer resInt = 0;
+		try {
+			resInt = pvService.insertDBUCube(inParamList);
+			
+			if(resInt > 0) {
+//				dsRsltInfoMap.put(rtnStr, resInt);
+			}
+			
+			
+		}catch(Exception ex) {
+			// 강제 status 발생
+			res.setStatus(200);
+			res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
+			
+			rtnMap.put("serverName", "uplus-ars");
+			rtnMap.put("url", END_POINT_CCS);
+			rtnMap.put("method", "POST");
+			rtnMap.put("errorStack", ex.getMessage());
+			rtnMap.put("errorServer", "uplus_ars");
+			rtnMap.put("xForwardService", "uplus-ars");
+			rtnMap.put("errorCode", "400");
+			rtnMap.put("errorDetail", ex.getMessage());
+			rtnMap.put("hasErrorDetail", true);
+			rtnMap.put("version", "wafful-3.0");
+			rtnMap.put("errorMsg", ex.getMessage());
+			dsRsltInfoMap.put("moreInfomation", rtnMap);
+		}
 		
 		return dsRsltInfoMap;
 	}
+	
+
 	
 }

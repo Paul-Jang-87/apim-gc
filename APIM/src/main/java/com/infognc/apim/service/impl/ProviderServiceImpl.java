@@ -18,6 +18,7 @@ import com.infognc.apim.entities.Entity_ContactLt;
 import com.infognc.apim.gc.ClientAction;
 import com.infognc.apim.service.PostgreService;
 import com.infognc.apim.service.ProviderService;
+import com.infognc.apim.utl.ApiUtil;
 
 @Service
 public class ProviderServiceImpl implements ProviderService {
@@ -121,5 +122,69 @@ public class ProviderServiceImpl implements ProviderService {
 
 		return iUcnt;
 	}
-
+	
+	@Override
+	public Integer insertDBUCube(List<Map<String, String>> inParamList) throws Exception {
+		Integer resInt = 0;
+		ApiUtil apiUtil = new ApiUtil();
+		
+		
+		// TB_CALL_PDS_UCUBE
+		HashMap<String, String> insUcMap = new HashMap<String, String>();
+		List<Map<String, String>> hsList = new ArrayList<Map<String, String>>();
+		
+		// TB_CALL_PDS_PCUBE
+		HashMap<String, String> insPcMap = new HashMap<String, String>();
+		List<Map<String, String>> psList = new ArrayList<Map<String, String>>();
+		
+		Integer uCnt = 0;
+		Integer pCnt = 0;
+		for(int i=0; i<inParamList.size(); i++) {
+			String seqNo 	= inParamList.get(i).get("seqNo");
+			String surAni 	= inParamList.get(i).get("surAni");
+			String surGubun = inParamList.get(i).get("surGubun");
+			
+			inParamList.get(i).replace("surAni", apiUtil.decode(surAni));
+			
+			if("BS".equals(surGubun)) {		// UCUBE - BS고객만족도 조사수행
+				insUcMap = new HashMap<String, String>();
+				insUcMap.put("seqNo", seqNo);
+				insUcMap.put("surAni", surAni);
+				insUcMap.put("surGubun", surGubun);
+				hsList.add(uCnt, insUcMap);
+				
+				uCnt++;
+			} else if("C".equals(surGubun)) {	// PCUBE - ARS 고객만족도 실시간 자료전송
+				insPcMap = new HashMap<String, String>();
+				insPcMap.put("seqNo", seqNo);
+				insPcMap.put("surAni", surAni);
+				insPcMap.put("surGubun", surGubun);
+				psList.add(uCnt, insPcMap);
+				
+				pCnt++;
+			} else {
+			}
+			
+			logger.info("## API039301HS INSERT DATA BS ==> " + hsList);
+			logger.info("## API039301HS INSERT DATA BS SIZE ==> " + hsList.size());
+			logger.info("## API039301HS INSERT DATA C ==> " + psList);
+			logger.info("## API039301HS INSERT DATA C SIZE ==> " + psList.size());
+			
+			
+			if(hsList.size() > 0) {
+//				resInt = postgreService.insertPDS_UCUBE();
+				logger.info("## API039301HS UCUBE INSERT RESULT ==> " + resInt);
+			}
+			if(psList.size() > 0) {
+//				resInt = postgreService.insertPDS_PCUBE();
+				logger.info("## API039301HS PCUBE INSERT RESULT ==> " + resInt);
+			}
+		}
+		
+		return resInt;
+	}
+	
+	
+	
+	
 }
