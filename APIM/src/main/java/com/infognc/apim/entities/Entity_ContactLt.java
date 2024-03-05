@@ -10,7 +10,6 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "CONTACTLT")
-
 public class Entity_ContactLt {
 	
 	@EmbeddedId

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.LinkedMultiValueMap;
@@ -17,18 +16,20 @@ import com.infognc.apim.gc.HttpAction;
 import com.infognc.apim.utl.ApimCode;
 import com.infognc.apim.utl.Configure;
 
-@Configuration
 public class ApimMakeToken {
 	private static final Logger logger = LoggerFactory.getLogger(ApimMakeToken.class);
 	private final HttpAction httpAction;
+//	private final ClientAction clientAction;
 	
 	public ApimMakeToken(HttpAction httpAction) {
-//		httpAction = HttpAction.getInstance();
 		this.httpAction = httpAction;
+//		this.clientAction = clientAction;
 	}
 	
 	@Scheduled(fixedDelay=86400*1000)
-	public String getToken() {
+	public String getToken() throws Exception {
+//		clientAction.init();
+		
 		String callPath 		= Configure.get("callPath");
 		String tokenApiServer 	= "";
 		if(callPath.equals("0") || callPath.equals("2")) {
@@ -66,6 +67,7 @@ public class ApimMakeToken {
 									.build(true);
 		
 		
+//		String result = clientAction.restTemplateService(uriBuilder, headers, methodType);
 		String result = httpAction.restTemplateService(uriBuilder, headers, methodType);
 		if(result==null) {
 			logger.info(">>> get token error !!!");

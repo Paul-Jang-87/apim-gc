@@ -9,7 +9,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,6 @@ public class ProviderServiceImpl implements ProviderService {
 	private final PostgreService postgreService;
 	private final ClientAction clientAction;
 
-	@Autowired
 	public ProviderServiceImpl(PostgreService postgreService, ClientAction clientAction) {
 		this.postgreService = postgreService;
 		this.clientAction = clientAction;
@@ -88,6 +86,7 @@ public class ProviderServiceImpl implements ProviderService {
 
 			// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/contacts
 			gcUrl = "/api/v2/outbound/contactlists/{contactListId}/contacts";
+			clientAction.init();
 			clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqBody);
 
 			uCnt++;

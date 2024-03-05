@@ -1,10 +1,8 @@
 package com.infognc.apim.service;
 
-
 import com.infognc.apim.entities.Entity_CampMa;
 import com.infognc.apim.entities.Entity_CampRt;
 import com.infognc.apim.entities.Entity_ContactLt;
-
 
 public interface PostgreService {
 	

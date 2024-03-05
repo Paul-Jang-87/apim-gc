@@ -9,6 +9,11 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class CampRt implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1995491647743522758L;
+
 	@Column(name = "RLSQ")
 	private int rlsq;
 	

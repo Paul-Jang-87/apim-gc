@@ -1,10 +1,12 @@
-package com.infognc.apim.utl;
+package com.infognc.apim;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePropertySource;
+
+import com.infognc.apim.utl.Configure;
 
 @Configuration
 public class ApimConfig {
@@ -14,11 +16,14 @@ public class ApimConfig {
 	@Bean
 	public Configure configure() throws Exception {
 		String propertiesPath = "";
+		System.out.println(">> ENV_SYSTEM :: " + ENV_SYSTEM);
 		if(ENV_SYSTEM==null)
 			propertiesPath = "classpath:config/prop_dev.properties";
 		else
 			propertiesPath = "classpath:config/prop_" + ENV_SYSTEM + ".properties";
 		
+		
+		System.out.println("## propertiesPath :: " + propertiesPath);
 		
 		Configure configure = new Configure();
 		ResourcePropertySource res = new ResourcePropertySource(propertiesPath);
@@ -31,6 +36,5 @@ public class ApimConfig {
 		
 		return configure;
 	}
-	
 	
 }

@@ -28,11 +28,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ProviderController {
 	private static final Logger logger = LoggerFactory.getLogger(ProviderController.class);
 	private final ProviderService pvService;
-	private final ClientAction clientAction;
 	
-	public ProviderController(ProviderService pvService, ClientAction clientAction) {
+	public ProviderController(ProviderService pvService) {
 		this.pvService = pvService;
-		this.clientAction = clientAction;
 	}
 	
 	/*
@@ -207,15 +205,6 @@ public class ProviderController {
 		
 		
 		return dsRsltInfoMap;
-	}
-	
-	@RequestMapping(value="/gc-test")
-	public String gcApiTest() throws Exception{
-		String result = "Hello";
-		String url = "/api/v2/outbound/campaigns";
-		result = clientAction.callApiRestTemplate_GET(url).toString();
-		
-		return result;
 	}
 	
 }

@@ -11,6 +11,7 @@ public class SchedulerConfig implements SchedulingConfigurer {
 	
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+		
 		// Thread Pool 설정
 		ThreadPoolTaskScheduler threadPool = new ThreadPoolTaskScheduler(); 
 		

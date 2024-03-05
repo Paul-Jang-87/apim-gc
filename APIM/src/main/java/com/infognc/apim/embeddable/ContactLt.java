@@ -12,6 +12,7 @@ public class ContactLt implements Serializable {
 	/**
 	 * 
 	 */
+	private static final long serialVersionUID = 4671268505557288462L;
 
 	@Column(name = "CPID")
     private String cpid;
