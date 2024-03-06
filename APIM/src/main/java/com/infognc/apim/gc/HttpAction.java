@@ -116,16 +116,26 @@ public class HttpAction {
 		return result;
 	}
 	
-	
-	public String restTemplateService(UriComponents uriBuilder, HttpHeaders headers, String type) {
+	/**
+	 * 
+	 * APIM REST API 통신
+	 * 
+	 * @param uriBuilder
+	 * @param entity
+	 * @param type
+	 * @return
+	 */
+	public String restTemplateService(UriComponents uriBuilder, HttpEntity<String> entity, String type) {
 		String result = "";
+//		Map<String, Object> resBody = new HashMap<String, Object>();
+		
 		HttpMethod method = null;
 		try {
 
 			if("POST".equals(type))	method = HttpMethod.POST;
 			else					method = HttpMethod.GET;
 			
-			HttpEntity<String> entity = new HttpEntity<String>(headers);
+//			HttpEntity<String> entity = new HttpEntity<String>(headers);
 			
 			ResponseEntity<String> res = restTemplate.exchange(
 											uriBuilder.toUriString(), 
@@ -134,6 +144,7 @@ public class HttpAction {
 											String.class
 											);
 			
+//			resBody = res.getBody();
 			result = res.toString();
 			
 		}catch(HttpClientErrorException hce) {

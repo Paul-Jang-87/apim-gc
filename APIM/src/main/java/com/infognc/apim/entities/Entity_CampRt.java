@@ -1,17 +1,24 @@
 package com.infognc.apim.entities;
 
+import java.util.Date;
+
+import com.infognc.apim.embeddable.CampRt;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import java.util.Date;
-import com.infognc.apim.embeddable.CampRt;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor(access=AccessLevel.PROTECTED) // 기본생성자 막고, 프록시를 위해 protected까지 허용
+@Data	// getter, setter 생성
 @Table(name = "CAMPRT")
 public class Entity_CampRt {
 	
-	@EmbeddedId
+	@EmbeddedId		// 복합키
     private CampRt id;
 	
 	@Column(name = "CONTACTID_LIST_ID")
@@ -26,6 +33,9 @@ public class Entity_CampRt {
 	@Column(name = "CPSQ")
 	private int cpsq;
 	
+	@Column(name = "TKDA")	// 2024.03.06 TKDA 컬럼 추가 varchar(4000)
+	private int tkda;
+	
 	@Column(name = "DIRT")
 	private int dirt;
 	
@@ -38,11 +48,6 @@ public class Entity_CampRt {
 	@Column(name = "DIDT")
  	private Date didt;
 	
-	
-
-	public Entity_CampRt() {
-	}
-
 	public Entity_CampRt( String cpid,int cpsq, int hubid, Date didt,
 			int dirt, int dict, CampRt id,int coid,String contactLtId,String contactid) {
 		this.cpid = cpid;
@@ -56,6 +61,8 @@ public class Entity_CampRt {
 		this.id = new CampRt();
 	}
 
+	/*
+	
 	public int getRlsq() {return id.getRlsq();}
     public int getCoid() {return id.getCoid();}
 	public int getCpsq() {return cpsq;}
@@ -78,6 +85,6 @@ public class Entity_CampRt {
 	public void setDirt(int dirt) {this.dirt = dirt;}
 	public void setDict(int dict) {this.dict = dict;}
 	
-	
+	*/
 }
 	

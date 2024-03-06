@@ -18,6 +18,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+
 public class ApiUtil {
 	private static final Logger logger = LoggerFactory.getLogger(ApiUtil.class);
 	protected static final String REQ_MNDT_FIELD_ERROR = "요청 필수항목이 누락되었습니다.";
@@ -149,4 +151,28 @@ public class ApiUtil {
 			throw new HmacTimeoutException("Request not valid (timeout)");
 		}
 	}
+	
+	public static String nullToString(Object obj) {
+		return nullToString(obj, "");
+	}
+	
+	public static String nullToString(Object obj, String defStr) {
+		String rtn = "";
+		if((obj==null) || ("".equals(obj.toString().trim()))) {
+			rtn = defStr;
+		} else if(obj instanceof Map) {
+			Gson gson = new Gson();
+			rtn = gson.toJson(obj);
+		} else if(obj instanceof String[]) {
+			rtn = String.join("-", (String[])obj);
+		} else {
+			rtn = obj.toString().trim();
+		}
+		
+		return rtn; 
+	}
+	
+	
+	
+	
 }

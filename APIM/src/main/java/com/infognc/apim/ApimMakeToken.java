@@ -5,6 +5,7 @@ import java.util.HashMap;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.LinkedMultiValueMap;
@@ -54,6 +55,8 @@ public class ApimMakeToken {
 		headers.set("Content-Type", "application/x-www-form-urlencoded");
 		headers.set("X-Forwarded-Appname", "UPLUS_ARS");
 		
+		HttpEntity<String> entity = new HttpEntity<String>(headers);
+		
 		// parameter 세팅
 		MultiValueMap<String, String> param = new LinkedMultiValueMap<String, String>();
 		param.add("grant_type", "client_credentials");
@@ -66,9 +69,8 @@ public class ApimMakeToken {
 									.queryParams(param)
 									.build(true);
 		
-		
 //		String result = clientAction.restTemplateService(uriBuilder, headers, methodType);
-		String result = httpAction.restTemplateService(uriBuilder, headers, methodType);
+		String result = httpAction.restTemplateService(uriBuilder, entity, methodType);
 		if(result==null) {
 			logger.info(">>> get token error !!!");
 			return null;

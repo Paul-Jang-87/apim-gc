@@ -1,22 +1,27 @@
 package com.infognc.apim.service;
 
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.Query;
+
 import com.infognc.apim.entities.Entity_CampMa;
 import com.infognc.apim.entities.Entity_CampRt;
 import com.infognc.apim.entities.Entity_ContactLt;
 
 public interface PostgreService {
 	
-	//insert
-	Entity_CampRt InsertCampRt(Entity_CampRt entityCampRt);
-	Entity_CampMa InsertCampMa(Entity_CampMa entityCampMa);
-	Integer InsertContactLt(Entity_ContactLt entityContactLt);
+	// 캠페인 마스터 (CAMPMA)
+	Entity_CampMa InsertCampMa(Entity_CampMa entityCampMa);		// INSERT
+	// SELECT
 	
-//	// Select DB (CAMPMA)
-//	public List<Map<String, String>> selCampMa() throws Exception;
-//	// Select DB (CAMPLT)
-//	public List<Map<String, String>> selCampLt() throws Exception;
-//	// Select DB (CAMPRT)
-//	public List<Map<String, String>> selCampRt() throws Exception;
+	
+	// 캠페인 리스트 (CONTACTLT)
+	Integer InsertContactLt(Entity_ContactLt entityContactLt);	// INSERT
+	
+	
+	// 캠페인 결과 (CAMPRT)
+//	Entity_CampRt InsertCampRt(Entity_CampRt entityCampRt);		// INSERT
+//	Entity_CampRt selectCampRtByCpid(String cpid);				// SELECT by 캠페인 ID
 	
 	
 }

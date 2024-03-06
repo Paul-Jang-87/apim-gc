@@ -11,12 +11,11 @@ import com.infognc.apim.entities.Entity_CampRt;
 
 @Repository
 public interface Repository_CampRt extends CrudRepository<Entity_CampRt, CampRt> {
-
+	
 	Optional<Entity_CampRt> findByCpid(String cpid);
-
 	Optional<Entity_CampRt> findById(CampRt id);
 
-	@Query("SELECT MAX(e.id.rlsq) FROM Entity_CampRt e")
+	@Query("SELECT MAX(camprt.id.rlsq) FROM Entity_CampRt camprt")
     Optional<Integer> findMaxRlsq();
 
 }

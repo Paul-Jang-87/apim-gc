@@ -25,8 +25,8 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ProviderController {
 	private static final Logger logger = LoggerFactory.getLogger(ProviderController.class);
 	private final ProviderService pvService;
-	private final String END_POINT_CRM = "/ars/hs/v1/luncRsvCallTsms";
-	private final String END_POINT_CCS = "/ars/hs/v1/hmArsStafDatRtmTsms";
+	private final String ENDPOINT_CRM = "/ars/hs/v1/luncRsvCallTsms";
+	private final String ENDPOINT_CCS = "/ars/hs/v1/hmArsStafDatRtmTsms";
 	
 	
 	public ProviderController(ProviderService pvService) {
@@ -141,7 +141,7 @@ public class ProviderController {
 			res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
 			
 			rtnMap.put("serverName", "uplus-ars");
-			rtnMap.put("url", END_POINT_CRM);
+			rtnMap.put("url", ENDPOINT_CRM);
 			rtnMap.put("method", "POST");
 			rtnMap.put("errorStack", ex.getMessage());
 			rtnMap.put("errorServer", "uplus_ars");
@@ -177,7 +177,7 @@ public class ProviderController {
 	 * [ARS 고객만족도 실시간 자료전송, BS고객만족도 조사수행]
 	 * IF-API-039301 (IF-CCS-852, IF-CCSN-001)
 	 */
-	@PostMapping(value=END_POINT_CCS)
+	@PostMapping(value=ENDPOINT_CCS)
 	public Map<String, Object> saveRsvCallDat(
 			HttpServletRequest req, HttpServletResponse res,
 			@RequestHeader(value="X-APP-NAME")String appName,
@@ -246,7 +246,7 @@ public class ProviderController {
 					res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
 					
 					rtnMap.put("serverName", "uplus-ars");
-					rtnMap.put("url", END_POINT_CCS);
+					rtnMap.put("url", ENDPOINT_CCS);
 					rtnMap.put("method", "POST");
 					rtnMap.put("errorStack", "잘못된 구분값입니다.");
 					rtnMap.put("errorServer", "uplus_ars");
@@ -268,7 +268,7 @@ public class ProviderController {
 			res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
 			
 			rtnMap.put("serverName", "uplus-ars");
-			rtnMap.put("url", END_POINT_CCS);
+			rtnMap.put("url", ENDPOINT_CCS);
 			rtnMap.put("method", "POST");
 			rtnMap.put("errorStack", ex.getMessage());
 			rtnMap.put("errorServer", "uplus_ars");
@@ -297,7 +297,7 @@ public class ProviderController {
 			res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
 			
 			rtnMap.put("serverName", "uplus-ars");
-			rtnMap.put("url", END_POINT_CCS);
+			rtnMap.put("url", ENDPOINT_CCS);
 			rtnMap.put("method", "POST");
 			rtnMap.put("errorStack", ex.getMessage());
 			rtnMap.put("errorServer", "uplus_ars");
