@@ -16,17 +16,18 @@ import com.infognc.apim.service.ClientService;
 public class ClientController {
 	private static final Logger logger = LoggerFactory.getLogger(ClientController.class);
 	private final String ENDPOINT_PDS_RSLT = "/dspRslt";
-	private final String ENDPOINT_PDS_005 = "/dspRsltHs";
-	private final String ENDPOINT_PDS_006 = "/dspRsltPm";
-	private final String ENDPOINT_PDS_007 = "/cmpnMstrRegistHs";
-	private final String ENDPOINT_PDS_008 = "/cmpnMstrRegistPm";
+//	private final String ENDPOINT_PDS_005 = "/dspRsltHs";
+//	private final String ENDPOINT_PDS_006 = "/dspRsltPm";
+	private final String ENDPOINT_PDS_RGST = "/cmpnMstrRegist";
+//	private final String ENDPOINT_PDS_007 = "/cmpnMstrRegistHs";
+//	private final String ENDPOINT_PDS_008 = "/cmpnMstrRegistPm";
+	private final String GC_API_ACTION = "/gcApiAction";
 	
 	private final ClientService clService;
 	
 	public ClientController(ClientService clService) {
 		this.clService = clService;
 	}
-	
 	
 	/*
 	 * IF-API-035101 (IF-CCS-005) - PDS발신결과수신_상담_유선
@@ -38,7 +39,7 @@ public class ClientController {
 		logger.info("## IF-API-035101 - PDS발신결과수신 start");
 		HashMap<String, Object> dsRstlInfoMap = new HashMap<String, Object>();
 		
-		dsRstlInfoMap = clService.getCmpnRsltList(reqBodyList);
+		dsRstlInfoMap = clService.sendCmpnRsltList(reqBodyList);
 		
 		return dsRstlInfoMap;
 	}
@@ -53,26 +54,44 @@ public class ClientController {
 	}
 	*/
 	
-	@PostMapping(value=ENDPOINT_PDS_007)
-	public Map<String, Object> saveCampMstrHs() throws Exception {	// IF-API-035102 (IF-CCS-007) - PDS캠페인마스터수신_상담_유선
-		logger.info("## IF-API-035102 (IF-CCS-007) - PDS캠페인마스터수신_상담_유선 start");
-		HashMap dsHsRsltInfoMap = new HashMap();
+	
+	@PostMapping(value=ENDPOINT_PDS_RGST)
+	public Map<String, Object> saveCampMstrHs(@RequestBody List<Map<String, Object>> reqBodyList) throws Exception {	// IF-API-035102 (IF-CCS-007) - PDS캠페인마스터수신_상담_유선
+		logger.info("## IF-API-035102 - PDS캠페인마스터수신_상담 start");
+		HashMap<String, Object> dsHsRsltInfoMap = new HashMap<String, Object>();
+		
+		dsHsRsltInfoMap = clService.sendCmpnMaData(reqBodyList);
 		
 		return dsHsRsltInfoMap;
 	}
 	
 	
-	
+	/*
 	@PostMapping(value=ENDPOINT_PDS_008)
 	public Map<String, Object> saveCampMstrPm() throws Exception {	// IF-API-035102 (IF-CCS-008) - PDS캠페인마스터수신_상담_무선
 		logger.info("## IF-API-035102 (IF-CCS-008) - PDS캠페인마스터수신_상담_무선 start");
-		HashMap dsHsRsltInfoMap = new HashMap();
+		HashMap<String, Object> dsHsRsltInfoMap = new HashMap<String, Object>();
 		
 		return dsHsRsltInfoMap;
 	}
+	*/
 	
-	// IF-API-003704 (IF-CCS-100) - 매장상담원관리
-	// IF-API-050604 (IF-CCS-101) - 매장상담원관리
+	/**
+	 * G.C DataAction에서 APIM 호출을 위한 EndPoint
+	 * 
+	 * @param reqBodyList
+	 * @return
+	 * @throws Exception
+	 */
+	@PostMapping(value=GC_API_ACTION)
+	public Map<String, Object> getApimDataToDataAction(@RequestBody List<Map<String, Object>> reqBodyList) throws Exception {	
+		logger.info("## GenesysCloud DataAction 호출 ");
+		HashMap<String, Object> dsRstlInfoMap = new HashMap<String, Object>();
+		
+		dsRstlInfoMap = clService.sendCmpnRsltList(reqBodyList);
+		
+		return dsRstlInfoMap;
+	}
 	
 	
 }
