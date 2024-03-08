@@ -123,6 +123,8 @@ public class ClientAction {
 		
 		System.out.println(res);
 		
+		if(res == null) return null;
+		
 		return new JSONObject(res);
 	}
 	

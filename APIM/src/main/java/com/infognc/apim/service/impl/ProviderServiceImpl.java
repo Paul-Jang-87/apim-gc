@@ -31,40 +31,30 @@ public class ProviderServiceImpl implements ProviderService {
 		this.clientAction = clientAction;
 	}
 
+	/**
+	 * 캠페인 리스트 전송 (To G.C)
+	 */
 	@Override
 	public Integer sendCampListToGc(List<Map<String, String>> inParamList) throws Exception {
-		Integer uCnt = 0;
-		Integer iUcnt = 0;
 		HashMap<String, String> insUcMap = new HashMap<String, String>();
 		Entity_ContactLt enContactLt = new Entity_ContactLt();
-		ContactLt id = new ContactLt();
 		List<Map<String, String>> hsList = new ArrayList<Map<String, String>>();
 		JSONObject reqBody = null;
 
+		ContactLt contactLt = new ContactLt();
+		Integer uCnt = 0;
+		Integer iUcnt = 0;
 		for (int i = 0; i < inParamList.size(); i++) {
-//			insUcMap = new HashMap<String, String>();
-//			insUcMap.put("cpid", inParamList.get(i).get("cpid"));
-//			insUcMap.put("cpsq", inParamList.get(i).get("cpsq"));
-//			insUcMap.put("cske", inParamList.get(i).get("cske"));
-//			insUcMap.put("csna", inParamList.get(i).get("csna"));
-//			insUcMap.put("tno1", new String(Base64.decodeBase64(inParamList.get(i).get("tno1"))));
-//			insUcMap.put("tno2", new String(Base64.decodeBase64(inParamList.get(i).get("tno2"))));
-//			insUcMap.put("tno3", new String(Base64.decodeBase64(inParamList.get(i).get("tno3"))));
-//			insUcMap.put("tkda", inParamList.get(i).get("tkda"));
-//			insUcMap.put("flag", inParamList.get(i).get("flag"));
-
-//			hsList.add(uCnt, insUcMap);
-
-			id.setCpid(inParamList.get(i).get("cpid"));
-			id.setCpsq(Integer.parseInt(inParamList.get(i).get("cpsq")));
-			enContactLt.setId(id);
+			contactLt.setCpid(inParamList.get(i).get("cpid"));
+			contactLt.setCpsq(Integer.parseInt(inParamList.get(i).get("cpsq")));
+			enContactLt.setId(contactLt);
 			enContactLt.setCske(inParamList.get(i).get("cske"));
 			enContactLt.setCsna(inParamList.get(i).get("csna"));
-			enContactLt.setTn01(new String(Base64.decodeBase64(inParamList.get(i).get("tno1"))));
-			enContactLt.setTn02(new String(Base64.decodeBase64(inParamList.get(i).get("tno2"))));
-			enContactLt.setTn03(new String(Base64.decodeBase64(inParamList.get(i).get("tno3"))));
+			enContactLt.setTno1(new String(Base64.decodeBase64(inParamList.get(i).get("tno1"))));
+			enContactLt.setTno2(new String(Base64.decodeBase64(inParamList.get(i).get("tno2"))));
+			enContactLt.setTno3(new String(Base64.decodeBase64(inParamList.get(i).get("tno3"))));
 			enContactLt.setTkda(inParamList.get(i).get("tkda"));
-			enContactLt.setFlag(inParamList.get(i).get("flag"));
+//			enContactLt.setFlag(inParamList.get(i).get("flag"));
 
 			// GC API 호출
 			reqBody = new JSONObject();
@@ -82,7 +72,7 @@ public class ProviderServiceImpl implements ProviderService {
 			reqBody.put("tno2", insUcMap.get("tno2"));
 			reqBody.put("tno3", insUcMap.get("tno3"));
 			reqBody.put("tkda", insUcMap.get("tkda"));
-			reqBody.put("flag", insUcMap.get("flag"));
+//			reqBody.put("flag", insUcMap.get("flag"));
 			reqBody.put("tmzo", "Asia/Seoul (+09:00)");
 
 			// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/contacts
@@ -96,16 +86,7 @@ public class ProviderServiceImpl implements ProviderService {
 		logger.info("## IF-API-039302 INSERT DATA >> " + hsList);
 		logger.info("## IF-API-039302 INSERT DATA SIZE >> " + hsList.size());
 
-//		// UCUBE INSERT
-//		Integer iUcnt = 0;
-//		if (hsList.size() > 0) {
-//			iUcnt = postgreService.insertCampLt(hsList);
-//			logger.info("## IF-API-039302 INSERT RESULT >> " + iUcnt + " (1:성공, 0:실패)");
-//		}
-
-		// UCUBE INSERT
 		if (uCnt > 0) {
-
 			// db인서트
 			try {
 				
@@ -119,66 +100,103 @@ public class ProviderServiceImpl implements ProviderService {
 			}
 
 		}
-
 		return iUcnt;
 	}
 	
+	/**
+	 * ARS 만족도 실시간 자료전송 ('C', PCUBE)
+	 * BS 고객만족도 조사 수행 ('BS', UCUBE)
+	 * 
+	 */
 	@Override
-	public Integer insertDBUCube(List<Map<String, String>> inParamList) throws Exception {
+	public Integer sendArsStafData(List<Map<String, String>> inParamList) throws Exception {
 		Integer resInt = 0;
 		ApiUtil apiUtil = new ApiUtil();
+		JSONObject reqBody = null;
+		String gcUrl = "";
 		
+		// G.C로 보낼 contact data 
+		String contactListId 	= "";
 		
-		// TB_CALL_PDS_UCUBE
-		HashMap<String, String> insUcMap = new HashMap<String, String>();
-		List<Map<String, String>> hsList = new ArrayList<Map<String, String>>();
+		String cpid 	= "";
+		String cpsq		= "";
+		String cske		= "";
+		String csna		= "";
+		String tno1		= "";
+		String tno2		= "";
+		String tno3		= "";
+		String tkda		= "";
 		
-		// TB_CALL_PDS_PCUBE
-		HashMap<String, String> insPcMap = new HashMap<String, String>();
-		List<Map<String, String>> psList = new ArrayList<Map<String, String>>();
-		
-		Integer uCnt = 0;
-		Integer pCnt = 0;
-		for(int i=0; i<inParamList.size(); i++) {
-			String seqNo 	= inParamList.get(i).get("seqNo");
-			String surAni 	= inParamList.get(i).get("surAni");
-			String surGubun = inParamList.get(i).get("surGubun");
-			
-			inParamList.get(i).replace("surAni", apiUtil.decode(surAni));
-			
-			if("BS".equals(surGubun)) {		// UCUBE - BS고객만족도 조사수행
-				insUcMap = new HashMap<String, String>();
-				insUcMap.put("seqNo", seqNo);
-				insUcMap.put("surAni", surAni);
-				insUcMap.put("surGubun", surGubun);
-				hsList.add(uCnt, insUcMap);
+		try {
+			for(int i=0; i<inParamList.size(); i++) {
+				String seqNo 	= inParamList.get(i).get("seqNo");
+				String surAni 	= inParamList.get(i).get("surAni");
+				String surGubun = inParamList.get(i).get("surGubun");
 				
-				uCnt++;
-			} else if("C".equals(surGubun)) {	// PCUBE - ARS 고객만족도 실시간 자료전송
-				insPcMap = new HashMap<String, String>();
-				insPcMap.put("seqNo", seqNo);
-				insPcMap.put("surAni", surAni);
-				insPcMap.put("surGubun", surGubun);
-				psList.add(uCnt, insPcMap);
+				inParamList.get(i).replace("surAni", apiUtil.decode(surAni));
 				
-				pCnt++;
-			} else {
+				if("BS".equals(surGubun)) {		// UCUBE - BS고객만족도 조사수행
+					// SET G.C Send Data 
+					cpid = "11";
+					tno1 = surAni;
+					tkda = "8443" + "||" + seqNo + "||" + surAni + "||" + surGubun;
+
+				} else if("C".equals(surGubun)) {	// PCUBE - ARS 고객만족도 실시간 자료전송
+					// SET G.C Send Data 
+					cpid = "9";
+					tno1 = surAni;
+					tkda = "5996" + "||" + seqNo + "||" + surAni + "||" + surGubun;
+					
+				} else {
+				}
+				
+				// 공휴일 체크? 휴일 아닐때 CAMPLT로 데이터 저장
+				// - 사용유무 확인 필요하나, 현재는 사용되지 않는 것으로 추측.
+				// (AS-IS) TB_SMS_HOLIDAY_CHECK 테이블에 2022년까지만 공휴일 데이터가 들어가 있고 이후는 없음.
+				
+				/*
+				 * [CAMPLT]
+				 * CPID = "11" or "9"
+				 * CPSQ = SQ_PCUBE.nextval or SQ_UCUBE.nextval
+				 * CSK2 = SEQ_NO
+				 * CSK3 = SUR_GUBUN
+				 * TNO1 = SUR_ANI
+				 * TKDA = '8443'||SQE_NO||SUR_ANI||SUR_GUBUN or '5996'||SQE_NO||SUR_ANI||SUR_GUBUN
+				 * FLAG = 'A'
+				 * CRDT = sysdate
+				 * 
+				 * 불필요한 데이터는 전송 X ( ex. FLAG, CRDT )
+				 * 
+				 */
+				
+				gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
+				// CampID로 ContactListId 가져온다.
+				// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
+				JSONObject cmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
+				if(cmpList != null) {
+					contactListId = ((JSONObject) cmpList.get("contactList")).getString("id");
+				}
+				
+				reqBody = new JSONObject();
+				reqBody.put("CPID", cpid);
+				reqBody.put("CPSQ", cpsq);
+				reqBody.put("CSKE", cske);
+				reqBody.put("CSNA", csna);
+				reqBody.put("TNO1", tno1);
+				reqBody.put("TNO2", tno2);
+				reqBody.put("TNO3", tno3);
+				reqBody.put("TKDA", tkda);
+				reqBody.put("tmzo", "Asia/Seoul (+09:00)");
+				
+				// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/contacts
+				gcUrl = "/api/v2/outbound/contactlists/{contactListId}/contacts";
+				clientAction.init();
+				clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqBody);
+				
 			}
-			
-			logger.info("## API039301HS INSERT DATA BS ==> " + hsList);
-			logger.info("## API039301HS INSERT DATA BS SIZE ==> " + hsList.size());
-			logger.info("## API039301HS INSERT DATA C ==> " + psList);
-			logger.info("## API039301HS INSERT DATA C SIZE ==> " + psList.size());
-			
-			
-			if(hsList.size() > 0) {
-//				resInt = postgreService.insertPDS_UCUBE();
-				logger.info("## API039301HS UCUBE INSERT RESULT ==> " + resInt);
-			}
-			if(psList.size() > 0) {
-//				resInt = postgreService.insertPDS_PCUBE();
-				logger.info("## API039301HS PCUBE INSERT RESULT ==> " + resInt);
-			}
+		}catch(Exception e) {
+			logger.error("## ERROR!!  : {} " + e.getMessage());
+			return 0;
 		}
 		
 		return resInt;

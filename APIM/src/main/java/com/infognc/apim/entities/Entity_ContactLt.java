@@ -6,8 +6,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-
+@NoArgsConstructor
+@Data
 @Entity
 @Table(name = "CONTACTLT")
 public class Entity_ContactLt {
@@ -36,7 +39,7 @@ public class Entity_ContactLt {
 	@Column(name = "FLAG")
 	private String flag;
 	
-
+/*
 	public Entity_ContactLt() {
 		
 	}
@@ -81,6 +84,6 @@ public class Entity_ContactLt {
 	public void setCsna(String csna) {this.csna = csna;}
 	public void setTkda(String tkda) {this.tkda = tkda;}
 	public void setFlag(String flag) {this.flag = flag;}
-	
+*/	
 }
 	

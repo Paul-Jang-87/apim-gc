@@ -48,43 +48,19 @@ public class Entity_CampRt {
 	@Column(name = "DIDT")
  	private Date didt;
 	
-	public Entity_CampRt( String cpid,int cpsq, int hubid, Date didt,
-			int dirt, int dict, CampRt id,int coid,String contactLtId,String contactid) {
-		this.cpid = cpid;
-		this.cpsq = cpsq;
-		this.hubid = hubid;
-		this.didt = didt;
-		this.dirt = dirt;
-		this.dict = dict;
+
+	public Entity_CampRt(String contactLtId, String contactid, int hubid, int cpsq, int tkda, int dirt,
+			int dict, String cpid, Date didt) {
+		this.id = new CampRt();;
 		this.contactLtId = contactLtId;
 		this.contactid = contactid;
-		this.id = new CampRt();
+		this.hubid = hubid;
+		this.cpsq = cpsq;
+		this.tkda = tkda;
+		this.dirt = dirt;
+		this.dict = dict;
+		this.cpid = cpid;
+		this.didt = didt;
 	}
-
-	/*
-	
-	public int getRlsq() {return id.getRlsq();}
-    public int getCoid() {return id.getCoid();}
-	public int getCpsq() {return cpsq;}
-	public int getHubId() {return hubid;}
-	public int getDirt() {return dirt;}
-	public int getDict() {return dict;}
-	public String getCpid() { return cpid; }
-	public String getContactLtid() { return contactLtId; }
-	public String getContactid() { return contactid; }
-	public Date getDidt() {return didt;}
-	public CampRt getId() {return id;}
-	
-	public void setId(CampRt id) {this.id = id;}
-	public void setCpid(String cpid) {this.cpid = cpid;}
-	public void setContactLtid(String contactLtId) {this.contactLtId = contactLtId;}
-	public void setContactid(String contactid) {this.contactid = contactid;}
-	public void setCpsq(int cpsq) {this.cpsq = cpsq;}
-	public void setHubId(int hubid) {this.hubid = hubid;}
-	public void setDidt(Date didt) {this.didt = didt;}
-	public void setDirt(int dirt) {this.dirt = dirt;}
-	public void setDict(int dict) {this.dict = dict;}
-	
-	*/
 }
 	

@@ -9,6 +9,6 @@ public interface ProviderService {
 	public Integer sendCampListToGc(List<Map<String, String>> inParamList) throws Exception;
 
 	// IF-CCS-852, IF-CCSN-001  ARS 고객만족도 실시간 자료전송, BS고객만족도 조사수행
-	public Integer insertDBUCube(List<Map<String, String>> inParamList) throws Exception;
+	public Integer sendArsStafData(List<Map<String, String>> inParamList) throws Exception;
 	
 }

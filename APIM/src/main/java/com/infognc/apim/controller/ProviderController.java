@@ -161,19 +161,6 @@ public class ProviderController {
 	
 	
 	/*
-	 * 
-	 * 
-	 * 
-	 * 
-	 * 
-	 * **** 사용여부 확인 필요! *******
-	 *    * TB_CALL_PDS_UCUBE, TB_CALL_PDS_PCUBE 데이터 insert가 필요하면 DB table 생성 요청
-	 *    * insert Data를 어디에 쓰는지? (사용처 불분명)
-	 *    * IVR에서 ARS 만족도 조사 데이터 insert는 TB_IVR_SURVEY_UCUBE, TB_IVR_SURVEY_PCUBE table 사용
-	 * 
-	 * 
-	 * 
-	 * 
 	 * [ARS 고객만족도 실시간 자료전송, BS고객만족도 조사수행]
 	 * IF-API-039301 (IF-CCS-852, IF-CCSN-001)
 	 */
@@ -284,7 +271,7 @@ public class ProviderController {
 		
 		Integer resInt = 0;
 		try {
-			resInt = pvService.insertDBUCube(inParamList);
+			resInt = pvService.sendArsStafData(inParamList);
 			
 			if(resInt > 0) {
 //				dsRsltInfoMap.put(rtnStr, resInt);
