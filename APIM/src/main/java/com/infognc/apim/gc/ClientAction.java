@@ -70,7 +70,7 @@ public class ClientAction {
 			authResponse = apiClient.authorizeClientCredentials(clientId, clientSecret);
 		
 		// Don't actually do this, this logs your auth token to the console!
-		System.out.println(authResponse.getBody().toString());
+		System.out.println("## authResponse.getBody() :: " + authResponse.getBody().toString());
 		logger.info(authResponse.getBody().toString());
 		
 		// Use the ApiClient instancer
@@ -121,7 +121,7 @@ public class ClientAction {
 		String res = httpAction.restTemplateService(uriBuilder, accessToken);
 //		String res = restTemplateService(uriBuilder, accessToken);
 		
-		System.out.println(res);
+		System.out.println("## res :: " + res);
 		
 		if(res == null) return null;
 		
@@ -206,7 +206,7 @@ public class ClientAction {
 	 * @param url
 	 * @param path
 	 */
-	public JSONObject callApiRestTemplate_POST(String url, String path, JSONObject reqBody) {
+	public JSONObject callApiRestTemplate_POST(String url, String path, Object reqBody) {
 		
 		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 									.buildAndExpand(path)

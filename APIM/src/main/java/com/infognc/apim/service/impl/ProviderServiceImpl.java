@@ -1,16 +1,20 @@
 package com.infognc.apim.service.impl;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import com.infognc.apim.embeddable.ContactLt;
@@ -36,75 +40,87 @@ public class ProviderServiceImpl implements ProviderService {
 	 */
 	@Override
 	public Integer sendCampListToGc(List<Map<String, String>> inParamList) throws Exception {
-		HashMap<String, String> insUcMap = new HashMap<String, String>();
 		Entity_ContactLt enContactLt = new Entity_ContactLt();
-		List<Map<String, String>> hsList = new ArrayList<Map<String, String>>();
 		JSONObject reqBody = null;
-
+		JSONArray bodyList = new JSONArray();
+		
 		ContactLt contactLt = new ContactLt();
 		Integer uCnt = 0;
 		Integer iUcnt = 0;
 		for (int i = 0; i < inParamList.size(); i++) {
-			contactLt.setCpid(inParamList.get(i).get("cpid"));
-			contactLt.setCpsq(Integer.parseInt(inParamList.get(i).get("cpsq")));
+			String cpid = inParamList.get(i).get("cpid");
+			String cpsq = inParamList.get(i).get("cpsq");
+			String cske = inParamList.get(i).get("cske");
+			String csna = inParamList.get(i).get("csna");
+			String tno1 = new String(Base64.decodeBase64(inParamList.get(i).get("tno1")));
+			String tno2 = new String(Base64.decodeBase64(inParamList.get(i).get("tno2")));
+			String tno3 = new String(Base64.decodeBase64(inParamList.get(i).get("tno3")));
+			String tkda = inParamList.get(i).get("tkda");
+			String flag = inParamList.get(i).get("flag");
+			
+			contactLt.setCpid(cpid);
+			contactLt.setCpsq(Integer.parseInt(cpsq));
 			enContactLt.setId(contactLt);
-			enContactLt.setCske(inParamList.get(i).get("cske"));
-			enContactLt.setCsna(inParamList.get(i).get("csna"));
-			enContactLt.setTno1(new String(Base64.decodeBase64(inParamList.get(i).get("tno1"))));
-			enContactLt.setTno2(new String(Base64.decodeBase64(inParamList.get(i).get("tno2"))));
-			enContactLt.setTno3(new String(Base64.decodeBase64(inParamList.get(i).get("tno3"))));
-			enContactLt.setTkda(inParamList.get(i).get("tkda"));
-//			enContactLt.setFlag(inParamList.get(i).get("flag"));
-
+			enContactLt.setCske(cske);
+			enContactLt.setCsna(csna);
+			enContactLt.setTno1(tno1);
+			enContactLt.setTno2(tno2);
+			enContactLt.setTno3(tno3);
+			enContactLt.setTkda(tkda);
+			enContactLt.setFlag(flag);
+			
 			// GC API 호출
+			clientAction.init();
+			
 			reqBody = new JSONObject();
 			String gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
 			// CampID로 ContactListId 가져온다.
 			// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
-			JSONObject cmpList = clientAction.callApiRestTemplate_GET(gcUrl, insUcMap.get("cpid"));
-			String contactListId = ((JSONObject) cmpList.get("contactList")).getString("id");
+			String contactListId = "";
+			JSONObject cmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
+			if(cmpList != null) {
+				contactListId = ((JSONObject) cmpList.get("contactList")).getString("id");
+			}
 
-			reqBody.put("cpid", insUcMap.get("cpid"));
-			reqBody.put("cpsq", insUcMap.get("cpsq"));
-			reqBody.put("cske", insUcMap.get("cske"));
-			reqBody.put("csna", insUcMap.get("csna"));
-			reqBody.put("tno1", insUcMap.get("tno1"));
-			reqBody.put("tno2", insUcMap.get("tno2"));
-			reqBody.put("tno3", insUcMap.get("tno3"));
-			reqBody.put("tkda", insUcMap.get("tkda"));
-//			reqBody.put("flag", insUcMap.get("flag"));
+			reqBody.put("cpid", cpid);
+			reqBody.put("cpsq", cpsq);
+			reqBody.put("cske", cske);
+			reqBody.put("csna", csna);
+			reqBody.put("tno1", tno1);
+			reqBody.put("tno2", tno2);
+			reqBody.put("tno3", tno3);
+			reqBody.put("tkda", tkda);
+//			reqBody.put("flag", flag);
 			reqBody.put("tmzo", "Asia/Seoul (+09:00)");
 
 			// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/contacts
 			gcUrl = "/api/v2/outbound/contactlists/{contactListId}/contacts";
-			clientAction.init();
-			clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqBody);
+			System.out.println("## client ready (gcUrl = " + gcUrl + ")");
+			System.out.println("## reqBody :: " + reqBody);
+			bodyList.put(reqBody);
+			
+//			clientAction.callApiRestTemplate_POST(gcUrl, contactListId, bodyList);
 
-			uCnt++;
-		}
-
-		logger.info("## IF-API-039302 INSERT DATA >> " + hsList);
-		logger.info("## IF-API-039302 INSERT DATA SIZE >> " + hsList.size());
-
-		if (uCnt > 0) {
 			// db인서트
 			try {
-				
 				iUcnt = postgreService.InsertContactLt(enContactLt);
-				logger.info("## IF-API-039302 INSERT RESULT >> {} (1:성공, 0:실패)", iUcnt);
+				logger.info("## IF-API-076702 INSERT RESULT >> {} (1:성공, 0:실패)", iUcnt);
 				
 			} catch (DataIntegrityViolationException ex) {
+				ex.printStackTrace();
 				logger.error("DataIntegrityViolationException 발생 : {}", ex.getMessage());
 			} catch (DataAccessException ex) {
+				ex.printStackTrace();
 				logger.error("DataAccessException 발생 : {}", ex.getMessage());
 			}
-
+			uCnt++;
 		}
+		
 		return iUcnt;
 	}
 	
 	/**
-	 * ARS 만족도 실시간 자료전송 ('C', PCUBE)
+	 * ARS 만족도 실시간 자료전송 ('C', PCUBEX
 	 * BS 고객만족도 조사 수행 ('BS', UCUBE)
 	 * 
 	 */
@@ -168,6 +184,7 @@ public class ProviderServiceImpl implements ProviderService {
 				 * 불필요한 데이터는 전송 X ( ex. FLAG, CRDT )
 				 * 
 				 */
+				clientAction.init();
 				
 				gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
 				// CampID로 ContactListId 가져온다.
@@ -190,8 +207,9 @@ public class ProviderServiceImpl implements ProviderService {
 				
 				// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/contacts
 				gcUrl = "/api/v2/outbound/contactlists/{contactListId}/contacts";
-				clientAction.init();
+				
 				clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqBody);
+				resInt = 1;
 				
 			}
 		}catch(Exception e) {

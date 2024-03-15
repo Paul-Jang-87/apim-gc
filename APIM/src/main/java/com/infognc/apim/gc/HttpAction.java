@@ -52,7 +52,7 @@ public class HttpAction {
 											String.class
 											);
 			
-			result = res.toString();
+			result = res.getBody();
 			
 		}catch(HttpClientErrorException hce) {
 			hce.printStackTrace();
@@ -80,7 +80,7 @@ public class HttpAction {
 	 * @param reqBody
 	 * @return
 	 */
-	public String restTemplateService(UriComponents uriBuilder, String token, JSONObject reqBody) {
+	public String restTemplateService(UriComponents uriBuilder, String token, Object reqBody) {
 		String result = "";
 		try {
 			// header 세팅
@@ -97,7 +97,7 @@ public class HttpAction {
 											entity, 
 											String.class
 											);
-			result = res.toString();
+			result = res.getBody();
 			
 		}catch(HttpClientErrorException hce) {
 			hce.printStackTrace();
@@ -132,8 +132,13 @@ public class HttpAction {
 		HttpMethod method = null;
 		try {
 
-			if("POST".equals(type))	method = HttpMethod.POST;
-			else					method = HttpMethod.GET;
+			if("POST".equals(type))	{ method = HttpMethod.POST; }
+			else if("GET".equals(type)) { method = HttpMethod.GET; } 
+			else if("PUT".equals(type)) { method = HttpMethod.PUT; } 
+			else if("DELETE".equals(type)) { method = HttpMethod.DELETE; } 
+			else {
+				method = HttpMethod.GET;
+			}
 			
 //			HttpEntity<String> entity = new HttpEntity<String>(headers);
 			
@@ -144,8 +149,7 @@ public class HttpAction {
 											String.class
 											);
 			
-//			resBody = res.getBody();
-			result = res.toString();
+			result = res.getBody();
 			
 		}catch(HttpClientErrorException hce) {
 			hce.printStackTrace();

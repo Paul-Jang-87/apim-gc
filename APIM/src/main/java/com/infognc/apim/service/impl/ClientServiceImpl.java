@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -19,6 +21,7 @@ import com.infognc.apim.service.ClientService;
 import com.infognc.apim.utl.ApimCode;
 import com.infognc.apim.utl.Configure;
 
+@Service
 public class ClientServiceImpl implements ClientService{
 	private static final Logger logger = LoggerFactory.getLogger(ClientServiceImpl.class);
 	private final HttpAction httpAction;
@@ -75,45 +78,9 @@ public class ClientServiceImpl implements ClientService{
 				reqBodyMap.put("pdsDspRslt", rsList);
 				logger.info("## reqBodyMap :: {}", reqBodyMap);
 				
-				
-				// =================   APIM 호출 ===============================
-				String callPath = Configure.get("callPath");
-				String ApiServer = "";
-				if(callPath.equals("0") || callPath.equals("1")) {
-					ApiServer = Configure.get("api.server");
-				} else {
-					ApiServer = Configure.get("cos.api.server");
-				}
-				
-				String token	= Configure.get("api.auth.token");
-				if(token.isEmpty() || token == null) {
-					ApimMakeToken makeToken = new ApimMakeToken(httpAction);
-					token = makeToken.getToken();
-				}
-				
-				String clientId		= Configure.get("client.id");
-				String clientSecret	= Configure.get("client.secret");
-				
 				String apiUrl 	= Configure.get("API.035101.URI");
-//				String apiAcpt	= Configure.get("api.accept");
-				String apiCont	= Configure.get("api.content.type");
-				String apiAuth	= Configure.get("api.auth");
-				String apiAppnm	= Configure.get("api.app.name");
 				
-				// make URI builder
-				UriComponents uriBuilder = UriComponentsBuilder.fromUriString(ApiServer + apiUrl).build(true);
-				// set http header
-				HttpHeaders headers = new HttpHeaders();
-				headers.set("Content-Type", apiCont);
-				headers.set("X-Forwarded-Appname", apiAppnm);
-				headers.set("X-IBM-Client-id", clientId);
-				headers.set("X-IBM-Client-Secret", clientSecret);
-				headers.set("Authorization", apiAuth + " " + token);
-				
-				HttpEntity<String> entity = new HttpEntity<String>(reqBodyMap.toString(), headers);
-				
-				String response = httpAction.restTemplateService(uriBuilder, entity, "POST");
-//				resBodyMap = httpAction.restTemplateService(uriBuilder, entity, "POST");
+				String response = callApim(apiUrl, "POST", reqBodyMap);
 				logger.info("## API-035101 Get Data !! : {}", response);
 				
 				JSONObject resObj = new JSONObject(response);
@@ -213,44 +180,9 @@ public class ClientServiceImpl implements ClientService{
 				reqBodyMap.put("cmpnDspRslt", rsList);
 				logger.info("## reqBodyMap :: {}", reqBodyMap);
 				
-				// =================   APIM 호출 ===============================
-				String callPath = Configure.get("callPath");
-				String ApiServer = "";
-				if(callPath.equals("0") || callPath.equals("1")) {
-					ApiServer = Configure.get("api.server");
-				} else {
-					ApiServer = Configure.get("cos.api.server");
-				}
-				
-				String token	= Configure.get("api.auth.token");
-				if(token.isEmpty() || token == null) {
-					ApimMakeToken makeToken = new ApimMakeToken(httpAction);
-					token = makeToken.getToken();
-				}
-				
-				String clientId		= Configure.get("client.id");
-				String clientSecret	= Configure.get("client.secret");
-				
 				String apiUrl 	= Configure.get("API.035102.URI");
-//				String apiAcpt	= Configure.get("api.accept");
-				String apiCont	= Configure.get("api.content.type");
-				String apiAuth	= Configure.get("api.auth");
-				String apiAppnm	= Configure.get("api.app.name");
 				
-				// make URI builder
-				UriComponents uriBuilder = UriComponentsBuilder.fromUriString(ApiServer + apiUrl).build(true);
-				// set http header
-				HttpHeaders headers = new HttpHeaders();
-				headers.set("Content-Type", apiCont);
-				headers.set("X-Forwarded-Appname", apiAppnm);
-				headers.set("X-IBM-Client-id", clientId);
-				headers.set("X-IBM-Client-Secret", clientSecret);
-				headers.set("Authorization", apiAuth + " " + token);
-				
-				HttpEntity<String> entity = new HttpEntity<String>(reqBodyMap.toString(), headers);
-				
-				String response = httpAction.restTemplateService(uriBuilder, entity, restMethod);
-//				resBodyMap = httpAction.restTemplateService(uriBuilder, entity, "POST");
+				String response = callApim(apiUrl, restMethod, reqBodyMap);
 				logger.info("## API-035102 Get Data !! : {}", response);
 				
 				JSONObject resObj = new JSONObject(response);
@@ -276,6 +208,93 @@ public class ClientServiceImpl implements ClientService{
 		
 		return dsRstlInfoMap;
 	}
+	
+	
+	/**
+	 * 
+	 * Genesys Cloud DataAction에서 APIM 호출 ( 443포트만 가능 )
+	 * 
+	 */
+	@Override
+	public JSONObject callApimByDataAction(JSONObject reqJson) throws Exception {
+		JSONObject resJson = null;
+		String url 			= (String) reqJson.get("url");		// APIM 호출 URL
+		String method		= (String) reqJson.get("method");		// REST CRUD (GET, POST, PUT, DELETE)
+		JSONArray bodyList 	= null;		// APIM request body List
+		JSONObject bodyJson = null;
+		
+		// method 구분 
+		bodyList = reqJson.getJSONArray("bodyList");
+		if(bodyList.toList().size() > 0) {
+			for(int i=0; i>bodyList.toList().size(); i++ ) {
+				bodyJson = (JSONObject) bodyList.getJSONObject(i);
+			}
+		}
+		
+		
+		return resJson;
+	}
+	
+	
+	/**
+	 * 
+	 * APIM 호출 함수
+	 * 
+	 * @param apiUrl
+	 * @param method
+	 * @param reqBodyMap
+	 * @return
+	 * @throws Exception
+	 */
+	public String callApim(String apiUrl, String method, HashMap<String, Object> reqBodyMap) throws Exception {
+		String res = "";
+		
+		// =================   APIM 호출 ===============================
+		String callPath = Configure.get("callPath");
+		String ApiServer = "";
+		if(callPath.equals("0") || callPath.equals("1")) {
+			ApiServer = Configure.get("api.server");
+		} else {
+			ApiServer = Configure.get("cos.api.server");
+		}
+		
+		String token	= Configure.get("api.auth.token");
+		if(token.isEmpty() || token == null) {
+			ApimMakeToken makeToken = new ApimMakeToken(httpAction);
+			token = makeToken.getToken();
+		}
+		
+		String clientId		= Configure.get("client.id");
+		String clientSecret	= Configure.get("client.secret");
+		
+		String apiCont	= Configure.get("api.content.type");
+		String apiAuth	= Configure.get("api.auth");
+		String apiAppnm	= Configure.get("api.app.name");
+		
+		// make URI builder
+		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(ApiServer + apiUrl).build(true);
+		// set http header
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Type", apiCont);
+		headers.set("X-Forwarded-Appname", apiAppnm);
+		headers.set("X-IBM-Client-id", clientId);
+		headers.set("X-IBM-Client-Secret", clientSecret);
+		headers.set("Authorization", apiAuth + " " + token);
+		
+		HttpEntity<String> entity = new HttpEntity<String>(reqBodyMap.toString(), headers);
+		
+		String response = httpAction.restTemplateService(uriBuilder, entity, method);
+//		resBodyMap = httpAction.restTemplateService(uriBuilder, entity, "POST");
+		logger.info("## API-035102 Get Data !! : {}", response);
+		
+		
+		
+		
+		
+		
+		return res;
+	}
+	
 	
 	
 }

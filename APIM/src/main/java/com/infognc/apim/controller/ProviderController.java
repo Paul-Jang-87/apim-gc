@@ -25,8 +25,8 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ProviderController {
 	private static final Logger logger = LoggerFactory.getLogger(ProviderController.class);
 	private final ProviderService pvService;
-	private final String ENDPOINT_CRM = "/ars/hs/v1/luncRsvCallTsms";
-	private final String ENDPOINT_CCS = "/ars/hs/v1/hmArsStafDatRtmTsms";
+	private final String ENDPOINT_CRM = "/clcc/hmCtDt/v1/luncRsvCallTsms";
+	private final String ENDPOINT_CCS = "/clcc/hmCtDt/v1/hmArsStafDatRtmTsms";
 	
 	
 	public ProviderController(ProviderService pvService) {
@@ -36,20 +36,20 @@ public class ProviderController {
 	/*
 	 * 
 	 * [유큐브 캠패인 대상자 전송]
-	 * IF-API-039302 (IF-CRM-010)
+	 * IF-API-076702 (IF-CRM-010)
 	 * 
 	 */
-	@PostMapping(value="/ars/hs/v1/luncRsvCallTsms")
+	@PostMapping(value=ENDPOINT_CRM)
 	public Map<String, Object> saveStafDat(
 			HttpServletRequest req, HttpServletResponse res,
 			@RequestHeader(value="X-APP-NAME")String appName,
 			@RequestHeader(value="X-Header-Authorization") String headerAuth,
 			@RequestHeader(value="X-AuthorizationTime") String authTime,
-			@RequestHeader(value="X-Global-transaction-Id") String gtid,
+			@RequestHeader(value="X-Global-transaction-ID") String gtid,
 			@RequestBody(required=false) List<Map<String, String>> inParamList
 			) throws Exception {
 		
-		logger.info("## IF-API-039302 START ");
+		logger.info("## IF-API-076702 START ");
 		ApiUtil apiUtil = new ApiUtil();
 		HashMap<String, Object> dsRsltInfoMap = new HashMap<String, Object>();	
 		
@@ -79,6 +79,7 @@ public class ProviderController {
 			// response body(dsRsltInfoMap)에 "rsltCd" : 02, "rsltMsg" : e.getMessage 세팅
 			dsRsltInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N); 
 			dsRsltInfoMap.put("rsltMsg", e.getMessage()); 
+			e.printStackTrace();
 			// 강제 status 발생
 			// response header에 "bizError" : "N" 세팅
 			// response status에 417 세팅
@@ -89,7 +90,7 @@ public class ProviderController {
 		}
 		
 		HashMap<String, String> paramChkMap = new HashMap<String, String>();
-		logger.info("## IF-API-039302 inParamMap :: " + inParamList.size());
+		logger.info("## IF-API-076702 inParamMap :: " + inParamList.size());
 		
 		List<Map<String, String>> paramMaps = new ArrayList<Map<String,String>>();
 		HashMap<String,Object> rtnMap = new HashMap<String, Object>();
@@ -106,12 +107,12 @@ public class ProviderController {
 			res.setStatus(200);
 			res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
 			
-			rtnMap.put("serverName", "uplus-ars");
+			rtnMap.put("serverName", "clcc");
 			rtnMap.put("url", "/ars/hs/v1/luncRsvCallTsms");
 			rtnMap.put("method", "POST");
 			rtnMap.put("errorStack", ex.getMessage());
-			rtnMap.put("errorServer", "uplus_ars");
-			rtnMap.put("xForwardService", "uplus-ars");
+			rtnMap.put("errorServer", "clcc");
+			rtnMap.put("xForwardService", "clcc");
 			rtnMap.put("errorCode", "400");
 			rtnMap.put("errorDetail", "BizException [code=400,message="+ex.getMessage()+"]");
 			rtnMap.put("hasErrorDetail", true);
@@ -127,12 +128,12 @@ public class ProviderController {
 			if(resInt > 0) {
 				dsRsltInfoMap.put("rstlCd", ApimCode.RESULT_SUCCESS_Y);
 				dsRsltInfoMap.put("rstlMsg", ApimCode.RESULT_SUCC_SAVE_MSG);
-				logger.info("## IF-API-039902 PRSS result >> " + ApimCode.RESULT_SUCC_SAVE_MSG);
+				logger.info("## IF-API-076702 PRSS result >> " + ApimCode.RESULT_SUCC_SAVE_MSG);
 			} else {
 				// error
 				dsRsltInfoMap.put("rstlCd", ApimCode.RESULT_SUCCESS_N);
 				dsRsltInfoMap.put("rstlMsg", ApimCode.RESULT_FAIL_SAVE_MSG);
-				logger.info("## IF-API-039902 PRSS result >> " + ApimCode.RESULT_FAIL_SAVE_MSG);
+				logger.info("## IF-API-076702 PRSS result >> " + ApimCode.RESULT_FAIL_SAVE_MSG);
 			}
 			
 		}catch(Exception ex) {
@@ -140,12 +141,12 @@ public class ProviderController {
 			res.setStatus(200);
 			res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
 			
-			rtnMap.put("serverName", "uplus-ars");
+			rtnMap.put("serverName", "clcc");
 			rtnMap.put("url", ENDPOINT_CRM);
 			rtnMap.put("method", "POST");
 			rtnMap.put("errorStack", ex.getMessage());
-			rtnMap.put("errorServer", "uplus_ars");
-			rtnMap.put("xForwardService", "uplus-ars");
+			rtnMap.put("errorServer", "clcc");
+			rtnMap.put("xForwardService", "clcc");
 			rtnMap.put("errorCode", "400");
 			rtnMap.put("errorDetail", ex.getMessage());
 			rtnMap.put("hasErrorDetail", true);
@@ -162,7 +163,7 @@ public class ProviderController {
 	
 	/*
 	 * [ARS 고객만족도 실시간 자료전송, BS고객만족도 조사수행]
-	 * IF-API-039301 (IF-CCS-852, IF-CCSN-001)
+	 * IF-API-076701 (IF-CCS-852, IF-CCSN-001)
 	 */
 	@PostMapping(value=ENDPOINT_CCS)
 	public Map<String, Object> saveRsvCallDat(
@@ -174,7 +175,7 @@ public class ProviderController {
 			@RequestBody(required=false) List<Map<String, String>> inParamList
 			) throws Exception {
 		
-		logger.info("## IF-API-039301 START ");
+		logger.info("## IF-API-076701 START ");
 		ApiUtil apiUtil = new ApiUtil();
 		HashMap<String, Object> dsRsltInfoMap = new HashMap<String, Object>();	
 		
@@ -213,7 +214,7 @@ public class ProviderController {
 		}
 		
 		HashMap<String, String> paramChkMap = new HashMap<String, String>();
-		logger.info("## IF-API-039301 inParamMap :: " + inParamList.size());
+		logger.info("## IF-API-076701 inParamMap :: " + inParamList.size());
 		
 		
 		List<Map<String, String>> paramMaps = new ArrayList<Map<String,String>>();
@@ -232,12 +233,12 @@ public class ProviderController {
 					res.setStatus(200);
 					res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
 					
-					rtnMap.put("serverName", "uplus-ars");
+					rtnMap.put("serverName", "clcc");
 					rtnMap.put("url", ENDPOINT_CCS);
 					rtnMap.put("method", "POST");
 					rtnMap.put("errorStack", "잘못된 구분값입니다.");
-					rtnMap.put("errorServer", "uplus_ars");
-					rtnMap.put("xForwardService", "uplus-ars");
+					rtnMap.put("errorServer", "clcc");
+					rtnMap.put("xForwardService", "clcc");
 					rtnMap.put("errorCode", "400");
 					rtnMap.put("errorDetail", "BizException [code=400,message="+"잘못된 구분값입니다."+"]");
 					rtnMap.put("hasErrorDetail", true);
@@ -254,12 +255,12 @@ public class ProviderController {
 			res.setStatus(200);
 			res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
 			
-			rtnMap.put("serverName", "uplus-ars");
+			rtnMap.put("serverName", "clcc");
 			rtnMap.put("url", ENDPOINT_CCS);
 			rtnMap.put("method", "POST");
 			rtnMap.put("errorStack", ex.getMessage());
-			rtnMap.put("errorServer", "uplus_ars");
-			rtnMap.put("xForwardService", "uplus-ars");
+			rtnMap.put("errorServer", "clcc");
+			rtnMap.put("xForwardService", "clcc");
 			rtnMap.put("errorCode", "400");
 			rtnMap.put("errorDetail", "BizException [code=400,message="+rtnStr+"]");
 			rtnMap.put("hasErrorDetail", true);
@@ -272,9 +273,15 @@ public class ProviderController {
 		Integer resInt = 0;
 		try {
 			resInt = pvService.sendArsStafData(inParamList);
-			
 			if(resInt > 0) {
-//				dsRsltInfoMap.put(rtnStr, resInt);
+				dsRsltInfoMap.put("rstlCd", ApimCode.RESULT_SUCCESS_Y);
+				dsRsltInfoMap.put("rstlMsg", ApimCode.RESULT_SUCC_SAVE_MSG);
+				logger.info("## IF-API-076701 PRSS result >> " + ApimCode.RESULT_SUCC_SAVE_MSG);
+			} else {
+				// error
+				dsRsltInfoMap.put("rstlCd", ApimCode.RESULT_SUCCESS_N);
+				dsRsltInfoMap.put("rstlMsg", ApimCode.RESULT_FAIL_SAVE_MSG);
+				logger.info("## IF-API-076701 PRSS result >> " + ApimCode.RESULT_FAIL_SAVE_MSG);
 			}
 			
 			
@@ -283,12 +290,12 @@ public class ProviderController {
 			res.setStatus(200);
 			res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
 			
-			rtnMap.put("serverName", "uplus-ars");
+			rtnMap.put("serverName", "clcc");
 			rtnMap.put("url", ENDPOINT_CCS);
 			rtnMap.put("method", "POST");
 			rtnMap.put("errorStack", ex.getMessage());
-			rtnMap.put("errorServer", "uplus_ars");
-			rtnMap.put("xForwardService", "uplus-ars");
+			rtnMap.put("errorServer", "clcc");
+			rtnMap.put("xForwardService", "clcc");
 			rtnMap.put("errorCode", "400");
 			rtnMap.put("errorDetail", ex.getMessage());
 			rtnMap.put("hasErrorDetail", true);
