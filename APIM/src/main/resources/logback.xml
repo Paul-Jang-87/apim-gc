@@ -137,7 +137,7 @@
     </logger>
 
     <!-- Root logger -->
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="CATALINA"/>
     </root>
 

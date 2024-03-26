@@ -11,28 +11,40 @@ import com.infognc.apim.utl.Configure;
 @Configuration
 public class ApimConfig {
 	private static final Logger logger = LoggerFactory.getLogger(ApimConfig.class);
-	private static final String ENV_SYSTEM = System.getProperty("env.system");
 	
 	@Bean
 	public Configure configure() throws Exception {
 		String propertiesPath = "";
-		System.out.println(">> ENV_SYSTEM :: " + ENV_SYSTEM);
-		if(ENV_SYSTEM==null)
-			propertiesPath = "classpath:config/prop_dev.properties";
-		else
-			propertiesPath = "classpath:config/prop_" + ENV_SYSTEM + ".properties";
 		
+		// 쿠버네티스 configMap으로 생성한 properties 파일부터 탐색 없으면 내부 /config
+		propertiesPath = "file:/config/apim.properties";
 		
 		System.out.println("## propertiesPath :: " + propertiesPath);
+		logger.info(">> propertiesPath :: " + propertiesPath);
 		
 		Configure configure = new Configure();
-		ResourcePropertySource res = new ResourcePropertySource(propertiesPath);
-		String[] properiNames = res.getPropertyNames();
 		
-		for(String name : properiNames) {
-			Configure.put(name, (String) res.getProperty(name));
-			logger.info(">> name : {}, value : {}", name, res.getProperty(name));
+		try {
+			ResourcePropertySource res = new ResourcePropertySource(propertiesPath);
+			String[] properiNames = res.getPropertyNames();
+			
+			for(String name : properiNames) {
+				Configure.put(name, (String) res.getProperty(name));
+				logger.info(">> name : {}, value : {}", name, res.getProperty(name));
+			}
+
+		}catch(Exception e) {
+			// configMap으로 생성된 properties 파일 제대로 못찾으면 내부 properties로 
+			propertiesPath = "classpath:/config/apim_dev.properties";
+			ResourcePropertySource res = new ResourcePropertySource(propertiesPath);
+			String[] properiNames = res.getPropertyNames();
+			
+			for(String name : properiNames) {
+				Configure.put(name, (String) res.getProperty(name));
+				logger.info(">> name : {}, value : {}", name, res.getProperty(name));
+			}
 		}
+
 		
 		return configure;
 	}

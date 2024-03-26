@@ -7,6 +7,7 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +20,7 @@ public class ClientController {
 	private static final Logger logger = LoggerFactory.getLogger(ClientController.class);
 	private final String ENDPOINT_PDS_RSLT = "/dsprslt";
 	private final String ENDPOINT_PDS_RGST = "/cmpnmstrregist";
-	private final String GC_API_ACTION = "/gcapi-action";
+	private final String GC_API_ACTION = "/gcapi-action";	
 	
 	private final ClientService clService;
 	
@@ -57,6 +58,9 @@ public class ClientController {
 	/**
 	 * G.C DataAction에서 APIM 호출을 위한 EndPoint
 	 * 
+	 * DEV : https://dev-gckafka.lguplus.co.kr/gcapi-action
+	 * PRD : https://gckafka.lguplus.co.kr/gcapi-action
+	 * 
 	 * @param reqBodyList
 	 * @return
 	 * @throws Exception
@@ -65,8 +69,20 @@ public class ClientController {
 	public JSONObject getApimDataToDataAction(@RequestBody JSONObject reqBodyJson) throws Exception {	
 		logger.info("## GenesysCloud DataAction 호출 ");
 		
+		System.out.println("## GenesysCloud DataAction 호출 ");
+		
 		return clService.callApimByDataAction(reqBodyJson);
 	}
+	
+	/*
+	@GetMapping("/gethc")
+	public String getHealthCheck() throws Exception {
+		
+		System.out.println("## call /gethc ");
+		
+		return "TEST RESPONSE";
+	}
+	*/
 	
 	
 }

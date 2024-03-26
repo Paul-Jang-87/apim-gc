@@ -25,8 +25,8 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ProviderController {
 	private static final Logger logger = LoggerFactory.getLogger(ProviderController.class);
 	private final ProviderService pvService;
-	private final String ENDPOINT_CRM = "/clcc/hmCtDt/v1/luncRsvCallTsms";
-	private final String ENDPOINT_CCS = "/clcc/hmCtDt/v1/hmArsStafDatRtmTsms";
+	private final String ENDPOINT_CRM = "/clcc/hmCucn/v1/luncRsvCallTsms";
+	private final String ENDPOINT_CCS = "/clcc/hmCucn/v1/hmArsStafDatRtmTsms";
 	
 	
 	public ProviderController(ProviderService pvService) {
@@ -50,9 +50,10 @@ public class ProviderController {
 			) throws Exception {
 		
 		logger.info("## IF-API-076702 START ");
+		System.out.println("## IF-API-076702 START ");
 		ApiUtil apiUtil = new ApiUtil();
 		HashMap<String, Object> dsRsltInfoMap = new HashMap<String, Object>();	
-		
+	/*	
 		try {
 			// Request Header Check!!
 			// 요청 헤더 인증 확인 : HMAC 인증 (req/res 위변조 체크)
@@ -88,27 +89,34 @@ public class ProviderController {
 			
 			return dsRsltInfoMap;
 		}
-		
+		*/
 		HashMap<String, String> paramChkMap = new HashMap<String, String>();
 		logger.info("## IF-API-076702 inParamMap :: " + inParamList.size());
 		
 		List<Map<String, String>> paramMaps = new ArrayList<Map<String,String>>();
 		HashMap<String,Object> rtnMap = new HashMap<String, Object>();
+		System.out.println("## inParamList.size() :: " + inParamList.size());
 		String rtnStr = "";
 		try {
-			for(int i=0; i<inParamList.size(); i++) {
-				paramChkMap = new HashMap<String,String>();
-				paramChkMap.put("cpid", inParamList.get(i).get("cpid"));
-				paramChkMap.put("cpsq", inParamList.get(i).get("cpsq"));
-				apiUtil.hasValue(paramChkMap, new String[] {"cpid", "cpsq"});
+			if(inParamList.size() == 0) {
+				// array[Object] 상태에서 하위컬럼이 필수인 경우 []만 호출해도 필수체크를 해야합니다. -- 고한솔 사원 요청 204.03.26
+				throw new Exception();
+			} else {
+				for(int i=0; i<inParamList.size(); i++) {
+					paramChkMap = new HashMap<String,String>();
+					paramChkMap.put("cpid", inParamList.get(i).get("cpid"));
+					paramChkMap.put("cpsq", inParamList.get(i).get("cpsq"));
+					apiUtil.hasValue(paramChkMap, new String[] {"cpid", "cpsq"});
+				}
 			}
+
 		}catch(Exception ex) {
 			// 강제 status 발생
 			res.setStatus(200);
 			res.setHeader("bizError", ApimCode.HEADER_BIZ_ERR_Y);
 			
 			rtnMap.put("serverName", "clcc");
-			rtnMap.put("url", "/ars/hs/v1/luncRsvCallTsms");
+			rtnMap.put("url", ENDPOINT_CRM);
 			rtnMap.put("method", "POST");
 			rtnMap.put("errorStack", ex.getMessage());
 			rtnMap.put("errorServer", "clcc");
@@ -176,6 +184,13 @@ public class ProviderController {
 			) throws Exception {
 		
 		logger.info("## IF-API-076701 START ");
+		System.out.println("## IF-API-076701 START - syso");
+		
+		logger.info(">> X-APP-NAME : {}", appName);
+		logger.info(">> X-Header-Authorization : {}", headerAuth);
+		logger.info(">> X-AuthorizationTime : {}", authTime);
+		logger.info(">> X-Global-transaction-Id : {}", gtid);
+		
 		ApiUtil apiUtil = new ApiUtil();
 		HashMap<String, Object> dsRsltInfoMap = new HashMap<String, Object>();	
 		

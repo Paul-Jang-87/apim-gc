@@ -18,6 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.infognc.apim.ApimMakeToken;
 import com.infognc.apim.gc.HttpAction;
 import com.infognc.apim.service.ClientService;
+import com.infognc.apim.utl.ApiUtil;
 import com.infognc.apim.utl.ApimCode;
 import com.infognc.apim.utl.Configure;
 
@@ -217,22 +218,14 @@ public class ClientServiceImpl implements ClientService{
 	 */
 	@Override
 	public JSONObject callApimByDataAction(JSONObject reqJson) throws Exception {
-		JSONObject resJson = null;
 		String url 			= (String) reqJson.get("url");		// APIM 호출 URL
-		String method		= (String) reqJson.get("method");		// REST CRUD (GET, POST, PUT, DELETE)
-		JSONArray bodyList 	= null;		// APIM request body List
-		JSONObject bodyJson = null;
+		String method		= (String) reqJson.get("method");	// REST CRUD (GET, POST, PUT, DELETE)
+//		JSONArray bodyList 	= reqJson.getJSONArray("bodyList");	// APIM request body List (List로 받을 필요 없다)
+		JSONObject bodyJson	= reqJson.getJSONObject("apimBody");
 		
-		// method 구분 
-		bodyList = reqJson.getJSONArray("bodyList");
-		if(bodyList.toList().size() > 0) {
-			for(int i=0; i>bodyList.toList().size(); i++ ) {
-				bodyJson = (JSONObject) bodyList.getJSONObject(i);
-			}
-		}
+		String response = callApim(url, method, ApiUtil.toMap(bodyJson));
 		
-		
-		return resJson;
+		return new JSONObject(response);
 	}
 	
 	
@@ -283,13 +276,8 @@ public class ClientServiceImpl implements ClientService{
 		
 		HttpEntity<String> entity = new HttpEntity<String>(reqBodyMap.toString(), headers);
 		
-		String response = httpAction.restTemplateService(uriBuilder, entity, method);
-//		resBodyMap = httpAction.restTemplateService(uriBuilder, entity, "POST");
-		logger.info("## API-035102 Get Data !! : {}", response);
-		
-		
-		
-		
+		res = httpAction.restTemplateService(uriBuilder, entity, method);
+		logger.info("## APIM Get Data !! : {}", res);
 		
 		
 		return res;

@@ -52,9 +52,9 @@ public class ProviderServiceImpl implements ProviderService {
 			String cpsq = inParamList.get(i).get("cpsq");
 			String cske = inParamList.get(i).get("cske");
 			String csna = inParamList.get(i).get("csna");
-			String tno1 = new String(Base64.decodeBase64(inParamList.get(i).get("tno1")));
-			String tno2 = new String(Base64.decodeBase64(inParamList.get(i).get("tno2")));
-			String tno3 = new String(Base64.decodeBase64(inParamList.get(i).get("tno3")));
+			String tno1 = new String(Base64.decodeBase64(ApiUtil.nullToString(inParamList.get(i).get("tno1"))  ));
+			String tno2 = new String(Base64.decodeBase64(ApiUtil.nullToString(inParamList.get(i).get("tno2"))  ));
+			String tno3 = new String(Base64.decodeBase64(ApiUtil.nullToString(inParamList.get(i).get("tno3"))  ));
 			String tkda = inParamList.get(i).get("tkda");
 			String flag = inParamList.get(i).get("flag");
 			

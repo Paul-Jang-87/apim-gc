@@ -5,16 +5,22 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,24 +122,27 @@ public class ApiUtil {
 	}
 	
 	public void checkHmacAuth(String appName, String apimAuth, String authTime, String gtid) throws Exception {
-		logger.debug(">>> keyHmacSha512 :: " + keyHmacSha512);
-		byte[] byteSha512key = keyHmacSha512.getBytes();
+		logger.info(">>> keyHmacSha512 :: " + keyHmacSha512);
+		byte[] byteSha512key = keyHmacSha512.getBytes("utf-8");
 		SecretKeySpec keySpec = new SecretKeySpec(byteSha512key, "HmacSHA512");
-		logger.debug(">> keyspec :: " + keySpec);
-		logger.debug(">> authTime :: " + authTime);
+		logger.info(">> keyspec :: " + keySpec);
+		logger.info(">> authTime :: " + authTime);
 		
-		Mac mac = null;
+//		Mac mac;
 		String serverAuth = null;
 		String hmacMessage = authTime+"@"+appName+"@"+gtid;
 		
+		logger.info(">> hmacMessage :: " + hmacMessage);
+		
 		try {
-			mac.getInstance("HmacSHA512");
+			Mac mac = Mac.getInstance("HmacSHA512");
 			mac.init(keySpec);
-			byte[] result = mac.doFinal(hmacMessage.getBytes());
-			logger.debug("hmacMessage >>> " + hmacMessage.getBytes());
-			logger.debug("hmacMessage2 >>> " + mac.doFinal(hmacMessage.getBytes()));
-			logger.debug("result >>> " + result);
-			serverAuth = new String(base64encoder.encode(result), "UTF-8");
+			byte[] result = mac.doFinal(hmacMessage.getBytes("utf-8"));
+			logger.info("hmacMessage >>> " + hmacMessage.getBytes().toString());
+			logger.info("hmacMessage2 >>> " + mac.doFinal(hmacMessage.getBytes()).toString());
+			logger.info("result >>> " + result.toString());
+			serverAuth = new String(base64encoder.encode(result), "UTF8");
+//			serverAuth = new String(base64encoder.encode(result));
 			
 			logger.info("## serverAuth >> " + serverAuth);
 			logger.info("## info >> " + serverAuth + ", apimAuth >> " + apimAuth);
@@ -172,6 +181,59 @@ public class ApiUtil {
 		return rtn; 
 	}
 	
+	
+	/**
+	 * 
+	 * JSONOject to HashMap
+	 * 
+	 * @param object
+	 * @return
+	 * @throws JSONException
+	 */
+	public static HashMap<String, Object> toMap(JSONObject object) throws JSONException {
+        
+	     HashMap<String, Object> map = new HashMap<String, Object>();             
+	     Iterator<String> keysItr = object.keys();                            
+	                                                                          
+	     while(keysItr.hasNext()) {                                           
+	         String key = keysItr.next();                                     
+	         Object value = object.get(key);                                  
+	         if(value instanceof JSONArray) {                                 
+	             value = toList((JSONArray) value);                           
+	         }                                                                
+	         else if(value instanceof JSONObject) {                           
+	             value = toMap((JSONObject) value);                           
+	         }                                                                
+	         map.put(key, value);                                             
+	     }                                                                    
+	                                                                          
+	     return map;                                                          
+	                                                                          
+	 }                                                                        
+	      
+	/**
+	 * JSONArray to List
+	 * 
+	 * @param array
+	 * @return
+	 * @throws JSONException
+	 */
+	public static List<Object> toList(JSONArray array) throws JSONException {       
+	     List<Object> list = new ArrayList<Object>();                         
+	     for(int i = 0; i < array.length(); i++) {                            
+	         Object value = array.get(i);                                     
+	         if(value instanceof JSONArray) {                                 
+	             value = toList((JSONArray) value);                           
+	         }                                                                
+	         else if(value instanceof JSONObject) {                           
+	             value = toMap((JSONObject) value);                           
+	         }                                                                
+	         list.add(value);                                                 
+	     }                                                                    
+	                                                                          
+	     return list;                                                         
+	                                                                          
+	 }  
 	
 	
 	

@@ -11,7 +11,7 @@
 	<groupId>com.infognc</groupId>
 	<artifactId>APIM</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>APIM</name>
 	<description>APIMClient project for Spring Boot</description>
 	<properties>
@@ -136,8 +136,13 @@
 		    <version>2.10.1</version>
 		</dependency>
 
-		
-		
+
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 
 	<build>
