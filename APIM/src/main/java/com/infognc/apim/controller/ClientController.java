@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.gson.JsonObject;
+import com.infognc.apim.gc.DataAction;
 import com.infognc.apim.service.ClientService;
 
 @RestController
@@ -66,23 +66,30 @@ public class ClientController {
 	 * @throws Exception
 	 */
 	@PostMapping(value=GC_API_ACTION)
-	public JSONObject getApimDataToDataAction(@RequestBody JSONObject reqBodyJson) throws Exception {	
+	public JSONObject getApimDataToDataAction(
+							@RequestBody DataAction reqBody) throws Exception {	
 		logger.info("## GenesysCloud DataAction 호출 ");
-		
 		System.out.println("## GenesysCloud DataAction 호출 ");
 		
-		return clService.callApimByDataAction(reqBodyJson);
+		return clService.callApimByDataAction(reqBody);
 	}
 	
-	/*
+	
+	/**
+	 * 
+	 * EKS Health Check 용도
+	 * 반드시 필요하다고 하니 일단 두자
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	@GetMapping("/gethc")
 	public String getHealthCheck() throws Exception {
 		
-		System.out.println("## call /gethc ");
-		
 		return "TEST RESPONSE";
 	}
-	*/
+
 	
+
 	
 }

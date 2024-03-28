@@ -53,7 +53,7 @@ public class ApimMakeToken {
 		HttpHeaders headers = new HttpHeaders();
 //		headers.setAccept(Arrays.asList(new MediaType[] { MediaType.APPLICATION_JSON }));
 		headers.set("Content-Type", "application/x-www-form-urlencoded");
-		headers.set("X-Forwarded-Appname", "UPLUS_ARS");
+		headers.set("X-Forwarded-Appname", "CLCC");
 		
 		HttpEntity<String> entity = new HttpEntity<String>(headers);
 		

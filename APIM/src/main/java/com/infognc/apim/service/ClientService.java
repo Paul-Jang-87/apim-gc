@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
-import org.springframework.stereotype.Service;
+
+import com.infognc.apim.gc.DataAction;
 
 public interface ClientService {
 
@@ -16,5 +17,5 @@ public interface ClientService {
 	public HashMap<String, Object> sendCmpnMaData(List<Map<String, Object>> reqBodyList) throws Exception;
 	
 	// Genesys Cloud DataAction에서 APIM 호출
-	public JSONObject callApimByDataAction(JSONObject reqJson) throws Exception;
+	public JSONObject callApimByDataAction(DataAction reqJson) throws Exception;
 }

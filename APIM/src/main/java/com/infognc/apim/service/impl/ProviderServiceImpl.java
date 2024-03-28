@@ -99,7 +99,7 @@ public class ProviderServiceImpl implements ProviderService {
 			System.out.println("## reqBody :: " + reqBody);
 			bodyList.put(reqBody);
 			
-//			clientAction.callApiRestTemplate_POST(gcUrl, contactListId, bodyList);
+			clientAction.callApiRestTemplate_POST(gcUrl, contactListId, bodyList);
 
 			// db인서트
 			try {

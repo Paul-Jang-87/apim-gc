@@ -2,20 +2,23 @@ package com.infognc.apim.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.infognc.apim.ApimMakeToken;
+import com.infognc.apim.gc.DataAction;
 import com.infognc.apim.gc.HttpAction;
 import com.infognc.apim.service.ClientService;
 import com.infognc.apim.utl.ApiUtil;
@@ -217,13 +220,93 @@ public class ClientServiceImpl implements ClientService{
 	 * 
 	 */
 	@Override
-	public JSONObject callApimByDataAction(JSONObject reqJson) throws Exception {
-		String url 			= (String) reqJson.get("url");		// APIM 호출 URL
-		String method		= (String) reqJson.get("method");	// REST CRUD (GET, POST, PUT, DELETE)
-//		JSONArray bodyList 	= reqJson.getJSONArray("bodyList");	// APIM request body List (List로 받을 필요 없다)
-		JSONObject bodyJson	= reqJson.getJSONObject("apimBody");
+	public JSONObject callApimByDataAction(DataAction reqJson) throws Exception {
+		String response = "";
 		
-		String response = callApim(url, method, ApiUtil.toMap(bodyJson));
+		try {
+			String url 				= reqJson.getUrl();		// APIM 호출 URL
+			String method			= reqJson.getMethod();	// REST CRUD (GET, POST, PUT, DELETE)
+			JSONObject headerJson	= ApiUtil.toJson(reqJson.getApimHeader());
+			JSONObject bodyJson		= ApiUtil.toJson(reqJson.getApimBody());
+			
+			logger.info(">>> \n #url = {} \n #method = {} \n #header = {} \n #body = {}", url, method, headerJson, bodyJson);
+			
+			// 호출하는 api들이 GET, POST 다르고, 데이터 셋이 제각각 다르기때문에 따로 로직 구성해준다. 
+			// =================   APIM 호출 ===============================
+			String callPath = Configure.get("callPath");
+			String ApiServer = "";
+			if(callPath.equals("0") || callPath.equals("1")) {
+				ApiServer = Configure.get("api.server");
+			} else {
+				ApiServer = Configure.get("cos.api.server");
+			}
+			
+			// get OAuth Token
+			String token	= Configure.get("api.auth.token");
+			if(token.isEmpty() || token == null) {
+				ApimMakeToken makeToken = new ApimMakeToken(httpAction);
+				token = makeToken.getToken();
+			}
+			
+			String clientId		= Configure.get("client.id");
+			String clientSecret	= Configure.get("client.secret");
+			
+			String apiCont	= Configure.get("api.content.type");
+			String apiAuth	= Configure.get("api.auth");
+			String apiAppnm	= Configure.get("api.app.name");
+			
+			UriComponents uriBuilder = null;
+			
+			// set http header
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Content-Type", apiCont);
+			headers.set("X-Forwarded-Appname", apiAppnm);
+			headers.set("X-IBM-Client-id", clientId);
+			headers.set("X-IBM-Client-Secret", clientSecret);
+			headers.set("Authorization", apiAuth + " " + token);
+			
+			if("POST".equals(method.toUpperCase())) {
+				// make URI builder
+				uriBuilder = UriComponentsBuilder.fromUriString(ApiServer + url).build(true);
+				
+			} else if("GET".equals(method.toUpperCase())) {
+				
+				if(bodyJson != null) {
+					// Query Parameter 세팅
+					MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+					Iterator<String> keys = bodyJson.keySet().iterator();
+					while(keys.hasNext()) {
+						String key = keys.next();
+						params.add(key, bodyJson.getString(key));
+					}
+					uriBuilder = UriComponentsBuilder.fromUriString(ApiServer + url).queryParams(params).build(true);
+				} else {
+					// Query Param 없으면 그냥
+					uriBuilder = UriComponentsBuilder.fromUriString(ApiServer + url).build(true);
+				}
+				
+			} else {
+				
+			}
+			
+			// APIM 호출 시 header data 세팅이 있는 경우 추가 헤더 세팅
+			if(headerJson != null) {
+				Iterator<String> keys = headerJson.keySet().iterator();
+				while(keys.hasNext()) {
+					String key = keys.next();
+					headers.set(key, headerJson.getString(key));
+				}
+			}
+			
+			HttpEntity<String> entity = new HttpEntity<String>(bodyJson.toString(), headers);
+			
+			response = httpAction.restTemplateService(uriBuilder, entity, method);
+			logger.info("## APIM Get Data !! : {}", response);
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
 		
 		return new JSONObject(response);
 	}

@@ -24,6 +24,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 public class ApiUtil {
@@ -210,7 +212,28 @@ public class ApiUtil {
 	     return map;                                                          
 	                                                                          
 	 }                                                                        
-	      
+	
+	/**
+	 * 
+	 * Map to Json
+	 * 
+	 * @param map
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONObject toJson(Map<String, Object> map) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String jsonString = objectMapper.writeValueAsString(map);
+            return new JSONObject(jsonString);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
+	}
+	
+	
+	
 	/**
 	 * JSONArray to List
 	 * 

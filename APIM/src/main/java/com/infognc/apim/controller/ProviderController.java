@@ -53,13 +53,12 @@ public class ProviderController {
 		System.out.println("## IF-API-076702 START ");
 		ApiUtil apiUtil = new ApiUtil();
 		HashMap<String, Object> dsRsltInfoMap = new HashMap<String, Object>();	
-	/*	
+
 		try {
 			// Request Header Check!!
 			// 요청 헤더 인증 확인 : HMAC 인증 (req/res 위변조 체크)
 			// Exception 처리
 			apiUtil.checkHmacAuth(appName, headerAuth, authTime, gtid);
-		
 			
 		}catch(HmacSha512Exception e) {
 			dsRsltInfoMap.put("rsltCd", ApimCode.RESULT_CODE_01);
@@ -89,14 +88,12 @@ public class ProviderController {
 			
 			return dsRsltInfoMap;
 		}
-		*/
+
 		HashMap<String, String> paramChkMap = new HashMap<String, String>();
 		logger.info("## IF-API-076702 inParamMap :: " + inParamList.size());
 		
-		List<Map<String, String>> paramMaps = new ArrayList<Map<String,String>>();
 		HashMap<String,Object> rtnMap = new HashMap<String, Object>();
 		System.out.println("## inParamList.size() :: " + inParamList.size());
-		String rtnStr = "";
 		try {
 			if(inParamList.size() == 0) {
 				// array[Object] 상태에서 하위컬럼이 필수인 경우 []만 호출해도 필수체크를 해야합니다. -- 고한솔 사원 요청 204.03.26
