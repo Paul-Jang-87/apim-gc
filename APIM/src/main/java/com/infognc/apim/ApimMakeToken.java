@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
@@ -17,6 +18,7 @@ import com.infognc.apim.gc.HttpAction;
 import com.infognc.apim.utl.ApimCode;
 import com.infognc.apim.utl.Configure;
 
+@Component
 public class ApimMakeToken {
 	private static final Logger logger = LoggerFactory.getLogger(ApimMakeToken.class);
 	private final HttpAction httpAction;
@@ -55,22 +57,21 @@ public class ApimMakeToken {
 		headers.set("Content-Type", "application/x-www-form-urlencoded");
 		headers.set("X-Forwarded-Appname", "CLCC");
 		
-		HttpEntity<String> entity = new HttpEntity<String>(headers);
 		
-		// parameter 세팅
-		MultiValueMap<String, String> param = new LinkedMultiValueMap<String, String>();
-		param.add("grant_type", "client_credentials");
-		param.add("client_id", clientId);
-		param.add("client_secret", clientSecret);
-		param.add("scope", scope);
-		
+		// parameter 세팅 
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+		map.add("grant_type", "client_credentials");
+		map.add("client_id", clientId);
+		map.add("client_secret", clientSecret);
+		map.add("scope", scope);
+
+		HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<MultiValueMap<String, String>>(map, headers);
 		// url 세팅
 		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(url)
-									.queryParams(param)
+//									.queryParams(param)
 									.build(true);
 		
-//		String result = clientAction.restTemplateService(uriBuilder, headers, methodType);
-		String result = httpAction.restTemplateService(uriBuilder, entity, methodType);
+		String result = httpAction.restTemplateService_oauth(uriBuilder, entity, methodType);
 		if(result==null) {
 			logger.info(">>> get token error !!!");
 			return null;

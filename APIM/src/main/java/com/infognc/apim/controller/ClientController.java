@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +19,10 @@ import com.infognc.apim.service.ClientService;
 @RestController
 public class ClientController {
 	private static final Logger logger = LoggerFactory.getLogger(ClientController.class);
-	private final String ENDPOINT_PDS_RSLT = "/dsprslt";
-	private final String ENDPOINT_PDS_RGST = "/cmpnmstrregist";
+	private final String ENDPOINT_PDS_RSLT = "/dspRslt";
+	private final String ENDPOINT_PDS_RGST = "/cmpnMstrRegist";
+	private final String ENDPOINT_ARSSATF_RSLT = "/arsSatfRsltRtmDat";
+	private final String ENDPOINT_BSARSSATF_RSLT = "/bsArsSatfRsltRtmDat";
 	private final String GC_API_ACTION = "/gcapi-action";	
 	
 	private final ClientService clService;
@@ -34,22 +37,53 @@ public class ClientController {
 	 * 10분주기?
 	 */
 	@PostMapping(value=ENDPOINT_PDS_RSLT)
-	public Map<String, Object> postDspRsltHs(@RequestBody List<Map<String, Object>> reqBodyList) throws Exception {	
+	public Map<String, Object> postDspRsltHs(@RequestBody String reqBodyList) throws Exception {	
 		logger.info("## IF-API-035101 - PDS발신결과수신 start");
 		HashMap<String, Object> dsRstlInfoMap = new HashMap<String, Object>();
 		
-		dsRstlInfoMap = clService.sendCmpnRsltList(reqBodyList);
+		logger.info("## Request Body :: " + reqBodyList);
+		
+		dsRstlInfoMap = clService.sendCmpnRsltList(new JSONArray(reqBodyList));
 		
 		return dsRstlInfoMap;
 	}
 	
 	
 	@PostMapping(value=ENDPOINT_PDS_RGST)
-	public Map<String, Object> saveCampMstrHs(@RequestBody List<Map<String, Object>> reqBodyList) throws Exception {	// IF-API-035102 (IF-CCS-007) - PDS캠페인마스터수신_상담_유선
+	public Map<String, Object> saveCampMstrHs(@RequestBody String reqBody) throws Exception {	// IF-API-035102 (IF-CCS-007) - PDS캠페인마스터수신_상담_유선
 		logger.info("## IF-API-035102 - PDS캠페인마스터수신_상담 start");
 		HashMap<String, Object> dsHsRsltInfoMap = new HashMap<String, Object>();
 		
-		dsHsRsltInfoMap = clService.sendCmpnMaData(reqBodyList);
+		logger.info("## Request Body :: " + reqBody);
+		
+		dsHsRsltInfoMap = clService.sendCmpnMaData(new JSONObject(reqBody));
+		
+		return dsHsRsltInfoMap;
+	}
+	
+	@PostMapping(value=ENDPOINT_ARSSATF_RSLT)
+	public Map<String, Object> arsSatfRslt(@RequestBody String reqBodyList) throws Exception {
+		logger.info("## IF-API-033701 - ARS 만족도결과 실시간 자료전송(IF-CCS-853) start");
+		HashMap<String, Object> dsHsRsltInfoMap = new HashMap<String, Object>();
+		
+//		logger.info("## Request Body :: " + reqBodyList);
+		
+//		dsHsRsltInfoMap = clService.sendArsSatfRslt(new JSONArray(reqBodyList));
+		dsHsRsltInfoMap = clService.sendArsSatfRslt();
+		
+		return dsHsRsltInfoMap;
+	}
+	
+	
+	@PostMapping(value=ENDPOINT_BSARSSATF_RSLT)
+	public Map<String, Object> bsArsSatfRslt(@RequestBody String reqBodyList) throws Exception {
+		logger.info("## IF-API-033701 - BS 고객만족도결과 결과수신 (IF-CCSN-002) start");
+		HashMap<String, Object> dsHsRsltInfoMap = new HashMap<String, Object>();
+		
+//		logger.info("## Request Body :: " + reqBodyList);
+		
+//		dsHsRsltInfoMap = clService.sendBsArsSatfRslt(new JSONArray(reqBodyList));
+		dsHsRsltInfoMap = clService.sendBsArsSatfRslt();
 		
 		return dsHsRsltInfoMap;
 	}
@@ -66,12 +100,15 @@ public class ClientController {
 	 * @throws Exception
 	 */
 	@PostMapping(value=GC_API_ACTION)
-	public JSONObject getApimDataToDataAction(
+	public String getApimDataToDataAction(
 							@RequestBody DataAction reqBody) throws Exception {	
 		logger.info("## GenesysCloud DataAction 호출 ");
 		System.out.println("## GenesysCloud DataAction 호출 ");
 		
-		return clService.callApimByDataAction(reqBody);
+		String result = clService.callApimByDataAction(reqBody).toString();
+		
+		return result;
+//		return clService.callApimByDataAction(reqBody);
 	}
 	
 	
@@ -89,6 +126,21 @@ public class ClientController {
 		return "TEST RESPONSE";
 	}
 
+	
+	@PostMapping("/testList")
+	public String testKafkaUcrmLt(@RequestBody List<Map<String, Object>> rList) throws Exception {
+		String result = "";
+		
+		System.out.println("## reqBodyList size :: " + rList.size());
+		
+		for(int i=0; i<rList.size(); i++) {
+			
+			result = clService.kafkaTest(rList.get(i));
+			System.out.println("##########   " + result);
+		}
+		return "DONE";
+	}
+	
 	
 
 	

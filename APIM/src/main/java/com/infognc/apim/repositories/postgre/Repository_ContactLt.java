@@ -1,4 +1,7 @@
-package com.infognc.apim.repositories;
+package com.infognc.apim.repositories.postgre;
+
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -6,10 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.infognc.apim.embeddable.ContactLt;
-import com.infognc.apim.entities.Entity_ContactLt;
-
-import java.util.List;
-import java.util.Optional;
+import com.infognc.apim.entities.postgre.Entity_ContactLt;
 
 
 @Repository

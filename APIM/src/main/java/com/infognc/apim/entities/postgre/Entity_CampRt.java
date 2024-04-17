@@ -1,4 +1,4 @@
-package com.infognc.apim.entities;
+package com.infognc.apim.entities.postgre;
 
 import java.util.Date;
 

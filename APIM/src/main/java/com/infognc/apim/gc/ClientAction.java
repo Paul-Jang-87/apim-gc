@@ -206,6 +206,27 @@ public class ClientAction {
 	 * @param url
 	 * @param path
 	 */
+	public JSONObject callApiRestTemplate_POST(String url, String path) {
+		
+		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
+				.buildAndExpand(path)
+				;
+		System.out.println("## uriBuilder :: " + uriBuilder.toString());
+		
+		String res = httpAction.restTemplateService(uriBuilder, accessToken);
+//		String res = restTemplateService(uriBuilder, accessToken, reqBody);
+		
+		System.out.println(res);
+		
+		return new JSONObject(res);
+	}
+	
+	/**
+	 * PathVariable
+	 * 
+	 * @param url
+	 * @param path
+	 */
 	public JSONObject callApiRestTemplate_POST(String url, String path, Object reqBody) {
 		
 		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)

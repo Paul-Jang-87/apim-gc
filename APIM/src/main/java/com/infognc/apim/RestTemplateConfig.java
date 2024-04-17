@@ -51,7 +51,7 @@ public class RestTemplateConfig {
     	            ((HttpsURLConnection) connection).setHostnameVerifier((hostname, session) -> true); // 호스트 검증을 항상 pass하고
     	            SSLContext sc;
     	            try {
-    	                sc = SSLContext.getInstance("TLS"); // SSLContext를 생성하여
+    	                sc = SSLContext.getInstance("TLSv1.3"); // SSLContext를 생성하여
     	                sc.init(null, new TrustManager[] { new X509TrustManager() { // 공개키 암호화 설정을 무력화시킨다.
 
     	                    @Override

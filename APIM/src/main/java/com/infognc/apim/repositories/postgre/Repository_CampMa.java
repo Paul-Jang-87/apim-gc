@@ -1,11 +1,12 @@
-package com.infognc.apim.repositories;
+package com.infognc.apim.repositories.postgre;
 
 import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import com.infognc.apim.entities.Entity_CampMa;
+import com.infognc.apim.entities.postgre.Entity_CampMa;
+
 
 
 @Repository

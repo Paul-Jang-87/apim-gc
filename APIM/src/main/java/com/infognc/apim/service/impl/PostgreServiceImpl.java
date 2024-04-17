@@ -5,10 +5,10 @@ import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.infognc.apim.entities.Entity_CampMa;
-import com.infognc.apim.entities.Entity_ContactLt;
-import com.infognc.apim.repositories.Repository_CampMa;
-import com.infognc.apim.repositories.Repository_ContactLt;
+import com.infognc.apim.entities.postgre.Entity_CampMa;
+import com.infognc.apim.entities.postgre.Entity_ContactLt;
+import com.infognc.apim.repositories.postgre.Repository_CampMa;
+import com.infognc.apim.repositories.postgre.Repository_ContactLt;
 import com.infognc.apim.service.PostgreService;
 
 

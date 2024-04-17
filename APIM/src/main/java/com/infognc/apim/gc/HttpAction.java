@@ -2,7 +2,6 @@ package com.infognc.apim.gc;
 
 import java.util.Arrays;
 
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -11,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -148,6 +148,50 @@ public class HttpAction {
 											entity, 
 											String.class
 											);
+			
+			result = res.getBody();
+			
+		}catch(HttpClientErrorException hce) {
+			hce.printStackTrace();
+			logger.error(hce.toString());
+			return null;
+		}catch(HttpServerErrorException hse) {
+			hse.printStackTrace();
+			logger.error(hse.toString());
+			return null;
+		}catch(Exception e) {
+			e.printStackTrace();
+			logger.error(e.toString());
+			return null;
+		}
+		
+		return result;
+	}
+	
+	
+	public String restTemplateService_oauth(UriComponents uriBuilder, HttpEntity<MultiValueMap<String, String>> entity, String type) {
+		String result = "";
+//		Map<String, Object> resBody = new HashMap<String, Object>();
+		
+		HttpMethod method = null;
+		try {
+			
+			if("POST".equals(type))	{ method = HttpMethod.POST; }
+			else if("GET".equals(type)) { method = HttpMethod.GET; } 
+			else if("PUT".equals(type)) { method = HttpMethod.PUT; } 
+			else if("DELETE".equals(type)) { method = HttpMethod.DELETE; } 
+			else {
+				method = HttpMethod.GET;
+			}
+			
+//			HttpEntity<String> entity = new HttpEntity<String>(headers);
+			
+			ResponseEntity<String> res = restTemplate.exchange(
+					uriBuilder.toUriString(), 
+					method, 
+					entity, 
+					String.class
+					);
 			
 			result = res.getBody();
 			

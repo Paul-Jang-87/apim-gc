@@ -1,24 +1,20 @@
 package com.infognc.apim.service.impl;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import com.infognc.apim.embeddable.ContactLt;
-import com.infognc.apim.entities.Entity_ContactLt;
+import com.infognc.apim.entities.postgre.Entity_ContactLt;
 import com.infognc.apim.gc.ClientAction;
 import com.infognc.apim.service.PostgreService;
 import com.infognc.apim.service.ProviderService;
@@ -41,22 +37,46 @@ public class ProviderServiceImpl implements ProviderService {
 	@Override
 	public Integer sendCampListToGc(List<Map<String, String>> inParamList) throws Exception {
 		Entity_ContactLt enContactLt = new Entity_ContactLt();
-		JSONObject reqBody = null;
-		JSONArray bodyList = new JSONArray();
+		
+		List<Map<String,Object>> reqList = new ArrayList<Map<String, Object>>();
+		HashMap<String,Object> reqBody = new HashMap<String, Object>();
+		HashMap<String,Object> reqData = new HashMap<String, Object>();
+		
+		String cpid = inParamList.get(0).get("cpid");
+		String queueid = "";
+		
+		// GC API 호출
+		clientAction.init();
+		
+		String gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
+		// CampID로 ContactListId 가져온다.
+		// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
+		String contactListId = "";
+		JSONObject cmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
+		if(cmpList != null) {
+			contactListId = ((JSONObject) cmpList.get("contactList")).getString("id");
+		/*	queueid = ((JSONObject) cmpList.get("queue")).getString("id") != null ? ((JSONObject) cmpList.get("queue")).getString("id") : "";  */
+			queueid = ((JSONObject) cmpList.get("queue")).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
+		}
+		
 		
 		ContactLt contactLt = new ContactLt();
 		Integer uCnt = 0;
 		Integer iUcnt = 0;
 		for (int i = 0; i < inParamList.size(); i++) {
-			String cpid = inParamList.get(i).get("cpid");
+			
 			String cpsq = inParamList.get(i).get("cpsq");
 			String cske = inParamList.get(i).get("cske");
 			String csna = inParamList.get(i).get("csna");
 			String tno1 = new String(Base64.decodeBase64(ApiUtil.nullToString(inParamList.get(i).get("tno1"))  ));
 			String tno2 = new String(Base64.decodeBase64(ApiUtil.nullToString(inParamList.get(i).get("tno2"))  ));
 			String tno3 = new String(Base64.decodeBase64(ApiUtil.nullToString(inParamList.get(i).get("tno3"))  ));
+			String tno4 = "";
+			String tno5 = "";
+			String tlno = "";
 			String tkda = inParamList.get(i).get("tkda");
 			String flag = inParamList.get(i).get("flag");
+			
 			
 			contactLt.setCpid(cpid);
 			contactLt.setCpsq(Integer.parseInt(cpsq));
@@ -69,37 +89,43 @@ public class ProviderServiceImpl implements ProviderService {
 			enContactLt.setTkda(tkda);
 			enContactLt.setFlag(flag);
 			
-			// GC API 호출
-			clientAction.init();
+			// id
+			reqBody.put("id", cske);
 			
-			reqBody = new JSONObject();
-			String gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
-			// CampID로 ContactListId 가져온다.
-			// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
-			String contactListId = "";
-			JSONObject cmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
-			if(cmpList != null) {
-				contactListId = ((JSONObject) cmpList.get("contactList")).getString("id");
-			}
-
-			reqBody.put("cpid", cpid);
-			reqBody.put("cpsq", cpsq);
-			reqBody.put("cske", cske);
-			reqBody.put("csna", csna);
-			reqBody.put("tno1", tno1);
-			reqBody.put("tno2", tno2);
-			reqBody.put("tno3", tno3);
-			reqBody.put("tkda", tkda);
-//			reqBody.put("flag", flag);
-			reqBody.put("tmzo", "Asia/Seoul (+09:00)");
-
+			// contactList id
+			reqBody.put("contactListId", contactListId);
+			
+			// data
+			reqData.put("cpid", cpid);
+			reqData.put("cpsq", cpsq);
+			reqData.put("cske", cske);
+			reqData.put("csna", csna);
+			reqData.put("tno1", tno1);
+			reqData.put("tno2", tno2);
+			reqData.put("tno3", tno3);
+			reqData.put("tno4", tno4);
+			reqData.put("tno5", tno5);
+			reqData.put("tlno", tlno);
+			reqData.put("tkda", tkda);
+			reqData.put("queueid", queueid);
+			reqData.put("trycnt", 0);
+			reqData.put("tmzo", "Asia/Seoul (+09:00)");
+			
+			reqBody.put("data", reqData);
+			
+			// contact data add 전에 clear 필요 - 2024.04.03 추가 JJH
+			// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/clear
+			gcUrl = "/api/v2/outbound/contactlists/{contactListId}/clear";
+			clientAction.callApiRestTemplate_POST(gcUrl, contactListId);
+			
+			
 			// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/contacts
 			gcUrl = "/api/v2/outbound/contactlists/{contactListId}/contacts";
 			System.out.println("## client ready (gcUrl = " + gcUrl + ")");
 			System.out.println("## reqBody :: " + reqBody);
-			bodyList.put(reqBody);
+			reqList.add(reqBody);
 			
-			clientAction.callApiRestTemplate_POST(gcUrl, contactListId, bodyList);
+			clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqList);
 
 			// db인서트
 			try {
@@ -128,7 +154,11 @@ public class ProviderServiceImpl implements ProviderService {
 	public Integer sendArsStafData(List<Map<String, String>> inParamList) throws Exception {
 		Integer resInt = 0;
 		ApiUtil apiUtil = new ApiUtil();
-		JSONObject reqBody = null;
+		
+		List<Map<String,Object>> reqList = new ArrayList<Map<String, Object>>();
+		HashMap<String,Object> reqBody = new HashMap<String, Object>();
+		HashMap<String,Object> reqData = new HashMap<String, Object>();
+		
 		String gcUrl = "";
 		
 		// G.C로 보낼 contact data 
@@ -141,7 +171,22 @@ public class ProviderServiceImpl implements ProviderService {
 		String tno1		= "";
 		String tno2		= "";
 		String tno3		= "";
+		String tno4		= "";
+		String tno5		= "";
+		String tlno		= "";
 		String tkda		= "";
+		String queueid 	= "";
+		
+		clientAction.init();
+		
+		gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
+		// CampID로 ContactListId 가져온다.
+		// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
+		JSONObject cmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
+		if(cmpList != null) {
+			contactListId = ((JSONObject) cmpList.get("contactList")).getString("id");
+			queueid = ((JSONObject) cmpList.get("queue")).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
+		}
 		
 		try {
 			for(int i=0; i<inParamList.size(); i++) {
@@ -184,31 +229,42 @@ public class ProviderServiceImpl implements ProviderService {
 				 * 불필요한 데이터는 전송 X ( ex. FLAG, CRDT )
 				 * 
 				 */
-				clientAction.init();
 				
-				gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
-				// CampID로 ContactListId 가져온다.
-				// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
-				JSONObject cmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
-				if(cmpList != null) {
-					contactListId = ((JSONObject) cmpList.get("contactList")).getString("id");
-				}
+				// id
+				reqBody.put("id", cske);
 				
-				reqBody = new JSONObject();
-				reqBody.put("CPID", cpid);
-				reqBody.put("CPSQ", cpsq);
-				reqBody.put("CSKE", cske);
-				reqBody.put("CSNA", csna);
-				reqBody.put("TNO1", tno1);
-				reqBody.put("TNO2", tno2);
-				reqBody.put("TNO3", tno3);
-				reqBody.put("TKDA", tkda);
-				reqBody.put("tmzo", "Asia/Seoul (+09:00)");
+				// contactList id
+				reqBody.put("contactListId", contactListId);
+				
+				reqData.put("cpid", cpid);
+				reqData.put("cpsq", cpsq);
+				reqData.put("cske", cske);
+				reqData.put("csna", csna);
+				reqData.put("tno1", tno1);
+				reqData.put("tno2", tno2);
+				reqData.put("tno3", tno3);
+				reqData.put("tno4", tno4);
+				reqData.put("tno5", tno5);
+				reqData.put("tlno", tlno);
+				reqData.put("tkda", tkda);
+				reqData.put("queueid", queueid);
+				reqData.put("trycnt", 0);
+				reqData.put("tmzo", "Asia/Seoul (+09:00)");
+				
+				reqBody.put("data", reqData);
+				
+				reqList.add(reqBody);
+				
+				
+				// contact data add 전에 clear 필요 - 2024.04.03 추가 JJH
+				// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/clear
+				gcUrl = "/api/v2/outbound/contactlists/{contactListId}/clear";
+				clientAction.callApiRestTemplate_POST(gcUrl, contactListId);
 				
 				// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/contacts
 				gcUrl = "/api/v2/outbound/contactlists/{contactListId}/contacts";
 				
-				clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqBody);
+				clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqList);
 				resInt = 1;
 				
 			}
