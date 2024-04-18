@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,10 +32,14 @@ public class ClientController {
 		this.clService = clService;
 	}
 	
-	/*
+	/**
+	 * 
 	 * IF-API-035101 (IF-CCS-005) - PDS발신결과수신_상담_유선
 	 * IF-API-035101 (IF-CCS-006) - PDS발신결과수신_상담_무선
-	 * 10분주기?
+	 * 
+	 * @param reqBodyList
+	 * @return
+	 * @throws Exception
 	 */
 	@PostMapping(value=ENDPOINT_PDS_RSLT)
 	public Map<String, Object> postDspRsltHs(@RequestBody String reqBodyList) throws Exception {	
@@ -48,7 +53,15 @@ public class ClientController {
 		return dsRstlInfoMap;
 	}
 	
-	
+	/**
+	 * 
+	 * IF-API-035102 (IF-CCS-007) - 캠페인마스터 송신_유선
+	 * IF-API-035102 (IF-CCS-008) - 캠페인마스터 송신_무선
+	 * 
+	 * @param reqBody
+	 * @return
+	 * @throws Exception
+	 */
 	@PostMapping(value=ENDPOINT_PDS_RGST)
 	public Map<String, Object> saveCampMstrHs(@RequestBody String reqBody) throws Exception {	// IF-API-035102 (IF-CCS-007) - PDS캠페인마스터수신_상담_유선
 		logger.info("## IF-API-035102 - PDS캠페인마스터수신_상담 start");
@@ -61,28 +74,45 @@ public class ClientController {
 		return dsHsRsltInfoMap;
 	}
 	
+	
+	
+	/**
+	 * 배치 1분? 10분?
+	 * 
+	 * IF-API-033701 (IF-CCS-835) - ARS 만족도결과 실시간 자료전송
+	 * 
+	 * @param reqBodyList
+	 * @return
+	 * @throws Exception
+	 */
+	@Scheduled(fixedDelay=60*1000)
 	@PostMapping(value=ENDPOINT_ARSSATF_RSLT)
-	public Map<String, Object> arsSatfRslt(@RequestBody String reqBodyList) throws Exception {
+	public Map<String, Object> arsSatfRslt() throws Exception {
 		logger.info("## IF-API-033701 - ARS 만족도결과 실시간 자료전송(IF-CCS-853) start");
 		HashMap<String, Object> dsHsRsltInfoMap = new HashMap<String, Object>();
 		
-//		logger.info("## Request Body :: " + reqBodyList);
-		
-//		dsHsRsltInfoMap = clService.sendArsSatfRslt(new JSONArray(reqBodyList));
 		dsHsRsltInfoMap = clService.sendArsSatfRslt();
 		
 		return dsHsRsltInfoMap;
 	}
 	
 	
+	
+	/**
+	 * 일배치 16:30 
+	 * 
+	 * IF-API-033701 (IF-CCSN-002) -  BS 고객만족도결과 결과수신
+	 * 
+	 * @param reqBodyList
+	 * @return
+	 * @throws Exception
+	 */
+	@Scheduled(cron="0 30 16 * * *")
 	@PostMapping(value=ENDPOINT_BSARSSATF_RSLT)
-	public Map<String, Object> bsArsSatfRslt(@RequestBody String reqBodyList) throws Exception {
+	public Map<String, Object> bsArsSatfRslt() throws Exception {
 		logger.info("## IF-API-033701 - BS 고객만족도결과 결과수신 (IF-CCSN-002) start");
 		HashMap<String, Object> dsHsRsltInfoMap = new HashMap<String, Object>();
 		
-//		logger.info("## Request Body :: " + reqBodyList);
-		
-//		dsHsRsltInfoMap = clService.sendBsArsSatfRslt(new JSONArray(reqBodyList));
 		dsHsRsltInfoMap = clService.sendBsArsSatfRslt();
 		
 		return dsHsRsltInfoMap;

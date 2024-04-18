@@ -7,9 +7,9 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import com.infognc.apim.entities.oracle.Entity_IVR_SURVEY_PCUBE;
-import com.infognc.apim.entities.oracle.Entity_IVR_SURVEY_UCUBE_SDW;
+import com.infognc.apim.entities.oracle.Entity_IVR_SURVEY_UCUBE_W;
 import com.infognc.apim.repositories.oracle.Repository_IvrSurPCUBE;
-import com.infognc.apim.repositories.oracle.Repository_IvrSurUCUBE_SDW;
+import com.infognc.apim.repositories.oracle.Repository_IvrSurUCUBE_W;
 import com.infognc.apim.service.OracleService;
 
 
@@ -17,9 +17,9 @@ import com.infognc.apim.service.OracleService;
 public class OracleServiceImpl implements OracleService{
 //	private static final Logger logger = LoggerFactory.getLogger(OracleServiceImpl.class);
 	private final Repository_IvrSurPCUBE ivrSurPcube;
-	private final Repository_IvrSurUCUBE_SDW ivrSurUcube;
+	private final Repository_IvrSurUCUBE_W ivrSurUcube;
 	
-	public OracleServiceImpl(Repository_IvrSurPCUBE ivrSurPcube, Repository_IvrSurUCUBE_SDW ivrSurUcube) {
+	public OracleServiceImpl(Repository_IvrSurPCUBE ivrSurPcube, Repository_IvrSurUCUBE_W ivrSurUcube) {
 		this.ivrSurPcube = ivrSurPcube;
 		this.ivrSurUcube = ivrSurUcube;
 	}
@@ -54,23 +54,24 @@ public class OracleServiceImpl implements OracleService{
 	@Override
 	public JSONArray selectUcube() throws Exception {
 		JSONArray resultJsonArray = new JSONArray();
-		List<Entity_IVR_SURVEY_UCUBE_SDW> ucubeList = ivrSurUcube.findAll();
+		List<Entity_IVR_SURVEY_UCUBE_W> ucubeList = ivrSurUcube.findAll();
 		
 		if(ucubeList.size() > 0) {
 			// List to JSONArray
-			for (Entity_IVR_SURVEY_UCUBE_SDW entity : ucubeList) {
+			for (Entity_IVR_SURVEY_UCUBE_W entity : ucubeList) {
 				JSONObject jsonObject = new JSONObject();
 				
-				jsonObject.put("orderid", entity.getOrderid());
-				jsonObject.put("new_seq_no", entity.getNew_seq_no());
-				jsonObject.put("new_sur_survey1", entity.getNew_sur_survey1());
-				jsonObject.put("new_sur_survey2", entity.getNew_sur_survey2());
-				jsonObject.put("new_sur_ans_date", entity.getNew_sur_ans_date());
+				jsonObject.put("seq_no", entity.getSeq_no());
+				jsonObject.put("sur_survey1", entity.getSur_survey1());
+				jsonObject.put("sur_survey2", entity.getSur_survey2());
+				jsonObject.put("sur_ans_date", entity.getSur_ans_date());
 				
 				resultJsonArray.put(jsonObject);
 				
-				// delete by Order ID
-				ivrSurUcube.deleteById(entity.getOrderid());
+				// delete 
+//				ivrSurUcube.deleteById(entity.getOrderid());
+				ivrSurUcube.deleteById(entity.getSeq_no());
+				
 			}
 		}
 		

@@ -77,7 +77,7 @@ public class ClientAction {
 		Configuration.setDefaultApiClient(apiClient);
 	}
 	
-	@Scheduled(fixedDelay=86400*1000, initialDelay=86400*1000)
+	@Scheduled(fixedDelay=86400*1000)
 	public String getAccessToken() {
 		System.out.println("## get access token !! ");
 		return authResponse.getBody().getAccess_token();

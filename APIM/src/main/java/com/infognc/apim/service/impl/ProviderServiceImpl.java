@@ -19,6 +19,7 @@ import com.infognc.apim.gc.ClientAction;
 import com.infognc.apim.service.PostgreService;
 import com.infognc.apim.service.ProviderService;
 import com.infognc.apim.utl.ApiUtil;
+import com.infognc.apim.utl.Configure;
 
 @Service
 public class ProviderServiceImpl implements ProviderService {
@@ -90,7 +91,7 @@ public class ProviderServiceImpl implements ProviderService {
 			enContactLt.setFlag(flag);
 			
 			// id
-			reqBody.put("id", cske);
+			reqBody.put("id", cpsq);
 			
 			// contactList id
 			reqBody.put("contactListId", contactListId);
@@ -113,10 +114,11 @@ public class ProviderServiceImpl implements ProviderService {
 			
 			reqBody.put("data", reqData);
 			
+			// clear 안하고 계속 add - 2024.04.18
 			// contact data add 전에 clear 필요 - 2024.04.03 추가 JJH
 			// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/clear
-			gcUrl = "/api/v2/outbound/contactlists/{contactListId}/clear";
-			clientAction.callApiRestTemplate_POST(gcUrl, contactListId);
+//			gcUrl = "/api/v2/outbound/contactlists/{contactListId}/clear";
+//			clientAction.callApiRestTemplate_POST(gcUrl, contactListId);
 			
 			
 			// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/contacts
@@ -146,133 +148,148 @@ public class ProviderServiceImpl implements ProviderService {
 	}
 	
 	/**
-	 * ARS 만족도 실시간 자료전송 ('C', PCUBEX
+	 * 
+	 * IF-API-076701 
+	 * ARS 만족도 실시간 자료전송 ('C', PCUBE)
 	 * BS 고객만족도 조사 수행 ('BS', UCUBE)
 	 * 
 	 */
 	@Override
 	public Integer sendArsStafData(List<Map<String, String>> inParamList) throws Exception {
-		Integer resInt = 0;
+		Integer resInt = 1;
 		ApiUtil apiUtil = new ApiUtil();
 		
 		List<Map<String,Object>> reqList = new ArrayList<Map<String, Object>>();
 		HashMap<String,Object> reqBody = new HashMap<String, Object>();
 		HashMap<String,Object> reqData = new HashMap<String, Object>();
-		
-		String gcUrl = "";
-		
-		// G.C로 보낼 contact data 
-		String contactListId 	= "";
-		
-		String cpid 	= "";
-		String cpsq		= "";
-		String cske		= "";
-		String csna		= "";
-		String tno1		= "";
-		String tno2		= "";
-		String tno3		= "";
-		String tno4		= "";
-		String tno5		= "";
-		String tlno		= "";
-		String tkda		= "";
-		String queueid 	= "";
-		
-		clientAction.init();
-		
-		gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
-		// CampID로 ContactListId 가져온다.
-		// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
-		JSONObject cmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
-		if(cmpList != null) {
-			contactListId = ((JSONObject) cmpList.get("contactList")).getString("id");
-			queueid = ((JSONObject) cmpList.get("queue")).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
-		}
-		
-		try {
-			for(int i=0; i<inParamList.size(); i++) {
-				String seqNo 	= inParamList.get(i).get("seqNo");
-				String surAni 	= inParamList.get(i).get("surAni");
-				String surGubun = inParamList.get(i).get("surGubun");
-				
-				inParamList.get(i).replace("surAni", apiUtil.decode(surAni));
-				
-				if("BS".equals(surGubun)) {		// UCUBE - BS고객만족도 조사수행
-					// SET G.C Send Data 
-					cpid = "11";
-					tno1 = surAni;
-					tkda = "8443" + "||" + seqNo + "||" + surAni + "||" + surGubun;
 
-				} else if("C".equals(surGubun)) {	// PCUBE - ARS 고객만족도 실시간 자료전송
-					// SET G.C Send Data 
-					cpid = "9";
-					tno1 = surAni;
-					tkda = "5996" + "||" + seqNo + "||" + surAni + "||" + surGubun;
-					
-				} else {
-				}
-				
-				// 공휴일 체크? 휴일 아닐때 CAMPLT로 데이터 저장
-				// - 사용유무 확인 필요하나, 현재는 사용되지 않는 것으로 추측.
-				// (AS-IS) TB_SMS_HOLIDAY_CHECK 테이블에 2022년까지만 공휴일 데이터가 들어가 있고 이후는 없음.
-				
-				/*
-				 * [CAMPLT]
-				 * CPID = "11" or "9"
-				 * CPSQ = SQ_PCUBE.nextval or SQ_UCUBE.nextval
-				 * CSK2 = SEQ_NO
-				 * CSK3 = SUR_GUBUN
-				 * TNO1 = SUR_ANI
-				 * TKDA = '8443'||SQE_NO||SUR_ANI||SUR_GUBUN or '5996'||SQE_NO||SUR_ANI||SUR_GUBUN
-				 * FLAG = 'A'
-				 * CRDT = sysdate
-				 * 
-				 * 불필요한 데이터는 전송 X ( ex. FLAG, CRDT )
-				 * 
-				 */
-				
-				// id
-				reqBody.put("id", cske);
-				
-				// contactList id
-				reqBody.put("contactListId", contactListId);
-				
-				reqData.put("cpid", cpid);
-				reqData.put("cpsq", cpsq);
-				reqData.put("cske", cske);
-				reqData.put("csna", csna);
-				reqData.put("tno1", tno1);
-				reqData.put("tno2", tno2);
-				reqData.put("tno3", tno3);
-				reqData.put("tno4", tno4);
-				reqData.put("tno5", tno5);
-				reqData.put("tlno", tlno);
-				reqData.put("tkda", tkda);
-				reqData.put("queueid", queueid);
-				reqData.put("trycnt", 0);
-				reqData.put("tmzo", "Asia/Seoul (+09:00)");
-				
-				reqBody.put("data", reqData);
-				
-				reqList.add(reqBody);
-				
-				
-				// contact data add 전에 clear 필요 - 2024.04.03 추가 JJH
-				// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/clear
-				gcUrl = "/api/v2/outbound/contactlists/{contactListId}/clear";
-				clientAction.callApiRestTemplate_POST(gcUrl, contactListId);
-				
-				// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/contacts
-				gcUrl = "/api/v2/outbound/contactlists/{contactListId}/contacts";
-				
-				clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqList);
-				resInt = 1;
-				
-			}
-		}catch(Exception e) {
-			logger.error("## ERROR!!  : {} " + e.getMessage());
-			return 0;
-		}
 		
+		// 휴일 체크? 휴일 아닐때 CAMPLT로 데이터 저장
+		// (AS-IS) TB_SMS_HOLIDAY_CHECK 테이블에 2022년까지만 공휴일 데이터가 들어가 있고 이후는 없음.
+		// 휴일 체크 사용한다면, 휴일(토,일,공휴일)이 아닐때만 Genesys Cloud로 대상자 리스트 전송.
+		boolean flagHoliday = true;
+		if(flagHoliday) {
+			String gcUrl = "";
+			
+			// G.C로 보낼 contact data 
+			String contactListId 	= "";
+			
+			String cpid 	= "";
+			String cpsq		= "";
+			String cske		= "";
+			String csna		= "";
+			String tno1		= "";
+			String tno2		= "";
+			String tno3		= "";
+			String tno4		= "";
+			String tno5		= "";
+			String tlno		= "";
+			String tkda		= "";
+			String queueid 	= "";
+			
+			clientAction.init();
+			
+			try {
+				for(int i=0; i<inParamList.size(); i++) {
+					String seqNo 	= inParamList.get(i).get("seqNo");
+					String surAni 	= inParamList.get(i).get("surAni");
+					String surGubun = inParamList.get(i).get("surGubun");
+					
+					inParamList.get(i).replace("surAni", apiUtil.decode(surAni));
+					
+					if("BS".equals(surGubun)) {		// UCUBE - BS고객만족도 조사수행
+						// SET G.C Send Data 
+						cpid = Configure.get("API.076701.BS.CPID") == "" ? "11": Configure.get("API.076701.BS.CPID");
+						tno1 = surAni;
+						tkda = "8443" + "||" + seqNo + "||" + surAni + "||" + surGubun;
+						
+					} else if("C".equals(surGubun)) {	// PCUBE - ARS 고객만족도 실시간 자료전송
+						// SET G.C Send Data 
+						cpid = Configure.get("API.076701.ARS.CPID") == "" ? "9" : Configure.get("API.076701.ARS.CPID");
+						tno1 = surAni;
+						tkda = "5996" + "||" + seqNo + "||" + surAni + "||" + surGubun;
+						
+					} else {
+					}
+					
+					/*
+					 * [CAMPLT]
+					 * CPID = "11" or "9"
+					 * CPSQ = SQ_PCUBE.nextval or SQ_UCUBE.nextval
+					 * CSK2 = SEQ_NO
+					 * CSK3 = SUR_GUBUN
+					 * TNO1 = SUR_ANI
+					 * TKDA = '8443'||SQE_NO||SUR_ANI||SUR_GUBUN or '5996'||SQE_NO||SUR_ANI||SUR_GUBUN
+					 * FLAG = 'A'
+					 * CRDT = sysdate
+					 * 
+					 * 불필요한 데이터는 전송 X ( ex. FLAG, CRDT )
+					 * 
+					 */
+					
+					gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
+					// CampID로 ContactListId 가져온다.
+					// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
+					JSONObject cmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
+					if(cmpList != null) {
+						contactListId = ((JSONObject) cmpList.get("contactList")).getString("id");
+						queueid = ((JSONObject) cmpList.get("queue")).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
+					}
+					
+					// postgre DB CONTACTLT TABLE CPSQ
+					// CPID로 조회한 CPSQ MAX + 1
+					int maxCpsq = postgreService.selectMaxCpsq(cpid);
+					cpsq = String.valueOf(maxCpsq + 1);
+					
+					// UPDATE CONTACTLT
+					ContactLt contactLt = new ContactLt();
+					contactLt.setCpid(cpid);
+					postgreService.updateContactLt(contactLt, cpsq);
+					
+					// id
+					reqBody.put("id", cpsq);
+					
+					// contactList id
+					reqBody.put("contactListId", contactListId);
+					
+					reqData.put("cpid", cpid);
+					reqData.put("cpsq", cpsq);
+					reqData.put("cske", cske);
+					reqData.put("csna", csna);
+					reqData.put("tno1", tno1);
+					reqData.put("tno2", tno2);
+					reqData.put("tno3", tno3);
+					reqData.put("tno4", tno4);
+					reqData.put("tno5", tno5);
+					reqData.put("tlno", tlno);
+					reqData.put("tkda", tkda);
+					reqData.put("queueid", queueid);
+					reqData.put("trycnt", 0);
+					reqData.put("tmzo", "Asia/Seoul (+09:00)");
+					
+					reqBody.put("data", reqData);
+					
+					reqList.add(reqBody);
+					
+					
+					// clear 대신 계속 add
+					// contact data add 전에 clear 필요 - 2024.04.03 추가 JJH
+					// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/clear
+//				gcUrl = "/api/v2/outbound/contactlists/{contactListId}/clear";
+//				clientAction.callApiRestTemplate_POST(gcUrl, contactListId);
+					
+					// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/contacts
+					gcUrl = "/api/v2/outbound/contactlists/{contactListId}/contacts";
+					
+					clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqList);
+					
+				}
+			}catch(Exception e) {
+				logger.error("## ERROR!!  : {} " + e.getMessage());
+				return 0;
+			}
+			
+		} 
 		return resInt;
 	}
 	
