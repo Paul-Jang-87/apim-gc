@@ -259,5 +259,40 @@ public class ApiUtil {
 	 }  
 	
 	
+	public static JSONObject transferBase64URLSafeEncoding(JSONObject json) throws Exception {
+//		JSONObject json = new JSONObject(body);
+		
+		for(String key : json.keySet()) {
+            Object value = json.get(key);
+            if(value instanceof String) {
+            	if (isBase64Encoded(String.valueOf(value))) {
+            		// Base64로 인코딩된 데이터인 경우 디코딩하여 값을 업데이트
+            		String decodedValue = decodeBase64(String.valueOf(value));
+            		json.put(key, decodedValue);
+            	}
+            }
+            
+		}
+		return json;
+	}
+	
+    // Base64로 인코딩된 데이터인지 확인하는 메서드
+    public static boolean isBase64Encoded(String data) {
+        try {
+//            byte[] decodedBytes = org.apache.commons.codec.binary.Base64.decodeBase64(data);
+//            return (decodedBytes.length != data.length());
+        	Base64.getDecoder().decode(data);
+        	return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+    
+    // Base64로 인코딩된 데이터를 디코딩하는 메서드
+    public static String decodeBase64(String data) {
+        byte[] decodedBytes = org.apache.commons.codec.binary.Base64.decodeBase64(data);
+        return new String(decodedBytes);
+    }
+	
 	
 }

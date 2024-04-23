@@ -77,7 +77,7 @@ public class ClientController {
 	
 	
 	/**
-	 * 배치 1분? 10분?
+	 * 배치 1분
 	 * 
 	 * IF-API-033701 (IF-CCS-835) - ARS 만족도결과 실시간 자료전송
 	 * 
@@ -134,6 +134,8 @@ public class ClientController {
 							@RequestBody DataAction reqBody) throws Exception {	
 		logger.info("## GenesysCloud DataAction 호출 ");
 		System.out.println("## GenesysCloud DataAction 호출 ");
+		
+		logger.info("## reqBody :: " + reqBody);
 		
 		String result = clService.callApimByDataAction(reqBody).toString();
 		

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +28,9 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
@@ -88,6 +92,9 @@ public class RestTemplateConfig {
                 .setReadTimeout(Duration.ofSeconds(20))
                 .additionalInterceptors(clientHttpRequestInterceptor(), new LoggingInterceptor())	// 재시도 설정/요청응답 로깅을 위한 인터셉터 설정
                 .requestFactory(()-> new BufferingClientHttpRequestFactory(factory))
+//                .additionalMessageConverters(new MappingJackson2HttpMessageConverter()) // JSON 변환기 추가
+//                .additionalMessageConverters(new StringHttpMessageConverter(Charset.defaultCharset())) // 문자열 변환기 추가
+//                .additionalMessageConverters(new FormHttpMessageConverter()) // application/x-www-form-urlencoded 데이터 처리
                 .build();
                 
     }

@@ -247,7 +247,7 @@ public class ClientServiceImpl implements ClientService{
 	 * 			NEW_SUR_SURVEY1, 
 	 * 			NEW_SUR_SURVEY2,
 	 * 			TO_CHAR(NEW_SUR_ANS_DATE, 'YYYY/MM/DD HH24:MI:SS') NEW_SUR_ANS_DATE
-	 * FROM		TB_IVR_SURVEY_UCUBE_SDW
+	 * FROM		TB_IVR_SURVEY_UCUBE_W
 	 * 
 	 */
 	@Override
@@ -300,10 +300,10 @@ public class ClientServiceImpl implements ClientService{
 					logger.info("## API-033701 데이터 전송 성공 ");
 					
 					// delete ????
-					
-					
-					
-					
+					for(int j=0; j<rsList.size(); j++) {
+						String ismsSendSno = rsList.get(j).optString("ismsSendSno", "");
+						oracleService.deleteUcubeSdw(ismsSendSno);
+					}
 				}
 				
 			}else {
@@ -414,18 +414,24 @@ public class ClientServiceImpl implements ClientService{
 	 * Genesys Cloud DataAction에서 APIM 호출 ( 443포트만 가능 )
 	 * 
 	 */
+	@SuppressWarnings("null")
 	@Override
 	public JSONObject callApimByDataAction(DataAction reqJson) throws Exception {
 		String response = "";
 		
 		try {
-			String url 				= reqJson.getUrl();		// APIM 호출 URL
-			String method			= reqJson.getMethod();	// REST CRUD (GET, POST, PUT, DELETE)
-			JSONObject headerJson	= ApiUtil.toJson(reqJson.getApimHeader());
-			JSONObject bodyJson		= ApiUtil.toJson(reqJson.getApimBody());
+			String url 				= reqJson.getUrl();			// APIM 호출 URL
+			String method			= reqJson.getMethod();		// REST CRUD (GET, POST, PUT, DELETE)
+			String pathParam		= reqJson.getApimPath();	// URL Path parameter
+			JSONObject queryParam	= ApiUtil.toJson(reqJson.getApimQuery());	// URL Query parameter
+			JSONObject headerJson	= ApiUtil.toJson(reqJson.getApimHeader());	// APIM request Header
+			JSONObject bodyJson		= ApiUtil.toJson(reqJson.getApimBody());	// APIM request Body (POST)
 			
-			logger.info(">>> \n #url = {} \n #method = {} \n #header = {} \n #body = {}", url, method, headerJson, bodyJson);
+			logger.info(">>> \n #url = {} \n #method = {} \n #path = {} \n #query = {} \n #header = {} \n #body = {}", url, method, pathParam, queryParam, headerJson, bodyJson);
 			
+			
+			// 따로 필요하면 사용, 아니면 주석
+			/*
 			// 호출하는 api들이 GET, POST 다르고, 데이터 셋이 제각각 다르기때문에 따로 로직 구성해준다. 
 			// =================   APIM 호출 ===============================
 			String callPath = Configure.get("callPath");
@@ -435,7 +441,8 @@ public class ClientServiceImpl implements ClientService{
 			} else {
 				ApiServer = Configure.get("cos.api.server");
 			}
-			
+			url = ApiServer + url;
+			*/
 			// get OAuth Token
 			String token	= Configure.get("api.auth.token");
 			if(token.isEmpty() || token == null) {
@@ -460,40 +467,26 @@ public class ClientServiceImpl implements ClientService{
 			headers.set("X-IBM-Client-Secret", clientSecret);
 			headers.set("Authorization", apiAuth + " " + token);
 			
-			if("POST".equals(method.toUpperCase())) {
-				// make URI builder
-				uriBuilder = UriComponentsBuilder.fromUriString(ApiServer + url).build(true);
-				
-			} else if("GET".equals(method.toUpperCase())) {
-				
-				if(bodyJson != null) {
-					// Query Parameter 세팅
-					MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-					Iterator<String> keys = bodyJson.keySet().iterator();
-					while(keys.hasNext()) {
-						String key = keys.next();
-						params.add(key, bodyJson.getString(key));
-					}
-					uriBuilder = UriComponentsBuilder.fromUriString(ApiServer + url).queryParams(params).build(true);
-				} else {
-					// Query Param 없으면 그냥
-					uriBuilder = UriComponentsBuilder.fromUriString(ApiServer + url).build(true);
-				}
-				
-			} else {
-				
-			}
+			// URI 세팅
+			uriBuilder = setURI(url, pathParam, queryParam);
 			
 			// APIM 호출 시 header data 세팅이 있는 경우 추가 헤더 세팅
-			if(headerJson != null) {
+			if(!headerJson.isEmpty()) {
 				Iterator<String> keys = headerJson.keySet().iterator();
 				while(keys.hasNext()) {
 					String key = keys.next();
-					headers.set(key, headerJson.getString(key));
+					String value = headerJson.getString(key);
+					headers.set(key, value);
 				}
 			}
 			
-			HttpEntity<String> entity = new HttpEntity<String>(bodyJson.toString(), headers);
+			HttpEntity<String> entity = null;
+			if(!bodyJson.isEmpty()) {
+				entity = new HttpEntity<String>(bodyJson.toString(), headers);
+			} else {
+				entity = new HttpEntity<String>(headers);
+			}
+			
 			response = httpAction.restTemplateService(uriBuilder, entity, method);
 			logger.info("## APIM Get Data !! : {}", response);
 			
@@ -504,14 +497,6 @@ public class ClientServiceImpl implements ClientService{
 		
 		return new JSONObject(response);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	/**
 	 * 
@@ -566,6 +551,53 @@ public class ClientServiceImpl implements ClientService{
 		
 		return res;
 	}
+	
+	
+	public UriComponents setURI(String url, String path, JSONObject queryJson) throws Exception {
+		UriComponents uriBuilder = null;
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		JSONObject jsonTemp = null;
+		
+		// URI Query parameter BASE64 SafeURL 변경
+		if(!queryJson.isEmpty()) {
+			// base64URLsafe 인코딩 전환
+			jsonTemp = ApiUtil.transferBase64URLSafeEncoding(queryJson);
+			logger.info("## jsonTemp :: " + jsonTemp.toString());
+			// Query Parameter 세팅
+		    for (String key : jsonTemp.keySet()) {
+		    	logger.info(path);
+		        params.add(key, jsonTemp.optString(key, ""));
+		    }
+		}
+		
+		// uri 특수문자
+//		url = UriUtils.encode(url, StandardCharsets.UTF_8);
+		
+		if(!"".equals(path) && !queryJson.isEmpty()) {
+			// path O, query O
+			System.out.println("## path O, query O");
+			Object[] pathArr = path.trim().split(",");
+			uriBuilder = UriComponentsBuilder.fromUriString(url).queryParams(params).buildAndExpand(pathArr);
+		} else if(!queryJson.isEmpty()) {
+			// path X, query O
+			System.out.println("## path X, query O");
+			uriBuilder = UriComponentsBuilder.fromUriString(url).queryParams(params).build(true);
+		} else if(!"".equals(path)) {
+			// path O, query X
+			System.out.println("## path O, query X");
+			Object[] pathArr = path.trim().split(",");
+			uriBuilder = UriComponentsBuilder.fromUriString(url).buildAndExpand(pathArr);
+		} else {
+			// path X, query X
+			System.out.println("## path X, query X");
+			uriBuilder = UriComponentsBuilder.fromUriString(url).build(true);
+		}
+		
+		System.out.println("## uriBuilder :: " + uriBuilder.toString());
+		
+		return uriBuilder;
+	}
+	
 	
 	
 	@Override

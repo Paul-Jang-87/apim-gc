@@ -39,11 +39,14 @@ public class ProviderServiceImpl implements ProviderService {
 	public Integer sendCampListToGc(List<Map<String, String>> inParamList) throws Exception {
 		Entity_ContactLt enContactLt = new Entity_ContactLt();
 		
-		List<Map<String,Object>> reqList = new ArrayList<Map<String, Object>>();
-		HashMap<String,Object> reqBody = new HashMap<String, Object>();
-		HashMap<String,Object> reqData = new HashMap<String, Object>();
+//		List<Map<String,Object>> reqList = new ArrayList<Map<String, Object>>();
+//		HashMap<String,Object> reqBody = new HashMap<String, Object>();
+//		HashMap<String,String> reqData = new HashMap<String, String>();
+		List<JSONObject> reqList = new ArrayList<JSONObject>();
+		JSONObject reqBody = new JSONObject();
+		JSONObject reqData = new JSONObject();
 		
-		String cpid = inParamList.get(0).get("cpid");
+		String cpid = (String) inParamList.get(0).get("cpid");
 		String queueid = "";
 		
 		// GC API 호출
@@ -54,10 +57,10 @@ public class ProviderServiceImpl implements ProviderService {
 		// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
 		String contactListId = "";
 		JSONObject cmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
-		if(cmpList != null) {
-			contactListId = ((JSONObject) cmpList.get("contactList")).getString("id");
+		if(!cmpList.isEmpty()) {
+			contactListId = ((JSONObject) cmpList.optJSONObject("contactList", new JSONObject())).optString("id", "");
 		/*	queueid = ((JSONObject) cmpList.get("queue")).getString("id") != null ? ((JSONObject) cmpList.get("queue")).getString("id") : "";  */
-			queueid = ((JSONObject) cmpList.get("queue")).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
+			queueid = ((JSONObject) cmpList.optJSONObject("queue", new JSONObject())).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
 		}
 		
 		
@@ -109,7 +112,7 @@ public class ProviderServiceImpl implements ProviderService {
 			reqData.put("tlno", tlno);
 			reqData.put("tkda", tkda);
 			reqData.put("queueid", queueid);
-			reqData.put("trycnt", 0);
+			reqData.put("trycnt", "0");
 			reqData.put("tmzo", "Asia/Seoul (+09:00)");
 			
 			reqBody.put("data", reqData);
@@ -159,10 +162,13 @@ public class ProviderServiceImpl implements ProviderService {
 		Integer resInt = 1;
 		ApiUtil apiUtil = new ApiUtil();
 		
-		List<Map<String,Object>> reqList = new ArrayList<Map<String, Object>>();
-		HashMap<String,Object> reqBody = new HashMap<String, Object>();
-		HashMap<String,Object> reqData = new HashMap<String, Object>();
+//		List<Map<String,Object>> reqList = new ArrayList<Map<String, Object>>();
+//		HashMap<String,Object> reqBody = new HashMap<String, Object>();
+//		HashMap<String,String> reqData = new HashMap<String, String>();
 
+		List<JSONObject> reqList = new ArrayList<JSONObject>();
+		JSONObject reqBody = new JSONObject();
+		JSONObject reqData = new JSONObject();
 		
 		// 휴일 체크? 휴일 아닐때 CAMPLT로 데이터 저장
 		// (AS-IS) TB_SMS_HOLIDAY_CHECK 테이블에 2022년까지만 공휴일 데이터가 들어가 있고 이후는 없음.
@@ -199,7 +205,9 @@ public class ProviderServiceImpl implements ProviderService {
 					
 					if("BS".equals(surGubun)) {		// UCUBE - BS고객만족도 조사수행
 						// SET G.C Send Data 
-						cpid = Configure.get("API.076701.BS.CPID") == "" ? "11": Configure.get("API.076701.BS.CPID");
+//						cpid = Configure.get("API.076701.BS.CPID") == "" ? "ee4d3744-be6c-473c-b2cc-22d8cbbb526e": Configure.get("API.076701.BS.CPID");
+						cpid = Configure.get("API.076701.BS.CPID");
+						if(cpid.equals("") || cpid == null) cpid = "ee4d3744-be6c-473c-b2cc-22d8cbbb526e";
 						tno1 = surAni;
 						tkda = "8443" + "||" + seqNo + "||" + surAni + "||" + surGubun;
 						
@@ -231,9 +239,9 @@ public class ProviderServiceImpl implements ProviderService {
 					// CampID로 ContactListId 가져온다.
 					// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
 					JSONObject cmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
-					if(cmpList != null) {
-						contactListId = ((JSONObject) cmpList.get("contactList")).getString("id");
-						queueid = ((JSONObject) cmpList.get("queue")).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
+					if(!cmpList.isEmpty()) {
+						contactListId = ((JSONObject) cmpList.optJSONObject("contactList", new JSONObject())).optString("id", "");
+						queueid = ((JSONObject) cmpList.optJSONObject("queue", new JSONObject())).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
 					}
 					
 					// postgre DB CONTACTLT TABLE CPSQ
@@ -264,13 +272,12 @@ public class ProviderServiceImpl implements ProviderService {
 					reqData.put("tlno", tlno);
 					reqData.put("tkda", tkda);
 					reqData.put("queueid", queueid);
-					reqData.put("trycnt", 0);
+					reqData.put("trycnt", "0");
 					reqData.put("tmzo", "Asia/Seoul (+09:00)");
 					
 					reqBody.put("data", reqData);
 					
 					reqList.add(reqBody);
-					
 					
 					// clear 대신 계속 add
 					// contact data add 전에 clear 필요 - 2024.04.03 추가 JJH
@@ -286,6 +293,7 @@ public class ProviderServiceImpl implements ProviderService {
 				}
 			}catch(Exception e) {
 				logger.error("## ERROR!!  : {} " + e.getMessage());
+				e.printStackTrace();
 				return 0;
 			}
 			

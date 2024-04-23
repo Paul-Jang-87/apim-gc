@@ -52,10 +52,10 @@ public class ClientAction {
 		System.out.println("clientSercret : " + clientSecret);
 		
 		credentialsAuth();
+		System.out.println("### client init() call");
 		
 		if("".equals(accessToken) || accessToken == null || accessToken.isEmpty()) {
-			System.out.println("### client init() call");
-			accessToken = getAccessToken();
+			accessToken = authResponse.getBody().getAccess_token();
 			System.out.println(accessToken);
 		}
 	}
@@ -63,11 +63,8 @@ public class ClientAction {
 	
 	public void credentialsAuth() throws IOException, ApiException{
 
-		if(apiClient==null)
-			apiClient = ApiClient.Builder.standard().withBasePath(REGION).build();
-		
-		if(authResponse==null)
-			authResponse = apiClient.authorizeClientCredentials(clientId, clientSecret);
+		apiClient = ApiClient.Builder.standard().withBasePath(REGION).build();
+		authResponse = apiClient.authorizeClientCredentials(clientId, clientSecret);
 		
 		// Don't actually do this, this logs your auth token to the console!
 		System.out.println("## authResponse.getBody() :: " + authResponse.getBody().toString());
@@ -78,10 +75,14 @@ public class ClientAction {
 	}
 	
 	@Scheduled(fixedDelay=86400*1000)
-	public String getAccessToken() {
+	public void getAccessToken() throws IOException, ApiException{
 		System.out.println("## get access token !! ");
-		return authResponse.getBody().getAccess_token();
+		init();
+		accessToken = authResponse.getBody().getAccess_token();
+		System.out.println(accessToken);
 	}
+	
+	
 	
 	/*
 	 * [GET]
@@ -186,7 +187,7 @@ public class ClientAction {
 	 * 
 	 * @param url
 	 */
-	public JSONObject callApiRestTemplate_POST(String url, JSONObject reqBody) {
+	public String callApiRestTemplate_POST(String url, JSONObject reqBody) {
 		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 									.build(true);
 
@@ -197,7 +198,7 @@ public class ClientAction {
 		
 		System.out.println(res);
 		
-		return new JSONObject(res);
+		return res;
 	}
 	
 	/**
@@ -206,7 +207,7 @@ public class ClientAction {
 	 * @param url
 	 * @param path
 	 */
-	public JSONObject callApiRestTemplate_POST(String url, String path) {
+	public String callApiRestTemplate_POST(String url, String path) {
 		
 		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 				.buildAndExpand(path)
@@ -218,7 +219,7 @@ public class ClientAction {
 		
 		System.out.println(res);
 		
-		return new JSONObject(res);
+		return res;
 	}
 	
 	/**
@@ -227,7 +228,7 @@ public class ClientAction {
 	 * @param url
 	 * @param path
 	 */
-	public JSONObject callApiRestTemplate_POST(String url, String path, Object reqBody) {
+	public String callApiRestTemplate_POST(String url, String path, Object reqBody) {
 		
 		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 									.buildAndExpand(path)
@@ -239,7 +240,7 @@ public class ClientAction {
 		
 		System.out.println(res);
 		
-		return new JSONObject(res);
+		return res;
 	}
 	
 	/**
@@ -248,7 +249,7 @@ public class ClientAction {
 	 * @param url
 	 * @param params
 	 */
-	public JSONObject callApiRestTemplate_POST(String url, MultiValueMap<String, String> params, JSONObject reqBody) {
+	public String callApiRestTemplate_POST(String url, MultiValueMap<String, String> params, JSONObject reqBody) {
 
 		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 									.queryParams(params)
@@ -261,7 +262,7 @@ public class ClientAction {
 		
 		System.out.println(res);
 		
-		return new JSONObject(res);
+		return res;
 	}
 	
 	/**
@@ -271,7 +272,7 @@ public class ClientAction {
 	 * @param path
 	 * @param params
 	 */
-	public JSONObject callApiRestTemplate_POST(String url, String path, MultiValueMap<String, String> params, JSONObject reqBody) {
+	public String callApiRestTemplate_POST(String url, String path, MultiValueMap<String, String> params, JSONObject reqBody) {
 		
 		UriComponents uriBuilder = null;
 		
@@ -287,7 +288,7 @@ public class ClientAction {
 		
 		System.out.println(res);
 		
-		return new JSONObject(res);
+		return res;
 	}
 	
 	

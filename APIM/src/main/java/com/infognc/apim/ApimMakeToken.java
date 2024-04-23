@@ -44,7 +44,7 @@ public class ApimMakeToken {
 		String clientId			= Configure.get("client.id");
 		String clientSecret		= Configure.get("client.secret");
 		String methodType		= "POST";
-		String scope			= "BL CM CC RC EA PM CM";
+		String scope			= "BL CM CC RC EA PM AI";
 		
 		HashMap<String,String> dsRsltInfoMap = new HashMap<String,String>();
 		

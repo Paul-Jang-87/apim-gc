@@ -15,6 +15,10 @@ import lombok.Setter;
 public class DataAction {
 	private String url;
 	private String method;
+	private String apimPath;
+	
+	@JsonProperty("apimQuery")
+	private Map<String,Object> apimQuery;
 	
 	@JsonProperty("apimHeader")
 	private Map<String,Object> apimHeader;
