@@ -50,7 +50,6 @@ public class ProviderController {
 			) throws Exception {
 		
 		logger.info("## IF-API-076702 START ");
-		System.out.println("## IF-API-076702 START ");
 		ApiUtil apiUtil = new ApiUtil();
 		HashMap<String, Object> dsRsltInfoMap = new HashMap<String, Object>();	
 
@@ -131,13 +130,13 @@ public class ProviderController {
 		try {
 			resInt = pvService.sendCampListToGc(inParamList);
 			if(resInt > 0) {
-				dsRsltInfoMap.put("rstlCd", ApimCode.RESULT_SUCCESS_Y);
-				dsRsltInfoMap.put("rstlMsg", ApimCode.RESULT_SUCC_SAVE_MSG);
+				dsRsltInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_Y);
+				dsRsltInfoMap.put("rsltMsg", ApimCode.RESULT_SUCC_SAVE_MSG);
 				logger.info("## IF-API-076702 PRSS result >> " + ApimCode.RESULT_SUCC_SAVE_MSG);
 			} else {
 				// error
-				dsRsltInfoMap.put("rstlCd", ApimCode.RESULT_SUCCESS_N);
-				dsRsltInfoMap.put("rstlMsg", ApimCode.RESULT_FAIL_SAVE_MSG);
+				dsRsltInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N);
+				dsRsltInfoMap.put("rsltMsg", ApimCode.RESULT_FAIL_SAVE_MSG);
 				logger.info("## IF-API-076702 PRSS result >> " + ApimCode.RESULT_FAIL_SAVE_MSG);
 			}
 			
@@ -181,8 +180,6 @@ public class ProviderController {
 			) throws Exception {
 		
 		logger.info("## IF-API-076701 START ");
-		System.out.println("## IF-API-076701 START - syso");
-		
 		logger.info(">> X-APP-NAME : {}", appName);
 		logger.info(">> X-Header-Authorization : {}", headerAuth);
 		logger.info(">> X-AuthorizationTime : {}", authTime);
@@ -286,13 +283,13 @@ public class ProviderController {
 		try {
 			resInt = pvService.sendArsStafData(inParamList);
 			if(resInt > 0) {
-				dsRsltInfoMap.put("rstlCd", ApimCode.RESULT_SUCCESS_Y);
-				dsRsltInfoMap.put("rstlMsg", ApimCode.RESULT_SUCC_SAVE_MSG);
+				dsRsltInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_Y);
+				dsRsltInfoMap.put("rsltMsg", ApimCode.RESULT_SUCC_SAVE_MSG);
 				logger.info("## IF-API-076701 PRSS result >> " + ApimCode.RESULT_SUCC_SAVE_MSG);
 			} else {
 				// error
-				dsRsltInfoMap.put("rstlCd", ApimCode.RESULT_SUCCESS_N);
-				dsRsltInfoMap.put("rstlMsg", ApimCode.RESULT_FAIL_SAVE_MSG);
+				dsRsltInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N);
+				dsRsltInfoMap.put("rsltMsg", ApimCode.RESULT_FAIL_SAVE_MSG);
 				logger.info("## IF-API-076701 PRSS result >> " + ApimCode.RESULT_FAIL_SAVE_MSG);
 			}
 			

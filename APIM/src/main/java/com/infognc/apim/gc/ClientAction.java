@@ -47,16 +47,12 @@ public class ClientAction {
 		clientSecret 	= Configure.get("gc.client.secret");
 		accessToken		= Configure.get("gc.auth.token");
 		
-		System.out.println("url : " + apiUrl);
-		System.out.println("clientID : " + clientId);
-		System.out.println("clientSercret : " + clientSecret);
-		
 		credentialsAuth();
-		System.out.println("### client init() call");
+		logger.info("### client init() call");
 		
 		if("".equals(accessToken) || accessToken == null || accessToken.isEmpty()) {
 			accessToken = authResponse.getBody().getAccess_token();
-			System.out.println(accessToken);
+			logger.info(accessToken);
 		}
 	}
 	
@@ -67,8 +63,7 @@ public class ClientAction {
 		authResponse = apiClient.authorizeClientCredentials(clientId, clientSecret);
 		
 		// Don't actually do this, this logs your auth token to the console!
-		System.out.println("## authResponse.getBody() :: " + authResponse.getBody().toString());
-		logger.info(authResponse.getBody().toString());
+		logger.info("## authResponse.getBody() :: " + authResponse.getBody().toString());
 		
 		// Use the ApiClient instancer
 		Configuration.setDefaultApiClient(apiClient);
@@ -76,10 +71,10 @@ public class ClientAction {
 	
 	@Scheduled(fixedDelay=86400*1000)
 	public void getAccessToken() throws IOException, ApiException{
-		System.out.println("## get access token !! ");
+		logger.info("## get access token !! ");
 		init();
 		accessToken = authResponse.getBody().getAccess_token();
-		System.out.println(accessToken);
+		logger.info(accessToken);
 	}
 	
 	
@@ -92,17 +87,15 @@ public class ClientAction {
 	 * 
 	 * @param url
 	 */
-	public JSONObject callApiRestTemplate_GET(String url) {
+	public String callApiRestTemplate_GET(String url) {
 		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 									.build(true);
 
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
 		
 		String res = httpAction.restTemplateService(uriBuilder, accessToken);
-//		String res = restTemplateService(uriBuilder, accessToken);
-		System.out.println(res);
 		
-		return new JSONObject(res);
+		return res;
 	}
 	
 	/**
@@ -111,7 +104,7 @@ public class ClientAction {
 	 * @param url
 	 * @param path
 	 */
-	public JSONObject callApiRestTemplate_GET(String url, String path) {
+	public String callApiRestTemplate_GET(String url, String path) {
 		
 		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 									.buildAndExpand(path)
@@ -120,13 +113,8 @@ public class ClientAction {
 		System.out.println("## accessToken :: " + accessToken);
 		
 		String res = httpAction.restTemplateService(uriBuilder, accessToken);
-//		String res = restTemplateService(uriBuilder, accessToken);
 		
-		System.out.println("## res :: " + res);
-		
-		if(res == null) return null;
-		
-		return new JSONObject(res);
+		return res;
 	}
 	
 	/**
@@ -135,7 +123,7 @@ public class ClientAction {
 	 * @param url
 	 * @param params
 	 */
-	public JSONObject callApiRestTemplate_GET(String url, MultiValueMap<String, String> params) {
+	public String callApiRestTemplate_GET(String url, MultiValueMap<String, String> params) {
 
 		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(apiUrl + url)
 									.queryParams(params)
@@ -144,11 +132,8 @@ public class ClientAction {
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
 		
 		String res = httpAction.restTemplateService(uriBuilder, accessToken);
-//		String res = restTemplateService(uriBuilder, accessToken);
 		
-		System.out.println(res);
-		
-		return new JSONObject(res);
+		return res;
 		
 	}
 	
@@ -159,7 +144,7 @@ public class ClientAction {
 	 * @param path
 	 * @param params
 	 */
-	public JSONObject callApiRestTemplate_GET(String url, String path, MultiValueMap<String, String> params) {
+	public String callApiRestTemplate_GET(String url, String path, MultiValueMap<String, String> params) {
 		
 		UriComponents uriBuilder = null;
 		
@@ -171,11 +156,9 @@ public class ClientAction {
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
 		
 		String res = httpAction.restTemplateService(uriBuilder, accessToken);
-//		String res = restTemplateService(uriBuilder, accessToken);
-		
-		System.out.println(res);
-		
-		return new JSONObject(res);
+
+	
+		return res;
 	}
 	
 	
@@ -194,10 +177,7 @@ public class ClientAction {
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
 		
 		String res = httpAction.restTemplateService(uriBuilder, accessToken, reqBody);
-//		String res = restTemplateService(uriBuilder, accessToken, reqBody);
-		
-		System.out.println(res);
-		
+
 		return res;
 	}
 	
@@ -215,9 +195,6 @@ public class ClientAction {
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
 		
 		String res = httpAction.restTemplateService(uriBuilder, accessToken);
-//		String res = restTemplateService(uriBuilder, accessToken, reqBody);
-		
-		System.out.println(res);
 		
 		return res;
 	}
@@ -236,9 +213,6 @@ public class ClientAction {
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
 		
 		String res = httpAction.restTemplateService(uriBuilder, accessToken, reqBody);
-//		String res = restTemplateService(uriBuilder, accessToken, reqBody);
-		
-		System.out.println(res);
 		
 		return res;
 	}
@@ -258,9 +232,6 @@ public class ClientAction {
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
 		
 		String res = httpAction.restTemplateService(uriBuilder, accessToken, reqBody);
-//		String res = restTemplateService(uriBuilder, accessToken, reqBody);
-		
-		System.out.println(res);
 		
 		return res;
 	}
@@ -284,142 +255,9 @@ public class ClientAction {
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
 		
 		String res = httpAction.restTemplateService(uriBuilder, accessToken, reqBody);
-//		String res = restTemplateService(uriBuilder, accessToken, reqBody);
-		
-		System.out.println(res);
 		
 		return res;
 	}
 	
-	
-//
-//	
-//	/**
-//	 * 
-//	 * [GET] G.C API 호출 restTemplate
-//	 * 
-//	 * @param uriBuilder
-//	 * @param token
-//	 * @return
-//	 */
-//	public String restTemplateService(UriComponents uriBuilder, String token) {
-//		String result = "";
-//		try {
-//			// header 세팅
-//			HttpHeaders headers = new HttpHeaders();
-//			headers.setAccept(Arrays.asList(new MediaType[] { MediaType.APPLICATION_JSON }));
-//			headers.setContentType(MediaType.APPLICATION_JSON);
-//			headers.set("authorization", "bearer " + token);
-//			
-//			HttpEntity<String> entity = new HttpEntity<String>(headers);
-//			
-//			ResponseEntity<String> res = restTemplate.exchange(
-//											uriBuilder.toUriString(), 
-//											HttpMethod.GET, 
-//											entity, 
-//											String.class
-//											);
-//			
-//			result = res.toString();
-//			
-//		}catch(HttpClientErrorException hce) {
-//			hce.printStackTrace();
-//			logger.error(hce.toString());
-//			return null;
-//		}catch(HttpServerErrorException hse) {
-//			hse.printStackTrace();
-//			logger.error(hse.toString());
-//			return null;
-//		}catch(Exception e) {
-//			e.printStackTrace();
-//			logger.error(e.toString());
-//			return null;
-//		}
-//		
-//		return result;
-//	}
-//	
-//	/**
-//	 * 
-//	 * [POST] G.C API 호출 restTemplate
-//	 * 
-//	 * @param uriBuilder
-//	 * @param token
-//	 * @param reqBody
-//	 * @return
-//	 */
-//	public String restTemplateService(UriComponents uriBuilder, String token, JSONObject reqBody) {
-//		String result = "";
-//		try {
-//			// header 세팅
-//			HttpHeaders headers = new HttpHeaders();
-//			headers.setAccept(Arrays.asList(new MediaType[] { MediaType.APPLICATION_JSON }));
-//			headers.setContentType(MediaType.APPLICATION_JSON);
-//			headers.set("authorization", "bearer " + token);
-//			
-//			HttpEntity<String> entity = new HttpEntity<String>(reqBody.toString(), headers);
-//			
-//			ResponseEntity<String> res = restTemplate.exchange(
-//											uriBuilder.toUriString(), 
-//											HttpMethod.POST, 
-//											entity, 
-//											String.class
-//											);
-//			result = res.toString();
-//			
-//		}catch(HttpClientErrorException hce) {
-//			hce.printStackTrace();
-//			logger.error(hce.toString());
-//			return null;
-//		}catch(HttpServerErrorException hse) {
-//			hse.printStackTrace();
-//			logger.error(hse.toString());
-//			return null;
-//		}catch(Exception e) {
-//			e.printStackTrace();
-//			logger.error(e.toString());
-//			return null;
-//		}
-//
-//		return result;
-//	}
-//	
-//	
-//	public String restTemplateService(UriComponents uriBuilder, HttpHeaders headers, String type) {
-//		String result = "";
-//		HttpMethod method = null;
-//		try {
-//
-//			if("POST".equals(type))	method = HttpMethod.POST;
-//			else					method = HttpMethod.GET;
-//			
-//			HttpEntity<String> entity = new HttpEntity<String>(headers);
-//			
-//			ResponseEntity<String> res = restTemplate.exchange(
-//											uriBuilder.toUriString(), 
-//											method, 
-//											entity, 
-//											String.class
-//											);
-//			
-//			result = res.toString();
-//			
-//		}catch(HttpClientErrorException hce) {
-//			hce.printStackTrace();
-//			logger.error(hce.toString());
-//			return null;
-//		}catch(HttpServerErrorException hse) {
-//			hse.printStackTrace();
-//			logger.error(hse.toString());
-//			return null;
-//		}catch(Exception e) {
-//			e.printStackTrace();
-//			logger.error(e.toString());
-//			return null;
-//		}
-//		
-//		return result;
-//	}
-//	
 	
 }

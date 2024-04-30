@@ -1,7 +1,6 @@
 package com.infognc.apim.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +55,8 @@ public class ProviderServiceImpl implements ProviderService {
 		// CampID로 ContactListId 가져온다.
 		// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
 		String contactListId = "";
-		JSONObject cmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
+		String resCmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
+		JSONObject cmpList = new JSONObject(resCmpList);
 		if(!cmpList.isEmpty()) {
 			contactListId = ((JSONObject) cmpList.optJSONObject("contactList", new JSONObject())).optString("id", "");
 		/*	queueid = ((JSONObject) cmpList.get("queue")).getString("id") != null ? ((JSONObject) cmpList.get("queue")).getString("id") : "";  */
@@ -130,8 +130,12 @@ public class ProviderServiceImpl implements ProviderService {
 			System.out.println("## reqBody :: " + reqBody);
 			reqList.add(reqBody);
 			
-			clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqList);
+			String resResult = clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqList);
 
+			if(!"".equals(resResult)) {
+				logger.info("## Genesys Cloud API Success : \n {}", resResult);
+			}
+			
 			// db인서트
 			try {
 				iUcnt = postgreService.InsertContactLt(enContactLt);
@@ -160,7 +164,7 @@ public class ProviderServiceImpl implements ProviderService {
 	@Override
 	public Integer sendArsStafData(List<Map<String, String>> inParamList) throws Exception {
 		Integer resInt = 1;
-		ApiUtil apiUtil = new ApiUtil();
+//		ApiUtil apiUtil = new ApiUtil();
 		
 //		List<Map<String,Object>> reqList = new ArrayList<Map<String, Object>>();
 //		HashMap<String,Object> reqBody = new HashMap<String, Object>();
@@ -191,17 +195,21 @@ public class ProviderServiceImpl implements ProviderService {
 			String tno5		= "";
 			String tlno		= "";
 			String tkda		= "";
+			String flag		= "";
 			String queueid 	= "";
 			
 			clientAction.init();
 			
 			try {
 				for(int i=0; i<inParamList.size(); i++) {
+					
+					logger.info("## inParamList :: {} ", inParamList.get(i).toString());
+					
 					String seqNo 	= inParamList.get(i).get("seqNo");
 					String surAni 	= inParamList.get(i).get("surAni");
 					String surGubun = inParamList.get(i).get("surGubun");
 					
-					inParamList.get(i).replace("surAni", apiUtil.decode(surAni));
+					surAni = new String(Base64.decodeBase64(surAni.getBytes()));
 					
 					if("BS".equals(surGubun)) {		// UCUBE - BS고객만족도 조사수행
 						// SET G.C Send Data 
@@ -238,21 +246,37 @@ public class ProviderServiceImpl implements ProviderService {
 					gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
 					// CampID로 ContactListId 가져온다.
 					// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
-					JSONObject cmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
+					String resCmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
+					JSONObject cmpList = new JSONObject(resCmpList);
 					if(!cmpList.isEmpty()) {
 						contactListId = ((JSONObject) cmpList.optJSONObject("contactList", new JSONObject())).optString("id", "");
 						queueid = ((JSONObject) cmpList.optJSONObject("queue", new JSONObject())).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
 					}
 					
+					ContactLt contactLt = new ContactLt();
+					// AS-IS 기준으로 DB TRIGGER에서 SQ_TB_CALL_PDS_UCUBE.nextval, SQ_TB_CALL_PDS_PCUBE.nextval로 CPSQ 설정
 					// postgre DB CONTACTLT TABLE CPSQ
 					// CPID로 조회한 CPSQ MAX + 1
 					int maxCpsq = postgreService.selectMaxCpsq(cpid);
 					cpsq = String.valueOf(maxCpsq + 1);
 					
+					Entity_ContactLt entityContactLt = postgreService.findByCpidCpsq(cpid, String.valueOf(maxCpsq));
+					// contactlt update
 					// UPDATE CONTACTLT
-					ContactLt contactLt = new ContactLt();
+//					ContactLt contactLt = new ContactLt();
+//					contactLt.setCpid(cpid);
+//					postgreService.updateContactLt(entityContactLt, cpsq);
+					
 					contactLt.setCpid(cpid);
-					postgreService.updateContactLt(contactLt, cpsq);
+					contactLt.setCpsq(Integer.parseInt(cpsq));
+					entityContactLt.setId(contactLt);
+					entityContactLt.setCske(cske);
+					entityContactLt.setCsna(csna);
+					entityContactLt.setTno1(tno1);
+					entityContactLt.setTno2(tno2);
+					entityContactLt.setTno3(tno3);
+					entityContactLt.setTkda(tkda);
+					entityContactLt.setFlag(flag);
 					
 					// id
 					reqBody.put("id", cpsq);
@@ -288,11 +312,17 @@ public class ProviderServiceImpl implements ProviderService {
 					// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/contacts
 					gcUrl = "/api/v2/outbound/contactlists/{contactListId}/contacts";
 					
-					clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqList);
-					
+					String resResult = clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqList);
+					if(!"".equals(resResult)) {
+						resInt = postgreService.InsertContactLt(entityContactLt);
+						if(resInt==1) {
+							logger.info("## DB INSERT SUCCESS !! , [CONTACTLT TABLE] ");
+						}
+						logger.info("## Genesys Cloud API Success : \n {}", resResult);
+					}
 				}
 			}catch(Exception e) {
-				logger.error("## ERROR!!  : {} " + e.getMessage());
+				logger.error("## ERROR!!  : {} ", e.getMessage());
 				e.printStackTrace();
 				return 0;
 			}

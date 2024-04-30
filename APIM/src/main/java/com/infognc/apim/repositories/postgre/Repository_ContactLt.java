@@ -21,8 +21,12 @@ public interface Repository_ContactLt extends CrudRepository<Entity_ContactLt,  
     Optional<Entity_ContactLt> findByCske(String id);
 
     Optional<Entity_ContactLt> findById(ContactLt id);
+
+    @Query(value = "SELECT * FROM CONTACTLT c WHERE c.cpid = :cpid AND CAST(c.cpsq AS TEXT) = :cpsq", nativeQuery = true)
+    Optional<Entity_ContactLt> findByCpidCpsq(String cpid, String cpsq);
     
-    @Query("SELECT MAX(e.id.cpsq) FROM Entity_ContactLt e WHERE e.id.cpid = :cpid")
+//    @Query("SELECT MAX(e.id.cpsq) FROM Entity_ContactLt e WHERE e.id.cpid = :cpid")
+    @Query(value = "SELECT MAX(c.cpsq) FROM CONTACTLT c WHERE c.cpid = :cpid", nativeQuery = true)
     Optional<Integer> findMaxCpsqByCpid(@Param("cpid") String cpid);
 
 }

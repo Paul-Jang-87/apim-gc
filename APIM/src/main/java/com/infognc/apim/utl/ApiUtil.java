@@ -1,6 +1,8 @@
 package com.infognc.apim.utl;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -265,10 +267,17 @@ public class ApiUtil {
 		for(String key : json.keySet()) {
             Object value = json.get(key);
             if(value instanceof String) {
+            	String strVal = String.valueOf(value);
             	if (isBase64Encoded(String.valueOf(value))) {
             		// Base64로 인코딩된 데이터인 경우 디코딩하여 값을 업데이트
             		String decodedValue = decodeBase64(String.valueOf(value));
-            		json.put(key, decodedValue);
+//            		json.put(key, decodedValue);
+            		
+//            		String urlEncodedValue = URLEncoder.encode(strVal, StandardCharsets.UTF_8);
+//            		json.put(key, urlEncodedValue);
+            		String urlEncodedValue = Base64.getUrlEncoder().encodeToString(decodedValue.getBytes());
+            		json.put(key, urlEncodedValue);
+//            		json.put(key, strVal);
             	}
             }
             
@@ -282,7 +291,16 @@ public class ApiUtil {
 //            byte[] decodedBytes = org.apache.commons.codec.binary.Base64.decodeBase64(data);
 //            return (decodedBytes.length != data.length());
         	Base64.getDecoder().decode(data);
-        	return true;
+        	
+            // Base64 디코딩 후 인코딩하여 원래 문자열과 비교
+            String decodedStr = new String(Base64.getDecoder().decode(data));
+            String encodedStr = Base64.getEncoder().encodeToString(decodedStr.getBytes());
+            
+            // 원래 문자열과 인코딩한 문자열이 같으면 Base64로 인코딩된 문자열
+            boolean isBase64 = data.equals(encodedStr);
+        	
+        	
+        	return isBase64;
         } catch (IllegalArgumentException e) {
             return false;
         }

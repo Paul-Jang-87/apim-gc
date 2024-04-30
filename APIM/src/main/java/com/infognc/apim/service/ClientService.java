@@ -1,7 +1,6 @@
 package com.infognc.apim.service;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,8 +25,5 @@ public interface ClientService {
 	
 	// Genesys Cloud DataAction에서 APIM 호출
 	public JSONObject callApimByDataAction(DataAction reqJson) throws Exception;
-	
-	public String kafkaTest(Map<String, Object> reqBody) throws Exception;
-	
 	
 }

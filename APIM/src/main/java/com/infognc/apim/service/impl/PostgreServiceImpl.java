@@ -1,5 +1,6 @@
 package com.infognc.apim.service.impl;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -8,7 +9,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
 
-import com.infognc.apim.embeddable.ContactLt;
 import com.infognc.apim.entities.postgre.Entity_CampMa;
 import com.infognc.apim.entities.postgre.Entity_ContactLt;
 import com.infognc.apim.repositories.postgre.Repository_CampMa;
@@ -55,6 +55,18 @@ public class PostgreServiceImpl implements PostgreService{
 			return 1;
 		}
 		
+		@Override
+		public Entity_ContactLt findByCpidCpsq(String cpid, String cpsq) {
+			Optional<Entity_ContactLt> existingEntity = repositoryContactLt.findByCpidCpsq(cpid, cpsq);
+			
+			if(existingEntity.isEmpty()) {
+				throw new NoSuchElementException("Entity with cpid: " + cpid + " and cpsq: " + cpsq + " not found");
+			}
+			
+			return existingEntity.orElse(null);
+		}
+		
+		
 		// SELECT CONTACTLT TABLE - MAX CPSQ 
 		@Override
 		public Integer selectMaxCpsq(String id) {
@@ -72,17 +84,16 @@ public class PostgreServiceImpl implements PostgreService{
 		// UPDATE CONTACTLT TABLE - CPSQ
 		@Override
 		@Transactional
-		public void updateContactLt(ContactLt id, String cpsq) {
-			Optional<Entity_ContactLt> optionalEntity = repositoryContactLt.findById(id);
+		public void updateContactLt(Entity_ContactLt entityContactLt, String cpsq) {
+	        // 주어진 엔티티의 ID를 기준으로 기존 엔티티를 조회합니다.
+	        Entity_ContactLt existingEntity = repositoryContactLt.findById(entityContactLt.getId()).orElseThrow(() ->
+	                new EntityNotFoundException("Entity not found: " + entityContactLt.getId()));
 
-			if (optionalEntity.isPresent()) {
-				Entity_ContactLt entity = optionalEntity.get();
-				entity.getId().setCpsq(Integer.parseInt(cpsq));
-				repositoryContactLt.save(entity);
-			} else {
-				throw new EntityNotFoundException("Entity not found : " + id);
-			}
-			
+	        // 기존 엔티티의 필드 값을 새로운 값으로 업데이트합니다.
+	        existingEntity.getId().setCpsq(Integer.parseInt(cpsq));
+
+	        // 변경된 엔티티를 저장합니다.
+	        repositoryContactLt.save(existingEntity);
 			
 		}
 		

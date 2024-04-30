@@ -1,7 +1,6 @@
 package com.infognc.apim.controller;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -133,9 +132,6 @@ public class ClientController {
 	public String getApimDataToDataAction(
 							@RequestBody DataAction reqBody) throws Exception {	
 		logger.info("## GenesysCloud DataAction 호출 ");
-		System.out.println("## GenesysCloud DataAction 호출 ");
-		
-		logger.info("## reqBody :: " + reqBody);
 		
 		String result = clService.callApimByDataAction(reqBody).toString();
 		
@@ -158,22 +154,26 @@ public class ClientController {
 		return "TEST RESPONSE";
 	}
 
-	
-	@PostMapping("/testList")
-	public String testKafkaUcrmLt(@RequestBody List<Map<String, Object>> rList) throws Exception {
-		String result = "";
-		
-		System.out.println("## reqBodyList size :: " + rList.size());
-		
-		for(int i=0; i<rList.size(); i++) {
-			
-			result = clService.kafkaTest(rList.get(i));
-			System.out.println("##########   " + result);
-		}
-		return "DONE";
+	/**
+	 * 부하테스트 health check 용도
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	@GetMapping("/apim-gw")
+	public String getHealthCheckAPIM() throws Exception {
+		return "TEST RESPONSE";
 	}
 	
-	
-
+	/**
+	 * 부하테스트 health check 용도
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	@GetMapping("/kafka-gw")
+	public String getHealthCheckKafka() throws Exception {
+		return "TEST RESPONSE";
+	}
 	
 }

@@ -1,10 +1,10 @@
 package com.infognc.apim.service.impl;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.infognc.apim.ApimMakeToken;
+import com.infognc.apim.gc.ClientAction;
 import com.infognc.apim.gc.DataAction;
 import com.infognc.apim.gc.HttpAction;
 import com.infognc.apim.service.ClientService;
@@ -31,10 +32,12 @@ import com.infognc.apim.utl.Configure;
 public class ClientServiceImpl implements ClientService{
 	private static final Logger logger = LoggerFactory.getLogger(ClientServiceImpl.class);
 	private final HttpAction httpAction;
+	private final ClientAction clientAction;
 	private final OracleService oracleService;
 	
-	public ClientServiceImpl(HttpAction httpAction, OracleService oracleService) {
+	public ClientServiceImpl(HttpAction httpAction, ClientAction clientAction, OracleService oracleService) {
 		this.httpAction = httpAction;
+		this.clientAction = clientAction;
 		this.oracleService = oracleService;
 	}
 	
@@ -141,6 +144,7 @@ public class ClientServiceImpl implements ClientService{
 	 */
 	@Override
 	public HashMap<String, Object> sendCmpnMaData(JSONObject reqBody) throws Exception {
+		String logAPINm = "";
 		HashMap<String, Object> dsRstlInfoMap = new HashMap<String, Object>();
 		
 		JSONObject reqBodyJson = new JSONObject();
@@ -172,30 +176,59 @@ public class ClientServiceImpl implements ClientService{
 				String cpid 	= ApiUtil.nullToString(reqBody.get("cpid"));	// 캠페인 ID
 				String cpNm 	= ApiUtil.nullToString(reqBody.get("cpna"));	// 캠페인 명
 				String gubun	= ApiUtil.nullToString(reqBody.get("gubun"));	// 작업 구분코드
-				String ctiDivsCd = ApiUtil.nullToString(gubun.substring(0, 1));	// CTI위치구분코드 (H:홈/기업, M:모바일)
-				if(ctiDivsCd.equals("T")) {
-					ctiDivsCd = "M";
-				}
+				String ctiDivsCd = "";											// CTI위치구분코드 (H:홈/기업, M:모바일)
+				String divisionId = "";
+				String divisionNm = "";
 				
-				String restMethod = "";	// http 통신 메소드
-				
-				if(cmd.toUpperCase().equals("INSERT")) {
-					restMethod= "POST";
-				}else {
-					restMethod= "PUT";
+				if(cmd.toUpperCase().equals("INSERT") || cmd.toUpperCase().equals("UPDATE")) {
+					// GC API 호출
+					clientAction.init();
+					
+					String gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
+					// CampID로 ContactListId 가져온다.
+					// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
+					String resCmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
+					JSONObject cmpList = new JSONObject(resCmpList);
+					if(!cmpList.isEmpty()) {
+						divisionId = ((JSONObject) cmpList.optJSONObject("division", new JSONObject())).optString("id", "");
+						divisionNm = ((JSONObject) cmpList.optJSONObject("division", new JSONObject())).optString("name", "");
+					}
+					if("유큐브모바일".equals(divisionNm) || "9fca54e1-5589-4bc2-8870-84c03af42d65".equals(divisionId)) {
+						ctiDivsCd = "M";
+					} else {
+						ctiDivsCd = "H";
+					}
 				}
 				
 				JSONObject cmpnmaJson = new JSONObject();
-				
-				if(cmd.toUpperCase().equals("INSERT") || cmd.toUpperCase().equals("UPDATE")) {
+				String restMethod = "";	// http 통신 메소드
+				String apiUrl = "";
+				if(cmd.toUpperCase().equals("INSERT")) {
+					restMethod= "POST";
 					cmpnmaJson.put("cnbkId", cpid);				// 상담콜백ID
 					cmpnmaJson.put("cnbkNm", cpNm);				// 상담콜백명
-					cmpnmaJson.put("cnslCntrDivsCd", gubun);		// 상담센터구분코드
+					cmpnmaJson.put("cnslCntrDivsCd", gubun);	// 상담센터구분코드
 					cmpnmaJson.put("ctiLocDivsCd", ctiDivsCd);	// CTI위치구분코드
 					
+					apiUrl 	= Configure.get("API.035102.URI");
+					logAPINm = "IF-API-035102";
+					
+				} else if(cmd.toUpperCase().equals("UPDATE")) {
+					restMethod= "PUT";
+					cmpnmaJson.put("cnbkId", cpid);				// 상담콜백ID
+					cmpnmaJson.put("cnbkNm", cpNm);				// 상담콜백명
+					cmpnmaJson.put("cnslCntrDivsCd", gubun);	// 상담센터구분코드
+					cmpnmaJson.put("ctiLocDivsCd", ctiDivsCd);	// CTI위치구분코드
+					
+					apiUrl 	= Configure.get("API.035103.URI");
+					logAPINm = "IF-API-035103";
 					
 				} else if(cmd.toUpperCase().equals("DELETE")) {
+					restMethod= "PUT";
 					cmpnmaJson.put("cnbkId", cpid);				// 상담콜백ID
+					
+					apiUrl 	= Configure.get("API.035104.URI");
+					logAPINm = "IF-API-035104";
 					
 				} else {
 				}
@@ -207,27 +240,25 @@ public class ClientServiceImpl implements ClientService{
 				reqBodyJson.put("cmpnDspRslt", rsList);
 				logger.info("## reqBodyMap :: {}", reqBodyJson);
 				
-				String apiUrl 	= Configure.get("API.035102.URI");
-				
 				String response = callApim(apiUrl, restMethod, reqBodyJson);
-				logger.info("## API-035102 Get Data !! : {}", response);
+				logger.info("## {} Get Data !! : {}", logAPINm, response);
 				
 				JSONObject resObj = new JSONObject(response);
 				String rsltCd = resObj.optString("rsltCd", "N");
 				if(resObj == null || !rsltCd.equals("Y")) {
-					logger.info("## API-035102 DATA NOT FOUND >> " + ApimCode.RESULT_FAIL_MSG);
+					logger.info("## {} DATA NOT FOUND >> {} ", logAPINm, ApimCode.RESULT_FAIL_MSG);
 					dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_FAIL_MSG);
 					return dsRstlInfoMap;
 				} else {
 					// 성공
 					dsRstlInfoMap.put("rsltCd", resObj.get("rsltCd"));
-					logger.info("## API-035102 데이터 전송 성공 ");
+					logger.info("## {} 데이터 전송 성공 ", logAPINm);
 				}
 				
 			} else {
 				dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N);
 				dsRstlInfoMap.put("rsltMsg", ApimCode.RESULT_FAIL_MSG);
-				logger.info("## API-035102 NO DATA => " + ApimCode.RESULT_FAIL_MSG);
+				logger.info("## {} NO DATA => {}", logAPINm, ApimCode.RESULT_FAIL_MSG);
 			}
 			
 		}catch(Exception e) {
@@ -269,10 +300,10 @@ public class ClientServiceImpl implements ClientService{
 					logger.info("## reqBodyList :: {}", reqBodyList.getJSONObject(i));
 					
 					arsRsltJson = new JSONObject();
-					arsRsltJson.put("ismsSendSno", reqBodyList.getJSONObject(i).optString("seqNo", ""));
-					arsRsltJson.put("ansrNm1", reqBodyList.getJSONObject(i).optString("surServey1", ""));
-					arsRsltJson.put("ansrNm4", reqBodyList.getJSONObject(i).optString("surServey2", ""));
-					arsRsltJson.put("ismsAnsrDttm", reqBodyList.getJSONObject(i).optString("surAnsDate", ""));
+					arsRsltJson.put("ismsSendSno", reqBodyList.getJSONObject(i).optString("seq_no", ""));
+					arsRsltJson.put("ansrNm1", reqBodyList.getJSONObject(i).optString("sur_survey1", ""));
+					arsRsltJson.put("ansrNm4", reqBodyList.getJSONObject(i).optString("sur_survey2", ""));
+					arsRsltJson.put("ismsAnsrDttm", reqBodyList.getJSONObject(i).optString("sur_ans_date", ""));
 					
 					rsList.add(i, arsRsltJson);
 					
@@ -353,10 +384,10 @@ public class ClientServiceImpl implements ClientService{
 					logger.info("## reqBodyList :: {}", reqBodyList.getJSONObject(i));
 					
 					arsRsltJson = new JSONObject();
-					arsRsltJson.put("ismsSendSno", reqBodyList.getJSONObject(i).optString("seqNo", ""));
-					arsRsltJson.put("ansrNm1", reqBodyList.getJSONObject(i).optString("surServey1", ""));
-					arsRsltJson.put("ansrNm4", reqBodyList.getJSONObject(i).optString("surServey2", ""));
-					arsRsltJson.put("ismsAnsrDttm", reqBodyList.getJSONObject(i).optString("surAnsDate", ""));
+					arsRsltJson.put("ismsSendSno", reqBodyList.getJSONObject(i).optString("seq_no", ""));
+					arsRsltJson.put("ansrNm1", reqBodyList.getJSONObject(i).optString("sur_survey1", ""));
+					arsRsltJson.put("ansrNm4", reqBodyList.getJSONObject(i).optString("sur_survey2", ""));
+					arsRsltJson.put("ismsAnsrDttm", reqBodyList.getJSONObject(i).optString("sur_ans_date", ""));
 					
 					rsList.add(i, arsRsltJson);
 					logger.info("## cmpnRsltJson :: {}", arsRsltJson);
@@ -387,8 +418,11 @@ public class ClientServiceImpl implements ClientService{
 							dsRstlInfoMap.put("rsltCd", resObj.get("rsltCd"));
 							logger.info("## API-033701 데이터 전송 성공 ");
 							
-							rsList.clear();
-							rsList = new ArrayList<JSONObject>();
+//							rsList.clear();
+//							rsList = new ArrayList<JSONObject>();
+							
+							
+							
 						}
 					}
 				}
@@ -427,7 +461,7 @@ public class ClientServiceImpl implements ClientService{
 			JSONObject headerJson	= ApiUtil.toJson(reqJson.getApimHeader());	// APIM request Header
 			JSONObject bodyJson		= ApiUtil.toJson(reqJson.getApimBody());	// APIM request Body (POST)
 			
-			logger.info(">>> \n #url = {} \n #method = {} \n #path = {} \n #query = {} \n #header = {} \n #body = {}", url, method, pathParam, queryParam, headerJson, bodyJson);
+			logger.info(">>> \n # url = {} \n # method = {} \n # path = {} \n # query = {} \n # header = {} \n # body = {}", url, method, pathParam, queryParam, headerJson, bodyJson);
 			
 			
 			// 따로 필요하면 사용, 아니면 주석
@@ -534,7 +568,7 @@ public class ClientServiceImpl implements ClientService{
 		String apiAppnm	= Configure.get("api.app.name");
 		
 		// make URI builder
-		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(ApiServer + apiUrl).build(true);
+		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(ApiServer + apiUrl).build();
 		// set http header
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", apiCont);
@@ -556,23 +590,16 @@ public class ClientServiceImpl implements ClientService{
 	public UriComponents setURI(String url, String path, JSONObject queryJson) throws Exception {
 		UriComponents uriBuilder = null;
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-		JSONObject jsonTemp = null;
-		
+		logger.info("## path variable :: " + path);
 		// URI Query parameter BASE64 SafeURL 변경
 		if(!queryJson.isEmpty()) {
-			// base64URLsafe 인코딩 전환
-			jsonTemp = ApiUtil.transferBase64URLSafeEncoding(queryJson);
-			logger.info("## jsonTemp :: " + jsonTemp.toString());
-			// Query Parameter 세팅
-		    for (String key : jsonTemp.keySet()) {
-		    	logger.info(path);
-		        params.add(key, jsonTemp.optString(key, ""));
-		    }
+			logger.info("## queryJson :: " + queryJson.toString());
+			for (String key : queryJson.keySet()) {
+				params.add(key, queryJson.optString(key, ""));
+			}
 		}
 		
 		// uri 특수문자
-//		url = UriUtils.encode(url, StandardCharsets.UTF_8);
-		
 		if(!"".equals(path) && !queryJson.isEmpty()) {
 			// path O, query O
 			System.out.println("## path O, query O");
@@ -581,7 +608,9 @@ public class ClientServiceImpl implements ClientService{
 		} else if(!queryJson.isEmpty()) {
 			// path X, query O
 			System.out.println("## path X, query O");
-			uriBuilder = UriComponentsBuilder.fromUriString(url).queryParams(params).build(true);
+//			uriBuilder = UriComponentsBuilder.fromUriString(url).queryParams(params).build(true);
+			URI uri = new URI(url);
+			uriBuilder = UriComponentsBuilder.fromUri(uri).queryParams(params).build();
 		} else if(!"".equals(path)) {
 			// path O, query X
 			System.out.println("## path O, query X");
@@ -596,26 +625,6 @@ public class ClientServiceImpl implements ClientService{
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
 		
 		return uriBuilder;
-	}
-	
-	
-	
-	@Override
-	public String kafkaTest(Map<String, Object> reqBody) throws Exception {
-		String result = "";
-		
-		// make URI builder
-		UriComponents uriBuilder = UriComponentsBuilder.fromUriString("http://localhost:8083/saveucrmdata").build(true);
-		// set http header
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Content-Type", "application/json");
-		
-		HttpEntity<String> entity = new HttpEntity<String>(reqBody.toString(), headers);
-		
-		result =httpAction.restTemplateService(uriBuilder, entity, "POST");
-		logger.info("## APIM Get Data !! : {}", result);
-		
-		return result;
 	}
 	
 	
