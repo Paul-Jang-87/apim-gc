@@ -16,7 +16,7 @@ public class SchedulerConfig implements SchedulingConfigurer {
 		ThreadPoolTaskScheduler threadPool = new ThreadPoolTaskScheduler(); 
 		
 		threadPool.setPoolSize(POOL_SIZE);
-		threadPool.setThreadNamePrefix("apim-token-scheduling");
+		threadPool.setThreadNamePrefix("apim-scheduling");
 		threadPool.initialize();
         
 		taskRegistrar.setTaskScheduler(threadPool);

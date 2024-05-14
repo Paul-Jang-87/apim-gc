@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -19,6 +18,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,9 +29,6 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.converter.FormHttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
@@ -39,12 +37,13 @@ import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 public class RestTemplateConfig {
+	private static final Logger logger = LoggerFactory.getLogger(RestTemplateConfig.class);
 //	private final int READ_TIMEOUT 			= 20000;
 //	private final int CONNECT_TIMEOUT		= 10000;
 	
     @Bean
     public RestTemplate restTemplate() {
-    	System.out.println("### RestTemplateConfig >>>>>>>>>>>>>>>>>>");
+    	logger.info("### RestTemplateConfig >>>>>>>>>>>>>>>>>>");
     	
     	// SSL 세팅을 위해 Factory 사용
     	SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
@@ -77,9 +76,11 @@ public class RestTemplateConfig {
     	                } }, new SecureRandom());
     	                ((HttpsURLConnection) connection).setSSLSocketFactory(sc.getSocketFactory());
     	            } catch (NoSuchAlgorithmException e) {
-    	                e.printStackTrace();
+//    	                e.printStackTrace();
+    	            	logger.error(e.getMessage());
     	            } catch (KeyManagementException e) {
-    	                e.printStackTrace();
+//    	                e.printStackTrace();
+    	                logger.error(e.getMessage());
     	            }
     	        }
     			super.prepareConnection(connection, httpMethod);
@@ -112,7 +113,6 @@ public class RestTemplateConfig {
         };
     }
     
-    @Slf4j
     static class LoggingInterceptor implements ClientHttpRequestInterceptor {
 
         @Override
@@ -129,7 +129,7 @@ public class RestTemplateConfig {
         }
 
         private void printRequest(final String sessionNumber, final HttpRequest req, final byte[] body) {
-            log.info("[{}] URI: {}, Method: {}, Headers:{}, Body:{} ",
+            logger.info("[{}] URI: {}, Method: {}, Headers:{}, Body:{} ",
                     sessionNumber, req.getURI(), req.getMethod(), req.getHeaders(), new String(body, StandardCharsets.UTF_8));
         }
 
@@ -137,7 +137,7 @@ public class RestTemplateConfig {
             String body = new BufferedReader(new InputStreamReader(res.getBody(), StandardCharsets.UTF_8)).lines()
                     .collect(Collectors.joining("\n"));
 
-            log.info("[{}] Status: {}, Headers:{}, Body:{} ",
+            logger.info("[{}] Status: {}, Headers:{}, Body:{} ",
                     sessionNumber, res.getStatusCode(), res.getHeaders(), body);
         }
     }

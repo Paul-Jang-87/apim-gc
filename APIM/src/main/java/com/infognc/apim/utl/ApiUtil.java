@@ -1,12 +1,12 @@
 package com.infognc.apim.utl;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Base64.Decoder;
@@ -260,24 +260,23 @@ public class ApiUtil {
 	                                                                          
 	 }  
 	
-	
-	public static JSONObject transferBase64URLSafeEncoding(JSONObject json) throws Exception {
+	/**
+	 * Json 데이터중에 Base64 인코딩된 데이터가 있을 시 디코딩해서 다시 세팅
+	 * 
+	 * @param json
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONObject transferBase64EncodingToJson(JSONObject json) throws Exception {
 //		JSONObject json = new JSONObject(body);
 		
 		for(String key : json.keySet()) {
             Object value = json.get(key);
             if(value instanceof String) {
             	String strVal = String.valueOf(value);
-            	if (isBase64Encoded(String.valueOf(value))) {
+            	if (isBase64Encoded(strVal)) {
             		// Base64로 인코딩된 데이터인 경우 디코딩하여 값을 업데이트
-            		String decodedValue = decodeBase64(String.valueOf(value));
-//            		json.put(key, decodedValue);
-            		
-//            		String urlEncodedValue = URLEncoder.encode(strVal, StandardCharsets.UTF_8);
-//            		json.put(key, urlEncodedValue);
-            		String urlEncodedValue = Base64.getUrlEncoder().encodeToString(decodedValue.getBytes());
-            		json.put(key, urlEncodedValue);
-//            		json.put(key, strVal);
+            		json.put(key, decodeBase64(strVal));
             	}
             }
             
@@ -299,7 +298,6 @@ public class ApiUtil {
             // 원래 문자열과 인코딩한 문자열이 같으면 Base64로 인코딩된 문자열
             boolean isBase64 = data.equals(encodedStr);
         	
-        	
         	return isBase64;
         } catch (IllegalArgumentException e) {
             return false;
@@ -312,5 +310,41 @@ public class ApiUtil {
         return new String(decodedBytes);
     }
 	
-	
+    /**
+     * 휴일 체크
+     * @return
+     */
+    public static boolean getFlagHoliday() {
+    	try {
+    		LocalDate currentDate = LocalDate.now();
+    		DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
+    		if(dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+    			return true;
+    		} else {
+    			return false;
+    		}
+    	}catch (Exception e) {
+    		e.printStackTrace();
+    		return false;
+    	}
+    }
+
+    /**
+     * 오른쪽 Padding
+     * 
+     * @param input
+     * @param length
+     * @param paddingChar
+     * @return
+     */
+    public static String rightPad(String input, int length, char paddingChar) {
+        StringBuilder paddedString = new StringBuilder(input);
+        int paddingLength = length - input.length();
+        for (int i = 0; i < paddingLength; i++) {
+            paddedString.append(paddingChar);
+        }
+        return paddedString.toString();
+    }
+    
+    
 }

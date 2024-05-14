@@ -33,6 +33,8 @@ public class ProviderServiceImpl implements ProviderService {
 
 	/**
 	 * 캠페인 리스트 전송 (To G.C)
+	 * IF-API-076702
+	 * 
 	 */
 	@Override
 	public Integer sendCampListToGc(List<Map<String, String>> inParamList) throws Exception {
@@ -164,11 +166,7 @@ public class ProviderServiceImpl implements ProviderService {
 	@Override
 	public Integer sendArsStafData(List<Map<String, String>> inParamList) throws Exception {
 		Integer resInt = 1;
-//		ApiUtil apiUtil = new ApiUtil();
-		
-//		List<Map<String,Object>> reqList = new ArrayList<Map<String, Object>>();
-//		HashMap<String,Object> reqBody = new HashMap<String, Object>();
-//		HashMap<String,String> reqData = new HashMap<String, String>();
+		boolean flagHoliday = ApiUtil.getFlagHoliday();
 
 		List<JSONObject> reqList = new ArrayList<JSONObject>();
 		JSONObject reqBody = new JSONObject();
@@ -177,8 +175,9 @@ public class ProviderServiceImpl implements ProviderService {
 		// 휴일 체크? 휴일 아닐때 CAMPLT로 데이터 저장
 		// (AS-IS) TB_SMS_HOLIDAY_CHECK 테이블에 2022년까지만 공휴일 데이터가 들어가 있고 이후는 없음.
 		// 휴일 체크 사용한다면, 휴일(토,일,공휴일)이 아닐때만 Genesys Cloud로 대상자 리스트 전송.
-		boolean flagHoliday = true;
-		if(flagHoliday) {
+		// 일단 토,일 체크
+		logger.info("## flagHoliday :: "  + flagHoliday);
+		if(flagHoliday==false) {
 			String gcUrl = "";
 			
 			// G.C로 보낼 contact data 
@@ -211,19 +210,23 @@ public class ProviderServiceImpl implements ProviderService {
 					
 					surAni = new String(Base64.decodeBase64(surAni.getBytes()));
 					
+					seqNo 		= ApiUtil.rightPad(seqNo, 20, ' ');
+					surAni 		= ApiUtil.rightPad(surAni, 12, ' ');
+					surGubun 	= ApiUtil.rightPad(surGubun, 2, ' ');
+					
 					if("BS".equals(surGubun)) {		// UCUBE - BS고객만족도 조사수행
 						// SET G.C Send Data 
 //						cpid = Configure.get("API.076701.BS.CPID") == "" ? "ee4d3744-be6c-473c-b2cc-22d8cbbb526e": Configure.get("API.076701.BS.CPID");
 						cpid = Configure.get("API.076701.BS.CPID");
 						if(cpid.equals("") || cpid == null) cpid = "ee4d3744-be6c-473c-b2cc-22d8cbbb526e";
 						tno1 = surAni;
-						tkda = "8443" + "||" + seqNo + "||" + surAni + "||" + surGubun;
+						tkda = "8443" + seqNo + surAni + surGubun;
 						
 					} else if("C".equals(surGubun)) {	// PCUBE - ARS 고객만족도 실시간 자료전송
 						// SET G.C Send Data 
 						cpid = Configure.get("API.076701.ARS.CPID") == "" ? "9" : Configure.get("API.076701.ARS.CPID");
 						tno1 = surAni;
-						tkda = "5996" + "||" + seqNo + "||" + surAni + "||" + surGubun;
+						tkda = "5996" + seqNo + surAni + surGubun;
 						
 					} else {
 					}
@@ -254,18 +257,15 @@ public class ProviderServiceImpl implements ProviderService {
 					}
 					
 					ContactLt contactLt = new ContactLt();
+					Entity_ContactLt entityContactLt = new Entity_ContactLt();
 					// AS-IS 기준으로 DB TRIGGER에서 SQ_TB_CALL_PDS_UCUBE.nextval, SQ_TB_CALL_PDS_PCUBE.nextval로 CPSQ 설정
 					// postgre DB CONTACTLT TABLE CPSQ
 					// CPID로 조회한 CPSQ MAX + 1
 					int maxCpsq = postgreService.selectMaxCpsq(cpid);
 					cpsq = String.valueOf(maxCpsq + 1);
 					
-					Entity_ContactLt entityContactLt = postgreService.findByCpidCpsq(cpid, String.valueOf(maxCpsq));
-					// contactlt update
-					// UPDATE CONTACTLT
-//					ContactLt contactLt = new ContactLt();
-//					contactLt.setCpid(cpid);
-//					postgreService.updateContactLt(entityContactLt, cpsq);
+					logger.info("## maxCpsq ::" + maxCpsq);
+					logger.info("## Cpsq(++) ::" + cpsq);
 					
 					contactLt.setCpid(cpid);
 					contactLt.setCpsq(Integer.parseInt(cpsq));

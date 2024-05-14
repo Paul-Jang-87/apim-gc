@@ -18,6 +18,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.infognc.apim.ApimConfig;
 import com.infognc.apim.ApimMakeToken;
 import com.infognc.apim.gc.ClientAction;
 import com.infognc.apim.gc.DataAction;
@@ -48,6 +49,7 @@ public class ClientServiceImpl implements ClientService{
 	 */
 	@Override
 	public HashMap<String, Object> sendCmpnRsltList(JSONArray reqBodyList) throws Exception {
+		ApiUtil apiUtil = new ApiUtil();
 		HashMap<String, Object> dsRstlInfoMap = new HashMap<String, Object>();
 		
 //		HashMap<String, Object> reqBodyMap = new HashMap<String, Object>();
@@ -93,8 +95,8 @@ public class ClientServiceImpl implements ClientService{
 					cmpnRsltJson = new JSONObject();
 					cmpnRsltJson.put("cnslTodoId", cnslTodoId);
 					cmpnRsltJson.put("todoInstId", totoInstId);
-					cmpnRsltJson.put("hldrCustId", hldrCustId);
-					cmpnRsltJson.put("entrId", entrId);
+					cmpnRsltJson.put("hldrCustId", apiUtil.encode(hldrCustId));
+					cmpnRsltJson.put("entrId", apiUtil.encode(entrId));
 					cmpnRsltJson.put("clbkRsltCd", clbkRsltCd);
 					
 					rsList.add(i, cmpnRsltJson);
@@ -167,9 +169,10 @@ public class ClientServiceImpl implements ClientService{
 			
 			logger.info("## reqBody JSON : {}", reqBody);
 			
-			// TO-BE는 Insert는 1분마다 G.C Campaign List 조회
-			// 기존 DB테이블과 비교하여 없으면 신규 캠페인 insert
-			// update, delete는 G.C에서 event bridge로 catch
+			// 기본적으로 gc-api-client에서 아래 서비스 로직 구현
+			// 1. TO-BE는 Insert는 1분마다 G.C Campaign List 조회
+			// 2. 기존 DB테이블과 비교하여 없으면 신규 캠페인 insert
+			// 3. update, delete는 G.C에서 event bridge로 전송 (gc-api-client endpoint 호출)
 		
 			if(!reqBody.isEmpty()) {
 				String cmd 		= ApiUtil.nullToString(reqBody.get("cmd"));		// insert, update, delete 구분
@@ -271,6 +274,7 @@ public class ClientServiceImpl implements ClientService{
 	
 
 	/**
+	 * 배치 (1분)
 	 * ARS 만족도 결과 실시간 전송 (IF-CCS-853)
 	 * 
 	 * SELECT 	ORDERID, 
@@ -291,7 +295,7 @@ public class ClientServiceImpl implements ClientService{
 		JSONObject arsRsltJson = null;
 		
 		List<JSONObject> rsList = new ArrayList<JSONObject>();
-		
+
 		try {
 			if(reqBodyList.length() > 0) {
 				
@@ -352,6 +356,7 @@ public class ClientServiceImpl implements ClientService{
 	}
 	
 	/**
+	 * 배치 ( 일 16:30 )
 	 * BS 고객만족도 결과 전송 (IF-CCSN-002)
 	 * 
 	 * SELECT 	SEQ_NO, 
@@ -528,8 +533,10 @@ public class ClientServiceImpl implements ClientService{
 			e.printStackTrace();
 		}
 		
+		// 2024.05.08 JJH
+		// Genesys Cloud에서 Base64 Decoding이 안되기 때문에 데이터중에 Base64 인코딩된 데이터는 디코딩해서 넘겨준다.
 		
-		return new JSONObject(response);
+		return ApiUtil.transferBase64EncodingToJson(new JSONObject(response));
 	}
 	
 	/**
@@ -544,6 +551,8 @@ public class ClientServiceImpl implements ClientService{
 	 */
 	public String callApim(String apiUrl, String method, JSONObject reqBodyMap) throws Exception {
 		String res = "";
+//		ApimConfig apimConfig = new ApimConfig();
+//		apimConfig.configure();
 		
 		// =================   APIM 호출 ===============================
 		String callPath = Configure.get("callPath");
@@ -586,7 +595,17 @@ public class ClientServiceImpl implements ClientService{
 		return res;
 	}
 	
-	
+	/**
+	 * 
+	 * RestTemplate를 사용한 UriComponent 세팅
+	 * query parameter, path variable 설정
+	 * 
+	 * @param url
+	 * @param path
+	 * @param queryJson
+	 * @return
+	 * @throws Exception
+	 */
 	public UriComponents setURI(String url, String path, JSONObject queryJson) throws Exception {
 		UriComponents uriBuilder = null;
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
