@@ -99,6 +99,7 @@ public class ClientController {
 	
 	/**
 	 * 일배치 16:30 
+	 * 서버시간이 UTC 기준이라 +09:00 필요
 	 * 
 	 * IF-API-033701 (IF-CCSN-002) -  BS 고객만족도결과 결과수신
 	 * 
@@ -106,7 +107,7 @@ public class ClientController {
 	 * @return
 	 * @throws Exception
 	 */
-	@Scheduled(cron="0 30 16 * * *")
+	@Scheduled(cron="0 30 07 * * *")
 	@PostMapping(value=ENDPOINT_BSARSSATF_RSLT)
 	public Map<String, Object> bsArsSatfRslt() throws Exception {
 		logger.info("## IF-API-033701 - BS 고객만족도결과 결과수신 (IF-CCSN-002) start");

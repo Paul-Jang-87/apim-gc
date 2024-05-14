@@ -18,16 +18,16 @@ public class Entity_IVR_SURVEY_PCUBE {
 	@Column(name = "SEQ_NO")
 	private Integer seq_no;
 	
-	@NotNull
-	@Column(name = "SUR_ANI")
-	private String sur_ani;
+//	@NotNull
+//	@Column(name = "SUR_ANI")
+//	private String sur_ani;
 	
-	@NotNull
-	@Column(name = "SUR_GUBUN")
-	private String sur_gubun;
+//	@NotNull
+//	@Column(name = "SUR_GUBUN")
+//	private String sur_gubun;
 	
-	@Column(name = "SUR_INPUTCODE")
-	private String sur_inputcode;
+//	@Column(name = "SUR_INPUTCODE")
+//	private String sur_inputcode;
 	
 	@Column(name = "SUR_SURVEY1")
 	private String sur_survey1;
@@ -35,8 +35,8 @@ public class Entity_IVR_SURVEY_PCUBE {
 	@Column(name = "SUR_SURVEY2")
 	private String sur_survey2;
 	
-	@Column(name = "SUR_SURVEY3")
-	private String sur_survey3;
+//	@Column(name = "SUR_SURVEY3")
+//	private String sur_survey3;
 	
 	@NotNull
 	@Column(name = "SUR_ANS_DATE")

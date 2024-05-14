@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePropertySource;
 
-import com.infognc.apim.utl.Configure;
+import com.infognc.apim.util.Configure;
 
 @Configuration
 public class ApimConfig {

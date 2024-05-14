@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.infognc.apim.service.ProviderService;
-import com.infognc.apim.utl.ApiUtil;
-import com.infognc.apim.utl.ApimCode;
-import com.infognc.apim.utl.HmacSha512Exception;
-import com.infognc.apim.utl.HmacTimeoutException;
+import com.infognc.apim.util.ApiUtil;
+import com.infognc.apim.util.ApimCode;
+import com.infognc.apim.util.HmacSha512Exception;
+import com.infognc.apim.util.HmacTimeoutException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

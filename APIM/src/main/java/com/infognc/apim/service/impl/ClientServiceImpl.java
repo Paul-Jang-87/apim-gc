@@ -18,16 +18,15 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.infognc.apim.ApimConfig;
 import com.infognc.apim.ApimMakeToken;
 import com.infognc.apim.gc.ClientAction;
 import com.infognc.apim.gc.DataAction;
 import com.infognc.apim.gc.HttpAction;
 import com.infognc.apim.service.ClientService;
 import com.infognc.apim.service.OracleService;
-import com.infognc.apim.utl.ApiUtil;
-import com.infognc.apim.utl.ApimCode;
-import com.infognc.apim.utl.Configure;
+import com.infognc.apim.util.ApiUtil;
+import com.infognc.apim.util.ApimCode;
+import com.infognc.apim.util.Configure;
 
 @Service
 public class ClientServiceImpl implements ClientService{

@@ -17,8 +17,8 @@ import com.infognc.apim.entities.postgre.Entity_ContactLt;
 import com.infognc.apim.gc.ClientAction;
 import com.infognc.apim.service.PostgreService;
 import com.infognc.apim.service.ProviderService;
-import com.infognc.apim.utl.ApiUtil;
-import com.infognc.apim.utl.Configure;
+import com.infognc.apim.util.ApiUtil;
+import com.infognc.apim.util.Configure;
 
 @Service
 public class ProviderServiceImpl implements ProviderService {

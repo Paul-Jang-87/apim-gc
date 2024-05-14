@@ -15,8 +15,8 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.infognc.apim.gc.HttpAction;
-import com.infognc.apim.utl.ApimCode;
-import com.infognc.apim.utl.Configure;
+import com.infognc.apim.util.ApimCode;
+import com.infognc.apim.util.Configure;
 
 @Component
 public class ApimMakeToken {

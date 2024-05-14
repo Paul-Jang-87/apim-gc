@@ -20,7 +20,6 @@ public interface Repository_IvrSurPCUBE extends CrudRepository<Entity_IVR_SURVEY
 									+ "AND 		SUR_INPUTCODE = 'Y' "
 									+ "AND 		SUR_SURVEY1 IS NOT NULL";
 	
-//    @Query(value = "SELECT SEQ_NO, SUR_SURVEY1, SUR_SURVEY2, TO_CHAR(SUR_ANS_DATE, 'YYYY/MM/DD HH24:MI:SS') AS SUR_ANS_DATE FROM TB_IVR_SURVEY_PCUBE WHERE SUR_ANS_DATE > TRUNC(SYSDATE) AND SUR_INPUTCODE = 'Y' AND SUR_SURVEY1 IS NOT NULL", nativeQuery = true)
     @Query(value = QUERY_STRING, nativeQuery = true)
     List<Entity_IVR_SURVEY_PCUBE> findSurveyNative();
 	

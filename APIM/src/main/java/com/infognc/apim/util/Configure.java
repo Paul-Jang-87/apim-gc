@@ -1,4 +1,4 @@
-package com.infognc.apim.utl;
+package com.infognc.apim.util;
 
 import java.util.HashMap;
 import java.util.Map;

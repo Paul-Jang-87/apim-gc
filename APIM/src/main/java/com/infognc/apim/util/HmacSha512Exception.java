@@ -1,4 +1,4 @@
-package com.infognc.apim.utl;
+package com.infognc.apim.util;
 
 public class HmacSha512Exception extends Exception {
 
