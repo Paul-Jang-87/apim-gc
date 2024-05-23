@@ -65,6 +65,7 @@ public class ClientServiceImpl implements ClientService{
 			if(reqBodyList.length() > 0) {
 				String tkda = "";	// 토큰데이터
 				String dirt = "";	// 발신결과코드
+				String dict = "";	// 발신시도 횟수
 				
 				for(int i=0; i<reqBodyList.length(); i++) {
 					
@@ -74,33 +75,42 @@ public class ClientServiceImpl implements ClientService{
 //					if(reqBodyList.get(i).get("dirt") != null) dirt = reqBodyList.get(i).get("dirt").toString();
 					tkda = reqBodyList.getJSONObject(i).optString("tkda");
 					dirt = reqBodyList.getJSONObject(i).optString("dirt");
+					dict = reqBodyList.getJSONObject(i).optString("dict");
 					
 					logger.info("## tkda_{} : {}", i, tkda);
 					logger.info("## dirt_{} : {}", i, dirt);
+					logger.info("## dict_{} : {}", i, dict);
 					
-					String cnslTodoId 	= tkda.split(",")[1];		// 상담TODO ID
-					String totoInstId 	= tkda.split(",")[3];		// TODO인스턴스 ID
-					String hldrCustId 	= tkda.split(",")[4];		// 명의자 고객 ID
-					String entrId 		= tkda.split(",")[5];		// 가입 ID
-					String clbkRsltCd 	= dirt;						// 콜백결과코드
-					/*
-					cmpnRsltMap = new HashMap<String, Object>();
-					cmpnRsltMap.put("cnslTodoId", cnslTodoId);
-					cmpnRsltMap.put("todoInstId", totoInstId);
-					cmpnRsltMap.put("hldrCustId", hldrCustId);
-					cmpnRsltMap.put("entrId", entrId);
-					cmpnRsltMap.put("clbkRsltCd", clbkRsltCd);
-					*/
-					cmpnRsltJson = new JSONObject();
-					cmpnRsltJson.put("cnslTodoId", cnslTodoId);
-					cmpnRsltJson.put("todoInstId", totoInstId);
-					cmpnRsltJson.put("hldrCustId", apiUtil.encode(hldrCustId));
-					cmpnRsltJson.put("entrId", apiUtil.encode(entrId));
-					cmpnRsltJson.put("clbkRsltCd", clbkRsltCd);
+					if(dirt.equals("")) dirt = "0";
 					
-					rsList.add(i, cmpnRsltJson);
+					String tkdaInitial = tkda.substring(0, 1);
+					if(dict.equals("2") && tkdaInitial.equals("S") && Integer.parseInt(dirt) > 1) {
+						String cnslTodoId 	= tkda.split(",")[1];		// 상담TODO ID
+						String totoInstId 	= tkda.split(",")[3];		// TODO인스턴스 ID
+						String hldrCustId 	= tkda.split(",")[4];		// 명의자 고객 ID
+						String entrId 		= tkda.split(",")[5];		// 가입 ID
+						String clbkRsltCd 	= dirt;						// 콜백결과코드
+						/*
+						cmpnRsltMap = new HashMap<String, Object>();
+						cmpnRsltMap.put("cnslTodoId", cnslTodoId);
+						cmpnRsltMap.put("todoInstId", totoInstId);
+						cmpnRsltMap.put("hldrCustId", hldrCustId);
+						cmpnRsltMap.put("entrId", entrId);
+						cmpnRsltMap.put("clbkRsltCd", clbkRsltCd);
+						 */
+						cmpnRsltJson = new JSONObject();
+						cmpnRsltJson.put("cnslTodoId", cnslTodoId);
+						cmpnRsltJson.put("todoInstId", totoInstId);
+						cmpnRsltJson.put("hldrCustId", apiUtil.encode(hldrCustId));
+						cmpnRsltJson.put("entrId", apiUtil.encode(entrId));
+						cmpnRsltJson.put("clbkRsltCd", clbkRsltCd);
+						
+						rsList.add(i, cmpnRsltJson);
+						
+						logger.info("## cmpnRsltJson :: {}", cmpnRsltJson);
+						
+					}
 					
-					logger.info("## cmpnRsltJson :: {}", cmpnRsltJson);
 				}
 				// apim request body 세팅
 				reqBodyJson.put("pdsDspRslt", rsList);
