@@ -1,5 +1,8 @@
 package com.infognc.apim.controller;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -140,6 +144,33 @@ public class ClientController {
 //		return clService.callApimByDataAction(reqBody);
 	}
 	
+	/**
+	 * gc-api-client 컨테이너에서 따로 스케쥴러 돌아가고 있어서 현재는 사용 X (참고용으로 둔다)
+	 * log_back.xml *.log.gz 파일 tar.gz로 변환 스크립트 스케쥴러
+	 * 보관주기 설정
+	 */
+//  @Scheduled(cron = "0 0 0 * * ?")
+//	@Scheduled(fixedDelay=60*1000)
+    @GetMapping("/logback")
+    public String compressLogs() throws IOException {
+    	logger.info("########### log_back.sh 실행 ");
+    	String result = "";
+        ProcessBuilder pb = new ProcessBuilder("/logs/log_back.sh");
+        pb.inheritIO();
+        Process process = pb.start();
+        try {
+            process.waitFor();
+            result = ">>>> log_back.sh 실행 성공";
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            result = ">>>> log_back.sh 실행 실패";
+            logger.error(">> [log_back.sh] Log compression script interrupted :: {} ", e.getMessage());
+            throw new IOException("Log compression script interrupted", e);
+        }
+        
+        return result;
+        
+    }
 	
 	/**
 	 * 
@@ -176,5 +207,20 @@ public class ClientController {
 	public String getHealthCheckKafka() throws Exception {
 		return "TEST RESPONSE";
 	}
+	
+	/**
+	 * [EKS] POD LivenessProbe 헬스체크 - 사용X
+	 */
+	private final Instant started = Instant.now();
+	
+    @GetMapping("/healthz")
+    public ResponseEntity<String> healthCheck() {
+        Duration duration = Duration.between(started, Instant.now());
+        if (duration.getSeconds() > 10) {
+            return ResponseEntity.status(500).body("error: " + duration.getSeconds());
+        } else {
+            return ResponseEntity.ok("ok");
+        }
+    }
 	
 }

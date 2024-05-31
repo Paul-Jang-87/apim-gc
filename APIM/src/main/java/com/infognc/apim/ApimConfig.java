@@ -30,7 +30,7 @@ public class ApimConfig {
 			
 			for(String name : properiNames) {
 				Configure.put(name, (String) res.getProperty(name));
-				logger.info(">> name : {}, value : {}", name, res.getProperty(name));
+//				logger.info(">> name : {}, value : {}", name, res.getProperty(name));
 			}
 
 		}catch(Exception e) {
@@ -41,7 +41,7 @@ public class ApimConfig {
 			
 			for(String name : properiNames) {
 				Configure.put(name, (String) res.getProperty(name));
-				logger.info(">> name : {}, value : {}", name, res.getProperty(name));
+//				logger.info(">> name : {}, value : {}", name, res.getProperty(name));
 			}
 		}
 

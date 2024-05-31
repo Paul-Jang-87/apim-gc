@@ -18,6 +18,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.infognc.apim.ApimConfig;
 import com.infognc.apim.ApimMakeToken;
 import com.infognc.apim.gc.ClientAction;
 import com.infognc.apim.gc.DataAction;
@@ -52,7 +53,7 @@ public class ClientServiceImpl implements ClientService{
 		HashMap<String, Object> dsRstlInfoMap = new HashMap<String, Object>();
 		
 //		HashMap<String, Object> reqBodyMap = new HashMap<String, Object>();
-		JSONObject reqBodyJson = new JSONObject();;
+		JSONObject reqBodyJson = new JSONObject();
 		JSONObject cmpnRsltJson = null;
 		
 		List<JSONObject> rsList = new ArrayList<JSONObject>();
@@ -84,7 +85,8 @@ public class ClientServiceImpl implements ClientService{
 					if(dirt.equals("")) dirt = "0";
 					
 					String tkdaInitial = tkda.substring(0, 1);
-					if(dict.equals("2") && tkdaInitial.equals("S") && Integer.parseInt(dirt) > 1) {
+					if(tkdaInitial.equals("S") && Integer.parseInt(dirt) > 1) {
+//					if(dict.equals("2") && tkdaInitial.equals("S") && Integer.parseInt(dirt) > 1) {
 						String cnslTodoId 	= tkda.split(",")[1];		// 상담TODO ID
 						String totoInstId 	= tkda.split(",")[3];		// TODO인스턴스 ID
 						String hldrCustId 	= tkda.split(",")[4];		// 명의자 고객 ID
@@ -108,29 +110,32 @@ public class ClientServiceImpl implements ClientService{
 						rsList.add(i, cmpnRsltJson);
 						
 						logger.info("## cmpnRsltJson :: {}", cmpnRsltJson);
-						
 					}
-					
 				}
 				// apim request body 세팅
-				reqBodyJson.put("pdsDspRslt", rsList);
+				if(rsList.size() > 0) {
+					reqBodyJson.put("pdsDspRslt", rsList);
+				}
 				logger.info("## reqBodyMap :: {}", reqBodyJson);
 				
 				String apiUrl 	= Configure.get("API.035101.URI");
 				
-				String response = callApim(apiUrl, "POST", reqBodyJson);
-				logger.info("## API-035101 Get Data !! : {}", response);
-				
-				JSONObject resObj = new JSONObject(response);
-				String rsltCd = resObj.optString("rsltCd", "N");
-				if(resObj == null || !rsltCd.equals("Y")) {
-					logger.info("## API-035101 DATA NOT FOUND >> " + ApimCode.RESULT_FAIL_MSG);
-					dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_FAIL_MSG);
-					return dsRstlInfoMap;
-				} else {
-					// 성공
-					dsRstlInfoMap.put("rsltCd", resObj.get("rsltCd"));
-					logger.info("## API-035101 데이터 전송 성공 ");
+				if(reqBodyJson.length() > 0) {
+					
+					String response = callApim(apiUrl, "POST", reqBodyJson);
+					logger.info("## API-035101 Get Data !! : {}", response);
+					
+					JSONObject resObj = new JSONObject(response);
+					String rsltCd = resObj.optString("rsltCd", "N");
+					if(resObj == null || !rsltCd.equals("Y")) {
+						logger.info("## API-035101 DATA NOT FOUND >> " + ApimCode.RESULT_FAIL_MSG);
+						dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_FAIL_MSG);
+						return dsRstlInfoMap;
+					} else {
+						// 성공
+						dsRstlInfoMap.put("rsltCd", resObj.get("rsltCd"));
+						logger.info("## API-035101 데이터 전송 성공 ");
+					}
 				}
 				
 			} else {
@@ -205,10 +210,19 @@ public class ClientServiceImpl implements ClientService{
 						divisionId = ((JSONObject) cmpList.optJSONObject("division", new JSONObject())).optString("id", "");
 						divisionNm = ((JSONObject) cmpList.optJSONObject("division", new JSONObject())).optString("name", "");
 					}
-					if("유큐브모바일".equals(divisionNm) || "9fca54e1-5589-4bc2-8870-84c03af42d65".equals(divisionId)) {
+					
+					logger.info("## divisionId :: " + divisionId);
+					logger.info("## divisionNm :: " + divisionNm);
+					
+					String divUcubeHome 	= Configure.get("DIV_UCUBE_HOME");
+					String divUcubeMobile 	= Configure.get("DIV_UCUBE_MOBILE");
+					
+					if("유큐브모바일".equals(divisionNm) || divUcubeMobile.equals(divisionId)) {
 						ctiDivsCd = "M";
-					} else {
+					} else if ("유큐브홈".equals(divisionNm) || divUcubeHome.equals(divisionId)) {
 						ctiDivsCd = "H";
+					} else {
+						ctiDivsCd = "";
 					}
 				}
 				
@@ -252,19 +266,22 @@ public class ClientServiceImpl implements ClientService{
 				reqBodyJson.put("cmpnDspRslt", rsList);
 				logger.info("## reqBodyMap :: {}", reqBodyJson);
 				
-				String response = callApim(apiUrl, restMethod, reqBodyJson);
-				logger.info("## {} Get Data !! : {}", logAPINm, response);
-				
-				JSONObject resObj = new JSONObject(response);
-				String rsltCd = resObj.optString("rsltCd", "N");
-				if(resObj == null || !rsltCd.equals("Y")) {
-					logger.info("## {} DATA NOT FOUND >> {} ", logAPINm, ApimCode.RESULT_FAIL_MSG);
-					dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_FAIL_MSG);
-					return dsRstlInfoMap;
-				} else {
-					// 성공
-					dsRstlInfoMap.put("rsltCd", resObj.get("rsltCd"));
-					logger.info("## {} 데이터 전송 성공 ", logAPINm);
+				// 유큐브가 아닌경우는 호출 X
+				if(!ctiDivsCd.equals("")) {
+					String response = callApim(apiUrl, restMethod, reqBodyJson);
+					logger.info("## {} Get Data !! : {}", logAPINm, response);
+					
+					JSONObject resObj = new JSONObject(response);
+					String rsltCd = resObj.optString("rsltCd", "N");
+					if(resObj == null || !rsltCd.equals("Y")) {
+						logger.info("## {} DATA NOT FOUND >> {} ", logAPINm, ApimCode.RESULT_FAIL_MSG);
+						dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_FAIL_MSG);
+						return dsRstlInfoMap;
+					} else {
+						// 성공
+						dsRstlInfoMap.put("rsltCd", resObj.get("rsltCd"));
+						logger.info("## {} 데이터 전송 성공 ", logAPINm);
+					}
 				}
 				
 			} else {
@@ -492,6 +509,10 @@ public class ClientServiceImpl implements ClientService{
 			url = ApiServer + url;
 			*/
 			// get OAuth Token
+			
+			ApimConfig apimConfig = new ApimConfig();
+			apimConfig.configure();
+			
 			String token	= Configure.get("api.auth.token");
 			if(token.isEmpty() || token == null) {
 				ApimMakeToken makeToken = new ApimMakeToken(httpAction);
@@ -560,8 +581,8 @@ public class ClientServiceImpl implements ClientService{
 	 */
 	public String callApim(String apiUrl, String method, JSONObject reqBodyMap) throws Exception {
 		String res = "";
-//		ApimConfig apimConfig = new ApimConfig();
-//		apimConfig.configure();
+		ApimConfig apimConfig = new ApimConfig();
+		apimConfig.configure();
 		
 		// =================   APIM 호출 ===============================
 		String callPath = Configure.get("callPath");
