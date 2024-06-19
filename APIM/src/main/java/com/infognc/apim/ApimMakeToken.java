@@ -83,10 +83,9 @@ public class ApimMakeToken {
 			token = (String) tokenObj.get("access_token");
 			if(isNull(token)) return null;
 		}catch(Exception e) {
-			logger.info(e.toString());
+			logger.error("Exception 발생 : {}", e.getMessage(), e);
 			return null;
 		}
-		
 		
 		dsRsltInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_Y);
 		logger.info(">> token :: " + token);

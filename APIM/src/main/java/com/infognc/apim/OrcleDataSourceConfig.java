@@ -99,8 +99,8 @@ public class OrcleDataSourceConfig {
 		Map<String, Object> hibernateProperties = new HashMap<>();
 		hibernateProperties.put("hibernate.dialect", "org.hibernate.dialect.OracleDialect");
 		hibernateProperties.put("hibernate.hbm2ddl.auto", "none");
-		hibernateProperties.put("hibernate.show_sql", true);
-		hibernateProperties.put("hibernate.format_sql", true);
+		hibernateProperties.put("hibernate.show_sql", false);	// sql 로그 출력 활성화 
+		hibernateProperties.put("hibernate.format_sql", false);	// sql 단일 라인으로 출력
 		return hibernateProperties;
 	}
 

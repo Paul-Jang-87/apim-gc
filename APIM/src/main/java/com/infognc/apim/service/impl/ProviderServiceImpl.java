@@ -115,8 +115,11 @@ public class ProviderServiceImpl implements ProviderService {
 			reqData.put("tkda", tkda);
 			reqData.put("queueid", queueid);
 			reqData.put("trycnt", "0");
-			reqData.put("tmzo", "Asia/Seoul (+09:00)");
+			reqData.put("tmzo", "Asia/Seoul");
+			// key 추가(value는 공백으로 전달) - 2024.06.14 JJH
+			reqData.put("cbdn", "");
 			
+			// 'data' Object 추가 
 			reqBody.put("data", reqData);
 			
 			// clear 안하고 계속 add - 2024.04.18
@@ -144,11 +147,9 @@ public class ProviderServiceImpl implements ProviderService {
 				logger.info("## IF-API-076702 INSERT RESULT >> {} (1:성공, 0:실패)", iUcnt);
 				
 			} catch (DataIntegrityViolationException ex) {
-				ex.printStackTrace();
-				logger.error("DataIntegrityViolationException 발생 : {}", ex.getMessage());
+				logger.error("DataIntegrityViolationException 발생 : {}", ex.getMessage(), ex);
 			} catch (DataAccessException ex) {
-				ex.printStackTrace();
-				logger.error("DataAccessException 발생 : {}", ex.getMessage());
+				logger.error("DataAccessException 발생 : {}", ex.getMessage(), ex);
 			}
 			uCnt++;
 		}
@@ -297,7 +298,8 @@ public class ProviderServiceImpl implements ProviderService {
 					reqData.put("tkda", tkda);
 					reqData.put("queueid", queueid);
 					reqData.put("trycnt", "0");
-					reqData.put("tmzo", "Asia/Seoul (+09:00)");
+					reqData.put("tmzo", "Asia/Seoul");
+					reqData.put("cbdn", "");
 					
 					reqBody.put("data", reqData);
 					
@@ -322,8 +324,7 @@ public class ProviderServiceImpl implements ProviderService {
 					}
 				}
 			}catch(Exception e) {
-				logger.error("## ERROR!!  : {} ", e.getMessage());
-				e.printStackTrace();
+				logger.error("## ERROR!!  : {} ", e.getMessage(), e);
 				return 0;
 			}
 			

@@ -147,7 +147,7 @@ public class ClientServiceImpl implements ClientService{
 			
 		}catch(Exception e) {
 			dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N);
-			e.printStackTrace();
+			logger.error("Exception 발생 : {}", e.getMessage(), e);
 		}
 		
 		return dsRstlInfoMap;
@@ -292,7 +292,7 @@ public class ClientServiceImpl implements ClientService{
 			
 		}catch(Exception e) {
 			dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N);
-			e.printStackTrace();
+			logger.error("Exception 발생 : {}", e.getMessage(), e);
 		}
 		
 		return dsRstlInfoMap;
@@ -375,7 +375,7 @@ public class ClientServiceImpl implements ClientService{
 			
 		}catch(Exception e) {
 			dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N);
-			e.printStackTrace();
+			logger.error("Exception 발생 : {}", e.getMessage(), e);
 		}
 
 		return dsRstlInfoMap;
@@ -466,7 +466,7 @@ public class ClientServiceImpl implements ClientService{
 			
 		}catch(Exception e) {
 			dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N);
-			e.printStackTrace();
+			logger.error("Exception 발생 : {}", e.getMessage(), e);
 		}
 		
 		return dsRstlInfoMap;
@@ -560,7 +560,7 @@ public class ClientServiceImpl implements ClientService{
 			logger.info("## APIM Get Data !! : {}", response);
 			
 		}catch(Exception e) {
-			e.printStackTrace();
+			logger.error("Exception 발생 : {}", e.getMessage(), e);
 		}
 		
 		// 2024.05.08 JJH

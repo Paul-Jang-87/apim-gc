@@ -55,16 +55,13 @@ public class HttpAction {
 			result = res.getBody();
 			
 		}catch(HttpClientErrorException hce) {
-			hce.printStackTrace();
-			logger.error(hce.toString());
+			logger.error(hce.getMessage(), hce);
 			return null;
 		}catch(HttpServerErrorException hse) {
-			hse.printStackTrace();
-			logger.error(hse.toString());
+			logger.error(hse.getMessage(), hse);
 			return null;
 		}catch(Exception e) {
-			e.printStackTrace();
-			logger.error(e.toString());
+			logger.error(e.getMessage(), e);
 			return null;
 		}
 		
@@ -100,16 +97,13 @@ public class HttpAction {
 			result = res.getBody();
 			
 		}catch(HttpClientErrorException hce) {
-			hce.printStackTrace();
-			logger.error(hce.toString());
+			logger.error(hce.getMessage(), hce);
 			return null;
 		}catch(HttpServerErrorException hse) {
-			hse.printStackTrace();
-			logger.error(hse.toString());
+			logger.error(hse.getMessage(), hse);
 			return null;
 		}catch(Exception e) {
-			e.printStackTrace();
-			logger.error(e.toString());
+			logger.error(e.getMessage(), e);
 			return null;
 		}
 
@@ -152,16 +146,13 @@ public class HttpAction {
 			result = res.getBody();
 			
 		}catch(HttpClientErrorException hce) {
-			hce.printStackTrace();
-			logger.error(hce.toString());
+			logger.error(hce.getMessage(), hce);
 			return null;
 		}catch(HttpServerErrorException hse) {
-			hse.printStackTrace();
-			logger.error(hse.toString());
+			logger.error(hse.getMessage(),hse);
 			return null;
 		}catch(Exception e) {
-			e.printStackTrace();
-			logger.error(e.toString());
+			logger.error(e.getMessage(), e);
 			return null;
 		}
 		
@@ -196,16 +187,13 @@ public class HttpAction {
 			result = res.getBody();
 			
 		}catch(HttpClientErrorException hce) {
-			hce.printStackTrace();
-			logger.error(hce.toString());
+			logger.error(hce.getMessage(), hce);
 			return null;
 		}catch(HttpServerErrorException hse) {
-			hse.printStackTrace();
-			logger.error(hse.toString());
+			logger.error(hse.getMessage(), hse);
 			return null;
 		}catch(Exception e) {
-			e.printStackTrace();
-			logger.error(e.toString());
+			logger.error(e.getMessage(), e);
 			return null;
 		}
 		

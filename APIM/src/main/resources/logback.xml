@@ -81,7 +81,7 @@
 			<timeBasedFileNamingAndTriggeringPolicy
 				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
 				<!-- 파일당 최고 용량 kb, mb, gb -->
-				<maxFileSize>1MB</maxFileSize>
+				<maxFileSize>10MB</maxFileSize>
 			</timeBasedFileNamingAndTriggeringPolicy>
 			<!-- 
 				# (maxHistory 사용 X)

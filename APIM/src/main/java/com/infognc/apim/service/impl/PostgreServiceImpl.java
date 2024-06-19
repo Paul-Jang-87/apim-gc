@@ -75,7 +75,7 @@ public class PostgreServiceImpl implements PostgreService{
 				Optional<Integer> optionalEntity = repositoryContactLt.findMaxCpsqByCpid(id);
 				return optionalEntity.orElse(null);
 			} catch (IncorrectResultSizeDataAccessException ex) {
-				logger.error("Error retrieving Entity_ContactLt which has hightest value of 'cpsq' column: {}", ex);
+				logger.error("Error retrieving Entity_ContactLt which has hightest value of 'cpsq' column: {}", ex.toString(), ex);
 
 				return 0;
 			}

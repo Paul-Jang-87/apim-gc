@@ -229,7 +229,8 @@ public class ApiUtil {
             String jsonString = objectMapper.writeValueAsString(map);
             return new JSONObject(jsonString);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+        	logger.error("Exception 발생 : {}", e.getMessage(), e);
             return null;
         }
 	}
@@ -324,7 +325,6 @@ public class ApiUtil {
     			return false;
     		}
     	}catch (Exception e) {
-    		e.printStackTrace();
     		return false;
     	}
     }

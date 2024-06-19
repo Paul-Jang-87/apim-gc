@@ -76,11 +76,9 @@ public class RestTemplateConfig {
     	                } }, new SecureRandom());
     	                ((HttpsURLConnection) connection).setSSLSocketFactory(sc.getSocketFactory());
     	            } catch (NoSuchAlgorithmException e) {
-//    	                e.printStackTrace();
-    	            	logger.error(e.getMessage());
+    	            	logger.error("Exception 발생 : {}", e.getMessage(), e);
     	            } catch (KeyManagementException e) {
-//    	                e.printStackTrace();
-    	                logger.error(e.getMessage());
+    	            	logger.error("Exception 발생 : {}", e.getMessage(), e);
     	            }
     	        }
     			super.prepareConnection(connection, httpMethod);

@@ -78,7 +78,6 @@ public class ProviderController {
 			// response body(dsRsltInfoMap)에 "rsltCd" : 02, "rsltMsg" : e.getMessage 세팅
 			dsRsltInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N); 
 			dsRsltInfoMap.put("rsltMsg", e.getMessage()); 
-			e.printStackTrace();
 			// 강제 status 발생
 			// response header에 "bizError" : "N" 세팅
 			// response status에 417 세팅
