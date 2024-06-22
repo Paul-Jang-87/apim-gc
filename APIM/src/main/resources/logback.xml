@@ -52,7 +52,7 @@
 			<timeBasedFileNamingAndTriggeringPolicy
 				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
 				<!-- 파일당 최고 용량 kb, mb, gb -->
-				<maxFileSize>20MB</maxFileSize>
+				<maxFileSize>10MB</maxFileSize>
 			</timeBasedFileNamingAndTriggeringPolicy>
 			<!-- 
 				# 일자별 로그파일 최대 보관주기(~일), 해당 설정일 이상된 파일은 자동으로 제거  
@@ -133,15 +133,14 @@
 		<appender-ref ref="Error" />
 	</root>
 
-	<logger name="org.apache.ibatis" level="DEBUG"
-		additivity="false">
+	<logger name="org.apache.ibatis" level="DEBUG" additivity="false">
 		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="FILE" />
 		<appender-ref ref="Error" />
 	</logger>
 
 	 <!-- Loggers -->
-    <logger name="org.apache.catalina" level="INFO" additivity="false">
+    <logger name="org.apache.catalina" level="DEBUG" additivity="false">
         <appender-ref ref="CATALINA"/>
     </logger>
 
@@ -149,6 +148,10 @@
     <root level="INFO">
         <appender-ref ref="CATALINA"/>
     </root>
+    
+    <logger name="io.netty.handler.timeout" level="OFF" />
+	<logger name="org.hibernate" level="ERROR" />
+
 
 	<!-- log4jdbc 옵션 설정 -->
 	<logger name="jdbc" level="OFF" />

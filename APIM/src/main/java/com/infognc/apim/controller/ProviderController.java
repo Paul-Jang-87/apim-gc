@@ -222,7 +222,8 @@ public class ProviderController {
 		}
 		
 		HashMap<String, String> paramChkMap = new HashMap<String, String>();
-		logger.info("## IF-API-076701 inParamMap :: " + inParamList.size());
+		logger.info("## IF-API-076701 inParamMap :: " + inParamList.toString());
+		logger.info("## IF-API-076701 inParamMap size :: " + inParamList.size());
 		
 		
 		List<Map<String, String>> paramMaps = new ArrayList<Map<String,String>>();

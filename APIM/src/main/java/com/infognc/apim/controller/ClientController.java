@@ -1,8 +1,8 @@
 package com.infognc.apim.controller;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +10,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -198,29 +197,23 @@ public class ClientController {
 	}
 	
 	/**
-	 * 부하테스트 health check 용도
+	 * 매일 00시(UTC) date 로그 생성
 	 * 
 	 * @return
 	 * @throws Exception
 	 */
-	@GetMapping("/kafka-gw")
-	public String getHealthCheckKafka() throws Exception {
-		return "TEST RESPONSE";
+	@Scheduled(cron = "0 0 0 * * ?")
+	@GetMapping("/today")
+	public void getHealthCheckKafka() throws Exception {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedDateTime = now.format(formatter);
+
+        System.out.println("Current date and time: " + formattedDateTime);
+        
+//        String res = clService.callEntContainer("https://dev-gckafka.lguplus.co.kr:8083/gethc");
+//        System.out.println("## res(8083 </gethc> :: " + res);
 	}
 	
-	/**
-	 * [EKS] POD LivenessProbe 헬스체크 - 사용X
-	 */
-	private final Instant started = Instant.now();
-	
-    @GetMapping("/healthz")
-    public ResponseEntity<String> healthCheck() {
-        Duration duration = Duration.between(started, Instant.now());
-        if (duration.getSeconds() > 10) {
-            return ResponseEntity.status(500).body("error: " + duration.getSeconds());
-        } else {
-            return ResponseEntity.ok("ok");
-        }
-    }
 	
 }

@@ -166,7 +166,7 @@ public class ProviderServiceImpl implements ProviderService {
 	 */
 	@Override
 	public Integer sendArsStafData(List<Map<String, String>> inParamList) throws Exception {
-		Integer resInt = 1;
+		Integer resInt = 0;
 		boolean flagHoliday = ApiUtil.getFlagHoliday();
 
 		List<JSONObject> reqList = new ArrayList<JSONObject>();
@@ -219,7 +219,7 @@ public class ProviderServiceImpl implements ProviderService {
 						// SET G.C Send Data 
 //						cpid = Configure.get("API.076701.BS.CPID") == "" ? "ee4d3744-be6c-473c-b2cc-22d8cbbb526e": Configure.get("API.076701.BS.CPID");
 						cpid = Configure.get("API.076701.BS.CPID");
-						if(cpid.equals("") || cpid == null) cpid = "ee4d3744-be6c-473c-b2cc-22d8cbbb526e";
+						if(cpid.equals("") || cpid == null) cpid = "01154382-5d44-4793-8f66-89277946ee59";
 						tno1 = surAni;
 						tkda = "8443" + seqNo + surAni + surGubun;
 						

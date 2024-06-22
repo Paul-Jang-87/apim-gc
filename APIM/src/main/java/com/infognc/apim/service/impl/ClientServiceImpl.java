@@ -2,6 +2,7 @@ package com.infognc.apim.service.impl;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -674,6 +676,23 @@ public class ClientServiceImpl implements ClientService{
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
 		
 		return uriBuilder;
+	}
+	
+	
+	@Override
+	public String callEntContainer(String url) throws Exception {
+		String result = "";
+		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(url).build(true);;
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Arrays.asList(new MediaType[] { MediaType.APPLICATION_JSON }));
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
+		HttpEntity<String> entity = new HttpEntity<String>(headers);
+		
+		result = httpAction.restTemplateService(uriBuilder, entity, "GET");
+		
+		return result;
 	}
 	
 	

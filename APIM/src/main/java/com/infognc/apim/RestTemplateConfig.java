@@ -33,8 +33,6 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Configuration
 public class RestTemplateConfig {
 	private static final Logger logger = LoggerFactory.getLogger(RestTemplateConfig.class);

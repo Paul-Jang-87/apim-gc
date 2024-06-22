@@ -134,7 +134,8 @@ public class HttpAction {
 				method = HttpMethod.GET;
 			}
 			
-//			HttpEntity<String> entity = new HttpEntity<String>(headers);
+			// 응답시간 체크용
+			long startTime = System.currentTimeMillis();
 			
 			ResponseEntity<String> res = restTemplate.exchange(
 											uriBuilder.toUriString(), 
@@ -143,6 +144,8 @@ public class HttpAction {
 											String.class
 											);
 			
+			long elapsedTime = System.currentTimeMillis() - startTime;
+			logger.info("## API response time :: " + elapsedTime + " ms");
 			result = res.getBody();
 			
 		}catch(HttpClientErrorException hce) {

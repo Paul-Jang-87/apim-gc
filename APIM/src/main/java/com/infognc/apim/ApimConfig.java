@@ -35,7 +35,7 @@ public class ApimConfig {
 
 		}catch(Exception e) {
 			// configMap으로 생성된 properties 파일 제대로 못찾으면 내부 properties로 
-			propertiesPath = "classpath:/config/apim_dev.properties";
+			propertiesPath = "classpath:/config/apim_prd.properties";
 			ResourcePropertySource res = new ResourcePropertySource(propertiesPath);
 			String[] properiNames = res.getPropertyNames();
 			
