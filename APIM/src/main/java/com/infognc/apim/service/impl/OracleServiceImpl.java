@@ -5,6 +5,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.infognc.apim.entities.oracle.Entity_IVR_SURVEY_PCUBE;
 import com.infognc.apim.entities.oracle.Entity_IVR_SURVEY_UCUBE_W;
@@ -24,6 +25,7 @@ public class OracleServiceImpl implements OracleService{
 		this.ivrSurUcube = ivrSurUcube;
 	}
 
+	@Transactional
 	@Override
 	public JSONArray selectPcube() throws Exception {
 		JSONArray resultJsonArray = new JSONArray();
@@ -50,7 +52,7 @@ public class OracleServiceImpl implements OracleService{
 		return resultJsonArray;
 	}
 	
-	
+	@Transactional
 	@Override
 	public JSONArray selectUcube() throws Exception {
 		JSONArray resultJsonArray = new JSONArray();

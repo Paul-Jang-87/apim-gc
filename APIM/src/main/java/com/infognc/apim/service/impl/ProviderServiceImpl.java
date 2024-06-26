@@ -40,9 +40,6 @@ public class ProviderServiceImpl implements ProviderService {
 	public Integer sendCampListToGc(List<Map<String, String>> inParamList) throws Exception {
 		Entity_ContactLt enContactLt = new Entity_ContactLt();
 		
-//		List<Map<String,Object>> reqList = new ArrayList<Map<String, Object>>();
-//		HashMap<String,Object> reqBody = new HashMap<String, Object>();
-//		HashMap<String,String> reqData = new HashMap<String, String>();
 		List<JSONObject> reqList = new ArrayList<JSONObject>();
 		JSONObject reqBody = new JSONObject();
 		JSONObject reqData = new JSONObject();
@@ -67,7 +64,6 @@ public class ProviderServiceImpl implements ProviderService {
 		
 		
 		ContactLt contactLt = new ContactLt();
-		Integer uCnt = 0;
 		Integer iUcnt = 0;
 		for (int i = 0; i < inParamList.size(); i++) {
 			
@@ -144,14 +140,16 @@ public class ProviderServiceImpl implements ProviderService {
 			// db인서트
 			try {
 				iUcnt = postgreService.InsertContactLt(enContactLt);
-				logger.info("## IF-API-076702 INSERT RESULT >> {} (1:성공, 0:실패)", iUcnt);
-				
 			} catch (DataIntegrityViolationException ex) {
 				logger.error("DataIntegrityViolationException 발생 : {}", ex.getMessage(), ex);
 			} catch (DataAccessException ex) {
 				logger.error("DataAccessException 발생 : {}", ex.getMessage(), ex);
+			} catch(Exception ex) {
+				logger.error("Exception 발생 : {}", ex.getMessage(), ex);
 			}
-			uCnt++;
+			
+			logger.info("## IF-API-076702 INSERT RESULT >> {} (1:성공, 0:실패)", iUcnt);
+
 		}
 		
 		return iUcnt;
@@ -327,7 +325,6 @@ public class ProviderServiceImpl implements ProviderService {
 				logger.error("## ERROR!!  : {} ", e.getMessage(), e);
 				return 0;
 			}
-			
 		} 
 		return resInt;
 	}

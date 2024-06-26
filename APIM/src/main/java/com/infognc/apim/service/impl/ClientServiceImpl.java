@@ -2,7 +2,6 @@ package com.infognc.apim.service.impl;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -13,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -653,47 +651,28 @@ public class ClientServiceImpl implements ClientService{
 		// uri 특수문자
 		if(!"".equals(path) && !queryJson.isEmpty()) {
 			// path O, query O
-			System.out.println("## path O, query O");
+			logger.info("## path O, query O");
 			Object[] pathArr = path.trim().split(",");
 			uriBuilder = UriComponentsBuilder.fromUriString(url).queryParams(params).buildAndExpand(pathArr);
 		} else if(!queryJson.isEmpty()) {
 			// path X, query O
-			System.out.println("## path X, query O");
+			logger.info("## path X, query O");
 //			uriBuilder = UriComponentsBuilder.fromUriString(url).queryParams(params).build(true);
 			URI uri = new URI(url);
 			uriBuilder = UriComponentsBuilder.fromUri(uri).queryParams(params).build();
 		} else if(!"".equals(path)) {
 			// path O, query X
-			System.out.println("## path O, query X");
+			logger.info("## path O, query X");
 			Object[] pathArr = path.trim().split(",");
 			uriBuilder = UriComponentsBuilder.fromUriString(url).buildAndExpand(pathArr);
 		} else {
 			// path X, query X
-			System.out.println("## path X, query X");
+			logger.info("## path X, query X");
 			uriBuilder = UriComponentsBuilder.fromUriString(url).build(true);
 		}
-		
-		System.out.println("## uriBuilder :: " + uriBuilder.toString());
+		logger.info("## uriBuilder :: " + uriBuilder.toString());
 		
 		return uriBuilder;
 	}
-	
-	
-	@Override
-	public String callEntContainer(String url) throws Exception {
-		String result = "";
-		UriComponents uriBuilder = UriComponentsBuilder.fromUriString(url).build(true);;
-		
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Arrays.asList(new MediaType[] { MediaType.APPLICATION_JSON }));
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		
-		HttpEntity<String> entity = new HttpEntity<String>(headers);
-		
-		result = httpAction.restTemplateService(uriBuilder, entity, "GET");
-		
-		return result;
-	}
-	
 	
 }

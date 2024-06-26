@@ -19,7 +19,6 @@ public class ApimConfig {
 		// 쿠버네티스 configMap으로 생성한 properties 파일부터 탐색 없으면 내부 /config
 		propertiesPath = "file:/config/apim.properties";
 		
-		System.out.println("## propertiesPath :: " + propertiesPath);
 		logger.info(">> propertiesPath :: " + propertiesPath);
 		
 		Configure configure = new Configure();

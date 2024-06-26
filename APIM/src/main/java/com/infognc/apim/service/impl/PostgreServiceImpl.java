@@ -36,7 +36,7 @@ public class PostgreServiceImpl implements PostgreService{
 			Optional<Entity_CampMa> existingEntity = repositoryCampMa.findById(entityCampMa.getCpid());
 			
 			if (existingEntity.isPresent()) {
-				throw new DataIntegrityViolationException("Record with the given composite key already exists.");
+				throw new DataIntegrityViolationException("해당 복합 키를 가진 레코드가 이미 존재합니다");
 			}
 			
 			return repositoryCampMa.save(entityCampMa);
@@ -48,7 +48,7 @@ public class PostgreServiceImpl implements PostgreService{
 			Optional<Entity_ContactLt> existingEntity = repositoryContactLt.findById(entityContactLt.getId());
 
 			if (existingEntity.isPresent()) {
-			    throw new DataIntegrityViolationException("Record with the given composite key already exists.");
+			    throw new DataIntegrityViolationException("해당 복합 키를 가진 레코드가 이미 존재합니다");
 			}
 			repositoryContactLt.save(entityContactLt);
 			
@@ -70,13 +70,15 @@ public class PostgreServiceImpl implements PostgreService{
 		// SELECT CONTACTLT TABLE - MAX CPSQ 
 		@Override
 		public Integer selectMaxCpsq(String id) {
-			
 			try {
-				Optional<Integer> optionalEntity = repositoryContactLt.findMaxCpsqByCpid(id);
-				return optionalEntity.orElse(null);
+				Optional<String> optionalEntity = repositoryContactLt.findMaxCpsqByCpid(id);
+				if(optionalEntity == null) {
+					return 0;
+				} else {
+					return Integer.parseInt(optionalEntity.orElse(null));
+				}
 			} catch (IncorrectResultSizeDataAccessException ex) {
-				logger.error("Error retrieving Entity_ContactLt which has hightest value of 'cpsq' column: {}", ex.toString(), ex);
-
+				logger.error("max 'cpsq' 값을 정상적으로 불러오지 못했습니다. : {}", ex.toString(), ex);
 				return 0;
 			}
 		}

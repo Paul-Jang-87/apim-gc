@@ -208,11 +208,10 @@ public class ClientController {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedDateTime = now.format(formatter);
-
-        System.out.println("Current date and time: " + formattedDateTime);
         
-//        String res = clService.callEntContainer("https://dev-gckafka.lguplus.co.kr:8083/gethc");
-//        System.out.println("## res(8083 </gethc> :: " + res);
+        logger.info("### Current date and time: " + formattedDateTime);
+        logger.error("### Current date and time: " + formattedDateTime);
+        
 	}
 	
 	

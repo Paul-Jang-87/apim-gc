@@ -26,7 +26,4 @@ public interface ClientService {
 	// Genesys Cloud DataAction에서 APIM 호출
 	public JSONObject callApimByDataAction(DataAction reqJson) throws Exception;
 	
-	// 컨테이너 내부 호출
-	public String callEntContainer(String url) throws Exception;
-	
 }

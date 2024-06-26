@@ -41,7 +41,6 @@ public class RestTemplateConfig {
 	
     @Bean
     public RestTemplate restTemplate() {
-    	logger.info("### RestTemplateConfig >>>>>>>>>>>>>>>>>>");
     	
     	// SSL 세팅을 위해 Factory 사용
     	SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {

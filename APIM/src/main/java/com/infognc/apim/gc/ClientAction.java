@@ -48,7 +48,6 @@ public class ClientAction {
 		accessToken		= Configure.get("gc.auth.token");
 		
 		credentialsAuth();
-		logger.info("### client init() call");
 		
 		if("".equals(accessToken) || accessToken == null || accessToken.isEmpty()) {
 			accessToken = authResponse.getBody().getAccess_token();
@@ -110,7 +109,6 @@ public class ClientAction {
 									.buildAndExpand(path)
 									;
 		System.out.println("## uriBuilder :: " + uriBuilder.toString());
-		System.out.println("## accessToken :: " + accessToken);
 		
 		String res = httpAction.restTemplateService(uriBuilder, accessToken);
 		
