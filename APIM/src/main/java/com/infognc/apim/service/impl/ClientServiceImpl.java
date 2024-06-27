@@ -32,6 +32,7 @@ import com.infognc.apim.util.Configure;
 @Service
 public class ClientServiceImpl implements ClientService{
 	private static final Logger logger = LoggerFactory.getLogger(ClientServiceImpl.class);
+	private static final Logger errorLogger = LoggerFactory.getLogger("ErrorLogger");
 	private final HttpAction httpAction;
 	private final ClientAction clientAction;
 	private final OracleService oracleService;
@@ -147,7 +148,8 @@ public class ClientServiceImpl implements ClientService{
 			
 		}catch(Exception e) {
 			dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N);
-			logger.error("Exception 발생 : {}", e.getMessage(), e);
+			logger.error("Exception 발생 : {}", e.getMessage());
+			errorLogger.error(e.getMessage(), e);
 		}
 		
 		return dsRstlInfoMap;
@@ -292,7 +294,8 @@ public class ClientServiceImpl implements ClientService{
 			
 		}catch(Exception e) {
 			dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N);
-			logger.error("Exception 발생 : {}", e.getMessage(), e);
+			logger.error("Exception 발생 : {}", e.getMessage());
+			errorLogger.error(e.getMessage(), e);
 		}
 		
 		return dsRstlInfoMap;
@@ -375,7 +378,8 @@ public class ClientServiceImpl implements ClientService{
 			
 		}catch(Exception e) {
 			dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N);
-			logger.error("Exception 발생 : {}", e.getMessage(), e);
+			logger.error("Exception 발생 : {}", e.getMessage());
+			errorLogger.error(e.getMessage(), e);
 		}
 
 		return dsRstlInfoMap;
@@ -466,7 +470,8 @@ public class ClientServiceImpl implements ClientService{
 			
 		}catch(Exception e) {
 			dsRstlInfoMap.put("rsltCd", ApimCode.RESULT_SUCCESS_N);
-			logger.error("Exception 발생 : {}", e.getMessage(), e);
+			logger.error("Exception 발생 : {}", e.getMessage());
+			errorLogger.error(e.getMessage(), e);
 		}
 		
 		return dsRstlInfoMap;
@@ -560,7 +565,8 @@ public class ClientServiceImpl implements ClientService{
 			logger.info("## APIM Get Data !! : {}", response);
 			
 		}catch(Exception e) {
-			logger.error("Exception 발생 : {}", e.getMessage(), e);
+			logger.error("Exception 발생 : {}", e.getMessage());
+			errorLogger.error(e.getMessage(), e);
 		}
 		
 		// 2024.05.08 JJH

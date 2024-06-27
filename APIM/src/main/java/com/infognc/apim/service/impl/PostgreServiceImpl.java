@@ -22,6 +22,7 @@ import jakarta.transaction.Transactional;
 @Service
 public class PostgreServiceImpl implements PostgreService{
 	private static final Logger logger = LoggerFactory.getLogger(PostgreServiceImpl.class);
+	private static final Logger errorLogger = LoggerFactory.getLogger("ErrorLogger");
 	private final Repository_CampMa repositoryCampMa;
 	private final Repository_ContactLt repositoryContactLt;
 	
@@ -78,7 +79,8 @@ public class PostgreServiceImpl implements PostgreService{
 					return Integer.parseInt(optionalEntity.orElse(null));
 				}
 			} catch (IncorrectResultSizeDataAccessException ex) {
-				logger.error("max 'cpsq' 값을 정상적으로 불러오지 못했습니다. : {}", ex.toString(), ex);
+				logger.error("max 'cpsq' 값을 정상적으로 불러오지 못했습니다. : {}", ex.getMessage());
+				errorLogger.error(ex.getMessage(), ex);
 				return 0;
 			}
 		}

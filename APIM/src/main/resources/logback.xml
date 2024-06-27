@@ -130,7 +130,7 @@
 	<root level="${LOG_LEVEL}">
 		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="FILE" />
-		<appender-ref ref="Error" />
+		<AppenderRef ref="Error" />
 	</root>
 
 	<logger name="org.apache.ibatis" level="DEBUG" additivity="false">
@@ -143,6 +143,11 @@
     <logger name="org.apache.catalina" level="DEBUG" additivity="false">
         <appender-ref ref="CATALINA"/>
     </logger>
+
+	<!--  error logger -->
+    <Logger name="ErrorLogger" level="error" additivity="false">
+    	<AppenderRef ref="Error" />
+    </Logger>
 
     <!-- Root logger -->
     <root level="INFO">

@@ -23,6 +23,7 @@ import com.infognc.apim.util.Configure;
 @Service
 public class ProviderServiceImpl implements ProviderService {
 	private static final Logger logger = LoggerFactory.getLogger(ProviderServiceImpl.class);
+	private static final Logger errorLogger = LoggerFactory.getLogger("ErrorLogger");
 	private final PostgreService postgreService;
 	private final ClientAction clientAction;
 
@@ -141,11 +142,14 @@ public class ProviderServiceImpl implements ProviderService {
 			try {
 				iUcnt = postgreService.InsertContactLt(enContactLt);
 			} catch (DataIntegrityViolationException ex) {
-				logger.error("DataIntegrityViolationException 발생 : {}", ex.getMessage(), ex);
+				logger.error("DataIntegrityViolationException 발생 : {}", ex.getMessage());
+				errorLogger.error("DataIntegrityViolationException 발생 : {}", ex.getMessage(), ex);
 			} catch (DataAccessException ex) {
-				logger.error("DataAccessException 발생 : {}", ex.getMessage(), ex);
+				logger.error("DataAccessException 발생 : {}", ex.getMessage());
+				errorLogger.error("DataAccessException 발생 : {}", ex.getMessage(), ex);
 			} catch(Exception ex) {
-				logger.error("Exception 발생 : {}", ex.getMessage(), ex);
+				logger.error("Exception 발생 : {}", ex.getMessage());
+				errorLogger.error("Exception 발생 : {}", ex.getMessage(), ex);
 			}
 			
 			logger.info("## IF-API-076702 INSERT RESULT >> {} (1:성공, 0:실패)", iUcnt);

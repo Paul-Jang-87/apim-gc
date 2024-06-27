@@ -21,6 +21,7 @@ import com.infognc.apim.util.Configure;
 @Component
 public class ApimMakeToken {
 	private static final Logger logger = LoggerFactory.getLogger(ApimMakeToken.class);
+	private static final Logger errorLogger = LoggerFactory.getLogger("ErrorLogger");
 	private final HttpAction httpAction;
 //	private final ClientAction clientAction;
 	
@@ -83,7 +84,8 @@ public class ApimMakeToken {
 			token = (String) tokenObj.get("access_token");
 			if(isNull(token)) return null;
 		}catch(Exception e) {
-			logger.error("Exception 발생 : {}", e.getMessage(), e);
+			logger.error("Exception 발생 : {}", e.getMessage());
+			errorLogger.error(e.getMessage(), e);
 			return null;
 		}
 		

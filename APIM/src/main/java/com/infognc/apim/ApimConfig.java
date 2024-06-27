@@ -14,10 +14,11 @@ public class ApimConfig {
 	
 	@Bean
 	public Configure configure() throws Exception {
-		String propertiesPath = "";
 		
 		// 쿠버네티스 configMap으로 생성한 properties 파일부터 탐색 없으면 내부 /config
-		propertiesPath = "file:/config/apim.properties";
+		String propertiesPath = "file:/config/apim.properties";
+		// Genesys Cloud OAuth Info 
+		String gcOAuthPropPath = "file:/logs/gc_config/gcapi_info.properties";
 		
 		logger.info(">> propertiesPath :: " + propertiesPath);
 		
@@ -32,6 +33,15 @@ public class ApimConfig {
 //				logger.info(">> name : {}, value : {}", name, res.getProperty(name));
 			}
 
+			ResourcePropertySource res_gc = new ResourcePropertySource(gcOAuthPropPath);
+			String[] properiNames_gc = res_gc.getPropertyNames();
+			
+			for(String name : properiNames_gc) {
+				Configure.put(name, (String) res_gc.getProperty(name));
+//				logger.info(">> name : {}, value : {}", name, res.getProperty(name));
+			}
+			
+			
 		}catch(Exception e) {
 			// configMap으로 생성된 properties 파일 제대로 못찾으면 내부 properties로 
 			propertiesPath = "classpath:/config/apim_prd.properties";

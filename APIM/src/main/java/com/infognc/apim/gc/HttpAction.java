@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponents;
 @Component
 public class HttpAction {
 	private static final Logger logger = LoggerFactory.getLogger(HttpAction.class);
+	private static final Logger errorLogger = LoggerFactory.getLogger("ErrorLogger");
 	
 	private final RestTemplate restTemplate;
 	
@@ -55,13 +56,16 @@ public class HttpAction {
 			result = res.getBody();
 			
 		}catch(HttpClientErrorException hce) {
-			logger.error(hce.getMessage(), hce);
+			logger.error(hce.getMessage());
+			errorLogger.error(hce.getMessage(), hce);
 			return null;
 		}catch(HttpServerErrorException hse) {
-			logger.error(hse.getMessage(), hse);
+			logger.error(hse.getMessage());
+			errorLogger.error(hse.getMessage(), hse);
 			return null;
 		}catch(Exception e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage());
+			errorLogger.error(e.getMessage(), e);
 			return null;
 		}
 		
@@ -97,13 +101,16 @@ public class HttpAction {
 			result = res.getBody();
 			
 		}catch(HttpClientErrorException hce) {
-			logger.error(hce.getMessage(), hce);
+			logger.error(hce.getMessage());
+			errorLogger.error(hce.getMessage(), hce);
 			return null;
 		}catch(HttpServerErrorException hse) {
-			logger.error(hse.getMessage(), hse);
+			logger.error(hse.getMessage());
+			errorLogger.error(hse.getMessage(), hse);
 			return null;
 		}catch(Exception e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage());
+			errorLogger.error(e.getMessage(), e);
 			return null;
 		}
 
@@ -149,13 +156,16 @@ public class HttpAction {
 			result = res.getBody();
 			
 		}catch(HttpClientErrorException hce) {
-			logger.error(hce.getMessage(), hce);
+			logger.error(hce.getMessage());
+			errorLogger.error(hce.getMessage(), hce);
 			return null;
 		}catch(HttpServerErrorException hse) {
-			logger.error(hse.getMessage(),hse);
+			logger.error(hse.getMessage());
+			errorLogger.error(hse.getMessage(), hse);
 			return null;
 		}catch(Exception e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage());
+			errorLogger.error(e.getMessage(), e);
 			return null;
 		}
 		
@@ -190,13 +200,16 @@ public class HttpAction {
 			result = res.getBody();
 			
 		}catch(HttpClientErrorException hce) {
-			logger.error(hce.getMessage(), hce);
+			logger.error(hce.getMessage());
+			errorLogger.error(hce.getMessage(), hce);
 			return null;
 		}catch(HttpServerErrorException hse) {
-			logger.error(hse.getMessage(), hse);
+			logger.error(hse.getMessage());
+			errorLogger.error(hse.getMessage(), hse);
 			return null;
 		}catch(Exception e) {
-			logger.error(e.getMessage(), e);
+			logger.error(e.getMessage());
+			errorLogger.error(e.getMessage(), e);
 			return null;
 		}
 		

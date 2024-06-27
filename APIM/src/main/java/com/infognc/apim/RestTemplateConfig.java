@@ -36,6 +36,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class RestTemplateConfig {
 	private static final Logger logger = LoggerFactory.getLogger(RestTemplateConfig.class);
+	private static final Logger errorLogger = LoggerFactory.getLogger("ErrorLogger");
 //	private final int READ_TIMEOUT 			= 20000;
 //	private final int CONNECT_TIMEOUT		= 10000;
 	
@@ -73,9 +74,11 @@ public class RestTemplateConfig {
     	                } }, new SecureRandom());
     	                ((HttpsURLConnection) connection).setSSLSocketFactory(sc.getSocketFactory());
     	            } catch (NoSuchAlgorithmException e) {
-    	            	logger.error("Exception 발생 : {}", e.getMessage(), e);
+    	            	logger.error("Exception 발생 : {}", e.getMessage());
+    	            	errorLogger.error(e.getMessage(), e);
     	            } catch (KeyManagementException e) {
-    	            	logger.error("Exception 발생 : {}", e.getMessage(), e);
+    	            	logger.error("Exception 발생 : {}", e.getMessage());
+    	            	errorLogger.error(e.getMessage(), e);
     	            }
     	        }
     			super.prepareConnection(connection, httpMethod);

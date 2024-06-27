@@ -32,6 +32,7 @@ import com.google.gson.Gson;
 
 public class ApiUtil {
 	private static final Logger logger = LoggerFactory.getLogger(ApiUtil.class);
+	private static final Logger errorLogger = LoggerFactory.getLogger("ErrorLogger");
 	protected static final String REQ_MNDT_FIELD_ERROR = "요청 필수항목이 누락되었습니다.";
 	
 	private static final String keyHmacSha512 = Configure.get("keyHmacSha512");
@@ -230,7 +231,8 @@ public class ApiUtil {
             return new JSONObject(jsonString);
         } catch (JsonProcessingException e) {
 //            e.printStackTrace();
-        	logger.error("Exception 발생 : {}", e.getMessage(), e);
+        	logger.error("Exception 발생 : {}", e.getMessage());
+        	errorLogger.error(e.getMessage(), e);
             return null;
         }
 	}
