@@ -46,7 +46,7 @@ public class ClientAction {
 		clientId 		= Configure.get("gc.client.id");
 		clientSecret 	= Configure.get("gc.client.secret");
 		accessToken		= Configure.get("gc.auth.token");
-		
+
 		credentialsAuth();
 		
 		if("".equals(accessToken) || accessToken == null || accessToken.isEmpty()) {

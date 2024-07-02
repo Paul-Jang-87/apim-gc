@@ -28,5 +28,5 @@ public interface Repository_ContactLt extends CrudRepository<Entity_ContactLt,  
 //    @Query("SELECT MAX(e.id.cpsq) FROM Entity_ContactLt e WHERE e.id.cpid = :cpid")
     @Query(value = "SELECT MAX(c.cpsq) FROM CONTACTLT c WHERE c.cpid = :cpid", nativeQuery = true)
     Optional<String> findMaxCpsqByCpid(@Param("cpid") String cpid);
-
+    
 }

@@ -69,17 +69,13 @@ public class OracleServiceImpl implements OracleService{
 				jsonObject.put("sur_ans_date", entity.getSur_ans_date());
 				
 				resultJsonArray.put(jsonObject);
-				
-				// 전송하고 지워야지
-				// delete
-//				ivrSurUcube.deleteById(entity.getOrderid());
-//				ivrSurUcube.deleteById(entity.getSeq_no());
 			}
 		}
 		
 		return resultJsonArray;
 	}
 	
+	@Transactional
 	@Override
 	public void deleteUcubeSdw(String seqNo) throws Exception {
 		ivrSurUcube.deleteById(seqNo);	

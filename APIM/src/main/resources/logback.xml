@@ -66,11 +66,11 @@
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<!-- 파일경로 설정 -->
 		<file>${LOG_PATH}/${LOG_FILE_NAME}.log</file>
-		<!-- 출력패턴 설정 -->
-		<encoder
-			class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>info</level>
+		</filter>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<pattern>${LOG_PATTERN}</pattern>
-
 		</encoder>
 		<!-- Rolling 정책 -->
 		<rollingPolicy
@@ -81,7 +81,7 @@
 			<timeBasedFileNamingAndTriggeringPolicy
 				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
 				<!-- 파일당 최고 용량 kb, mb, gb -->
-				<maxFileSize>10MB</maxFileSize>
+				<maxFileSize>20MB</maxFileSize>
 			</timeBasedFileNamingAndTriggeringPolicy>
 			<!-- 
 				# (maxHistory 사용 X)

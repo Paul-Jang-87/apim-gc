@@ -15,15 +15,8 @@ public interface PostgreService {
 	
 	Entity_ContactLt findByCpidCpsq(String cpid, String cpsq);	// select
 	
-	
 	// 특정 캠페인리스트 MAX 
 	Integer selectMaxCpsq(String id);
-	
-	
-	
-	// 캠페인 결과 (CAMPRT)
-//	Entity_CampRt InsertCampRt(Entity_CampRt entityCampRt);		// INSERT
-//	Entity_CampRt selectCampRtByCpid(String cpid);				// SELECT by 캠페인 ID
 	
 	
 }

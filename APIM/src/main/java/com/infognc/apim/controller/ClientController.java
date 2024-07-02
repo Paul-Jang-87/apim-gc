@@ -22,6 +22,7 @@ import com.infognc.apim.service.ClientService;
 @RestController
 public class ClientController {
 	private static final Logger logger = LoggerFactory.getLogger(ClientController.class);
+	private static final Logger errorLogger = LoggerFactory.getLogger("ErrorLogger");
 	private final String ENDPOINT_PDS_RSLT = "/dspRslt";
 	private final String ENDPOINT_PDS_RGST = "/cmpnMstrRegist";
 	private final String ENDPOINT_ARSSATF_RSLT = "/arsSatfRsltRtmDat";
@@ -202,16 +203,17 @@ public class ClientController {
 	 * @return
 	 * @throws Exception
 	 */
-	@Scheduled(cron = "0 0 0 * * ?")
+//	@Scheduled(fixedDelay=60*1000)
 	@GetMapping("/today")
+	@Scheduled(cron = "0 0 0 * * ?")
 	public void getHealthCheckKafka() throws Exception {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedDateTime = now.format(formatter);
         
-        logger.info("### Current date and time: " + formattedDateTime);
-        logger.error("### Current date and time: " + formattedDateTime);
-        
+        logger.info("### Current date and time: {} ", formattedDateTime);
+        logger.error("### Current date and time: {} ", formattedDateTime);
+        errorLogger.error("### Current date and time: {} [errorLogger]", formattedDateTime);
 	}
 	
 	

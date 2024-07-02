@@ -213,8 +213,7 @@ public class ClientServiceImpl implements ClientService{
 						divisionNm = ((JSONObject) cmpList.optJSONObject("division", new JSONObject())).optString("name", "");
 					}
 					
-					logger.info("## divisionId :: " + divisionId);
-					logger.info("## divisionNm :: " + divisionNm);
+					logger.info("## divisionId : {}, divisionNm : {} " + divisionId, divisionNm);
 					
 					String divUcubeHome 	= Configure.get("DIV_UCUBE_HOME");
 					String divUcubeMobile 	= Configure.get("DIV_UCUBE_MOBILE");
@@ -329,9 +328,6 @@ public class ClientServiceImpl implements ClientService{
 			if(reqBodyList.length() > 0) {
 				
 				for(int i=0; i<reqBodyList.length(); i++) {
-					
-					logger.info("## reqBodyList :: {}", reqBodyList.getJSONObject(i));
-					
 					arsRsltJson = new JSONObject();
 					arsRsltJson.put("ismsSendSno", reqBodyList.getJSONObject(i).optString("seq_no", ""));
 					arsRsltJson.put("ansrNm1", reqBodyList.getJSONObject(i).optString("sur_survey1", ""));
@@ -339,7 +335,6 @@ public class ClientServiceImpl implements ClientService{
 					arsRsltJson.put("ismsAnsrDttm", reqBodyList.getJSONObject(i).optString("sur_ans_date", ""));
 					
 					rsList.add(i, arsRsltJson);
-					
 					logger.info("## cmpnRsltJson :: {}", arsRsltJson);
 				}
 				
@@ -359,11 +354,11 @@ public class ClientServiceImpl implements ClientService{
 					return dsRstlInfoMap;
 				} else {
 					// 성공
-					// 결과가 성공이면 전송했던 데이터 삭제
 					dsRstlInfoMap.put("rsltCd", resObj.get("rsltCd"));
 					logger.info("## API-033701 데이터 전송 성공 ");
 					
-					// delete ????
+					// delete 
+					// 결과가 성공이면 전송했던 데이터 삭제
 					for(int j=0; j<rsList.size(); j++) {
 						String ismsSendSno = rsList.get(j).optString("ismsSendSno", "");
 						oracleService.deleteUcubeSdw(ismsSendSno);
@@ -409,11 +404,11 @@ public class ClientServiceImpl implements ClientService{
 		JSONObject arsRsltJson = null;
 		
 		List<JSONObject> rsList = new ArrayList<JSONObject>();
-		
+		logger.info("## reqBodyList size :: {}", reqBodyList.length());
 		try {
 			if(reqBodyList.length() > 0) {
 				int sDataCnt = 0;
-				
+				int count = 0;
 				for(int i=0; i<reqBodyList.length(); i++) {
 					
 					logger.info("## reqBodyList :: {}", reqBodyList.getJSONObject(i));
@@ -424,11 +419,11 @@ public class ClientServiceImpl implements ClientService{
 					arsRsltJson.put("ansrNm4", reqBodyList.getJSONObject(i).optString("sur_survey2", ""));
 					arsRsltJson.put("ismsAnsrDttm", reqBodyList.getJSONObject(i).optString("sur_ans_date", ""));
 					
-					rsList.add(i, arsRsltJson);
+					rsList.add(count, arsRsltJson);
 					logger.info("## cmpnRsltJson :: {}", arsRsltJson);
 					
 					// 건수가 많아서 500건씩 보냄???
-					
+					count++;
 					sDataCnt++;
 					if(sDataCnt % 500 == 0 || sDataCnt == reqBodyList.length()) {
 						reqBodyJson = new JSONObject();
@@ -449,15 +444,13 @@ public class ClientServiceImpl implements ClientService{
 							return dsRstlInfoMap;
 						} else {
 							// 성공
-							// 결과가 성공이면 전송했던 데이터 삭제
 							dsRstlInfoMap.put("rsltCd", resObj.get("rsltCd"));
 							logger.info("## API-033701 데이터 전송 성공 ");
 							
-//							rsList.clear();
-//							rsList = new ArrayList<JSONObject>();
-							
-							
-							
+							// 결과가 성공이면 전송했던 데이터 삭제
+							count = 0;
+							rsList.clear();
+							rsList = new ArrayList<JSONObject>();
 						}
 					}
 				}
@@ -484,7 +477,7 @@ public class ClientServiceImpl implements ClientService{
 	 * Genesys Cloud DataAction에서 APIM 호출 ( 443포트만 가능 )
 	 * 
 	 */
-	@SuppressWarnings("null")
+//	@SuppressWarnings("null")
 	@Override
 	public JSONObject callApimByDataAction(DataAction reqJson) throws Exception {
 		String response = "";
