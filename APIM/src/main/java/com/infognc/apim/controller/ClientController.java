@@ -194,6 +194,8 @@ public class ClientController {
 	 */
 	@GetMapping("/apim-gw")
 	public String getHealthCheckAPIM() throws Exception {
+		errorLogger.error("엔드포인트 /apim-gw , errorLogger 에러로그 발생");
+		errorLogger.info("엔드포인트 /apim-gw , INFO");
 		return "TEST RESPONSE";
 	}
 	
@@ -212,8 +214,7 @@ public class ClientController {
         String formattedDateTime = now.format(formatter);
         
         logger.info("### Current date and time: {} ", formattedDateTime);
-        logger.error("### Current date and time: {} ", formattedDateTime);
-        errorLogger.error("### Current date and time: {} [errorLogger]", formattedDateTime);
+        errorLogger.error("### Current date and time: {} ", formattedDateTime);
 	}
 	
 	
