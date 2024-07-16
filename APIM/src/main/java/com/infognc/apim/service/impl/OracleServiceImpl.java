@@ -78,7 +78,8 @@ public class OracleServiceImpl implements OracleService{
 	@Transactional
 	@Override
 	public void deleteUcubeSdw(String seqNo) throws Exception {
-		ivrSurUcube.deleteById(seqNo);	
+//		ivrSurUcube.deleteById(seqNo);	
+		ivrSurUcube.deleteById(seqNo);;	
 	}
 	
 }

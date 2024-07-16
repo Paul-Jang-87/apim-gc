@@ -35,8 +35,7 @@ public class ProviderController {
 	
 	/*
 	 * 
-	 * [유큐브 캠패인 대상자 전송]
-	 * IF-API-076702 (IF-CRM-010)
+	 * [유큐브 
 	 * 
 	 */
 	@PostMapping(value=ENDPOINT_CRM)
@@ -88,10 +87,10 @@ public class ProviderController {
 		}
 
 		HashMap<String, String> paramChkMap = new HashMap<String, String>();
-		logger.info("## IF-API-076702 inParamMap :: " + inParamList.size());
+		logger.info("## IF-API-076702 inParamMap :: " + inParamList);
+		logger.info("## IF-API-076702 inParamMap size :: " + inParamList.size());
 		
 		HashMap<String,Object> rtnMap = new HashMap<String, Object>();
-		System.out.println("## inParamList.size() :: " + inParamList.size());
 		try {
 			if(inParamList.size() == 0) {
 				// array[Object] 상태에서 하위컬럼이 필수인 경우 []만 호출해도 필수체크를 해야합니다. -- 고한솔 사원 요청 204.03.26

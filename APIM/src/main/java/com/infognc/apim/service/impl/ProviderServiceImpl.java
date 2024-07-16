@@ -45,28 +45,26 @@ public class ProviderServiceImpl implements ProviderService {
 		JSONObject reqBody = new JSONObject();
 		JSONObject reqData = new JSONObject();
 		
-		String cpid = (String) inParamList.get(0).get("cpid");
-		String queueid = "";
-		
 		// GC API 호출
 		clientAction.init();
-		
-		String gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
-		// CampID로 ContactListId 가져온다.
-		// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
-		String contactListId = "";
-		String resCmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
-		JSONObject cmpList = new JSONObject(resCmpList);
-		if(!cmpList.isEmpty()) {
-			contactListId = ((JSONObject) cmpList.optJSONObject("contactList", new JSONObject())).optString("id", "");
-		/*	queueid = ((JSONObject) cmpList.get("queue")).getString("id") != null ? ((JSONObject) cmpList.get("queue")).getString("id") : "";  */
-			queueid = ((JSONObject) cmpList.optJSONObject("queue", new JSONObject())).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
-		}
-		
 		
 		ContactLt contactLt = new ContactLt();
 		Integer iUcnt = 0;
 		for (int i = 0; i < inParamList.size(); i++) {
+			String cpid = (String) inParamList.get(i).get("cpid");
+			String queueid = "";
+			
+			String gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
+			// CampID로 ContactListId 가져온다.
+			// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
+			String contactListId = "";
+			String resCmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
+			JSONObject cmpList = new JSONObject(resCmpList);
+			if(!cmpList.isEmpty()) {
+				contactListId = ((JSONObject) cmpList.optJSONObject("contactList", new JSONObject())).optString("id", "");
+				/*	queueid = ((JSONObject) cmpList.get("queue")).getString("id") != null ? ((JSONObject) cmpList.get("queue")).getString("id") : "";  */
+				queueid = ((JSONObject) cmpList.optJSONObject("queue", new JSONObject())).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
+			}
 			
 			String cpsq = inParamList.get(i).get("cpsq");
 			String cske = inParamList.get(i).get("cske");
@@ -179,7 +177,7 @@ public class ProviderServiceImpl implements ProviderService {
 		// (AS-IS) TB_SMS_HOLIDAY_CHECK 테이블에 2022년까지만 공휴일 데이터가 들어가 있고 이후는 없음.
 		// 휴일 체크 사용한다면, 휴일(토,일,공휴일)이 아닐때만 Genesys Cloud로 대상자 리스트 전송.
 		// 일단 토,일 체크
-		logger.info("## flagHoliday :: "  + flagHoliday);
+		logger.info("## flagHoliday :: {} (true:휴일, false: 평일)", flagHoliday);
 		if(flagHoliday==false) {
 			String gcUrl = "";
 			
@@ -225,6 +223,104 @@ public class ProviderServiceImpl implements ProviderService {
 						tno1 = surAni;
 						tkda = "8443" + seqNo + surAni + surGubun;
 						
+						/*
+						 * [CAMPLT]
+						 * CPID = "11" or "9"
+						 * CPSQ = SQ_PCUBE.nextval or SQ_UCUBE.nextval
+						 * CSK2 = SEQ_NO
+						 * CSK3 = SUR_GUBUN
+						 * TNO1 = SUR_ANI
+						 * TKDA = '8443'||SQE_NO||SUR_ANI||SUR_GUBUN or '5996'||SQE_NO||SUR_ANI||SUR_GUBUN
+						 * FLAG = 'A'
+						 * CRDT = sysdate
+						 * 
+						 * 불필요한 데이터는 전송 X ( ex. FLAG, CRDT )
+						 * 
+						 */
+						
+						gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
+						// CampID로 ContactListId 가져온다.
+						// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
+						String resCmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
+						JSONObject cmpList = new JSONObject(resCmpList);
+						if(!cmpList.isEmpty()) {
+							contactListId = ((JSONObject) cmpList.optJSONObject("contactList", new JSONObject())).optString("id", "");
+							queueid = ((JSONObject) cmpList.optJSONObject("queue", new JSONObject())).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
+						}
+						
+						ContactLt contactLt = new ContactLt();
+						Entity_ContactLt entityContactLt = new Entity_ContactLt();
+						// AS-IS 기준으로 DB TRIGGER에서 SQ_TB_CALL_PDS_UCUBE.nextval, SQ_TB_CALL_PDS_PCUBE.nextval로 CPSQ 설정
+						// postgre DB CONTACTLT TABLE CPSQ
+						// CPID로 조회한 CPSQ MAX + 1
+						int maxCpsq = postgreService.selectMaxCpsq(cpid);
+						if(maxCpsq==0) {
+							// select 값이 null인 경우 0으로 return 
+							// 일시적인 오류일 수도 있으니 재조회 한다. 
+							maxCpsq = postgreService.selectMaxCpsq(cpid);
+						}
+						
+						cpsq = String.valueOf(maxCpsq + 1);
+						
+						logger.info("## maxCpsq ::" + maxCpsq);
+						logger.info("## Cpsq(++) ::" + cpsq);
+						
+						contactLt.setCpid(cpid);
+						contactLt.setCpsq(Integer.parseInt(cpsq));
+						entityContactLt.setId(contactLt);
+						entityContactLt.setCske(cske);
+						entityContactLt.setCsna(csna);
+						entityContactLt.setTno1(tno1);
+						entityContactLt.setTno2(tno2);
+						entityContactLt.setTno3(tno3);
+						entityContactLt.setTkda(tkda);
+						entityContactLt.setFlag(flag);
+						
+						// id
+						reqBody.put("id", cpsq);
+						
+						// contactList id
+						reqBody.put("contactListId", contactListId);
+						
+						reqData.put("cpid", cpid);
+						reqData.put("cpsq", cpsq);
+						reqData.put("cske", cske);
+						reqData.put("csna", csna);
+						reqData.put("tno1", tno1);
+						reqData.put("tno2", tno2);
+						reqData.put("tno3", tno3);
+						reqData.put("tno4", tno4);
+						reqData.put("tno5", tno5);
+						reqData.put("tlno", tlno);
+						reqData.put("tkda", tkda);
+						reqData.put("queueid", queueid);
+						reqData.put("trycnt", "0");
+						reqData.put("tmzo", "Asia/Seoul");
+						reqData.put("cbdn", "");
+						
+						reqBody.put("data", reqData);
+						
+						reqList.add(reqBody);
+						
+						// clear 대신 계속 add
+						// contact data add 전에 clear 필요 - 2024.04.03 추가 JJH
+						// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/clear
+//					gcUrl = "/api/v2/outbound/contactlists/{contactListId}/clear";
+//					clientAction.callApiRestTemplate_POST(gcUrl, contactListId);
+						
+						// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/contacts
+						gcUrl = "/api/v2/outbound/contactlists/{contactListId}/contacts";
+						
+						String resResult = clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqList);
+						if(!"".equals(resResult)) {
+							logger.info("## Genesys Cloud API Success : {}", resResult);
+							
+							resInt = postgreService.InsertContactLt(entityContactLt);
+							if(resInt==1) {
+								logger.info("## DB INSERT SUCCESS !! , [CONTACTLT TABLE] ");
+							}
+						}
+						
 					} else if("C".equals(surGubun)) {	// PCUBE - ARS 고객만족도 실시간 자료전송
 						// SET G.C Send Data 
 						cpid = Configure.get("API.076701.ARS.CPID") == "" ? "9" : Configure.get("API.076701.ARS.CPID");
@@ -232,97 +328,6 @@ public class ProviderServiceImpl implements ProviderService {
 						tkda = "5996" + seqNo + surAni + surGubun;
 						
 					} else {
-					}
-					
-					/*
-					 * [CAMPLT]
-					 * CPID = "11" or "9"
-					 * CPSQ = SQ_PCUBE.nextval or SQ_UCUBE.nextval
-					 * CSK2 = SEQ_NO
-					 * CSK3 = SUR_GUBUN
-					 * TNO1 = SUR_ANI
-					 * TKDA = '8443'||SQE_NO||SUR_ANI||SUR_GUBUN or '5996'||SQE_NO||SUR_ANI||SUR_GUBUN
-					 * FLAG = 'A'
-					 * CRDT = sysdate
-					 * 
-					 * 불필요한 데이터는 전송 X ( ex. FLAG, CRDT )
-					 * 
-					 */
-					
-					gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
-					// CampID로 ContactListId 가져온다.
-					// API Enpoint [GET] /api/v2/outbound/campaigns/{campaignId}
-					String resCmpList = clientAction.callApiRestTemplate_GET(gcUrl, cpid);
-					JSONObject cmpList = new JSONObject(resCmpList);
-					if(!cmpList.isEmpty()) {
-						contactListId = ((JSONObject) cmpList.optJSONObject("contactList", new JSONObject())).optString("id", "");
-						queueid = ((JSONObject) cmpList.optJSONObject("queue", new JSONObject())).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
-					}
-					
-					ContactLt contactLt = new ContactLt();
-					Entity_ContactLt entityContactLt = new Entity_ContactLt();
-					// AS-IS 기준으로 DB TRIGGER에서 SQ_TB_CALL_PDS_UCUBE.nextval, SQ_TB_CALL_PDS_PCUBE.nextval로 CPSQ 설정
-					// postgre DB CONTACTLT TABLE CPSQ
-					// CPID로 조회한 CPSQ MAX + 1
-					int maxCpsq = postgreService.selectMaxCpsq(cpid);
-					cpsq = String.valueOf(maxCpsq + 1);
-					
-					logger.info("## maxCpsq ::" + maxCpsq);
-					logger.info("## Cpsq(++) ::" + cpsq);
-					
-					contactLt.setCpid(cpid);
-					contactLt.setCpsq(Integer.parseInt(cpsq));
-					entityContactLt.setId(contactLt);
-					entityContactLt.setCske(cske);
-					entityContactLt.setCsna(csna);
-					entityContactLt.setTno1(tno1);
-					entityContactLt.setTno2(tno2);
-					entityContactLt.setTno3(tno3);
-					entityContactLt.setTkda(tkda);
-					entityContactLt.setFlag(flag);
-					
-					// id
-					reqBody.put("id", cpsq);
-					
-					// contactList id
-					reqBody.put("contactListId", contactListId);
-					
-					reqData.put("cpid", cpid);
-					reqData.put("cpsq", cpsq);
-					reqData.put("cske", cske);
-					reqData.put("csna", csna);
-					reqData.put("tno1", tno1);
-					reqData.put("tno2", tno2);
-					reqData.put("tno3", tno3);
-					reqData.put("tno4", tno4);
-					reqData.put("tno5", tno5);
-					reqData.put("tlno", tlno);
-					reqData.put("tkda", tkda);
-					reqData.put("queueid", queueid);
-					reqData.put("trycnt", "0");
-					reqData.put("tmzo", "Asia/Seoul");
-					reqData.put("cbdn", "");
-					
-					reqBody.put("data", reqData);
-					
-					reqList.add(reqBody);
-					
-					// clear 대신 계속 add
-					// contact data add 전에 clear 필요 - 2024.04.03 추가 JJH
-					// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/clear
-//				gcUrl = "/api/v2/outbound/contactlists/{contactListId}/clear";
-//				clientAction.callApiRestTemplate_POST(gcUrl, contactListId);
-					
-					// API Enpoint [POST] /api/v2/outbound/contactlists/{contactListId}/contacts
-					gcUrl = "/api/v2/outbound/contactlists/{contactListId}/contacts";
-					
-					String resResult = clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqList);
-					if(!"".equals(resResult)) {
-						resInt = postgreService.InsertContactLt(entityContactLt);
-						if(resInt==1) {
-							logger.info("## DB INSERT SUCCESS !! , [CONTACTLT TABLE] ");
-						}
-						logger.info("## Genesys Cloud API Success : \n {}", resResult);
 					}
 				}
 			}catch(Exception e) {

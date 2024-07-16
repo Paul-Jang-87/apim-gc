@@ -8,15 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.infognc.apim.entities.postgre.Entity_CampMa;
 import com.infognc.apim.entities.postgre.Entity_ContactLt;
 import com.infognc.apim.repositories.postgre.Repository_CampMa;
 import com.infognc.apim.repositories.postgre.Repository_ContactLt;
 import com.infognc.apim.service.PostgreService;
-
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 
 
 @Service
@@ -32,6 +30,7 @@ public class PostgreServiceImpl implements PostgreService{
 		this.repositoryContactLt = repositoryContactLt;
 	}
 
+		@Transactional
 		@Override
 		public Entity_CampMa InsertCampMa(Entity_CampMa entityCampMa) {
 			Optional<Entity_CampMa> existingEntity = repositoryCampMa.findById(entityCampMa.getCpid());
@@ -43,6 +42,7 @@ public class PostgreServiceImpl implements PostgreService{
 			return repositoryCampMa.save(entityCampMa);
 		}
 		
+		@Transactional
 		@Override
 		public Integer InsertContactLt(Entity_ContactLt entityContactLt) {
 			
@@ -56,6 +56,7 @@ public class PostgreServiceImpl implements PostgreService{
 			return 1;
 		}
 		
+		@Transactional
 		@Override
 		public Entity_ContactLt findByCpidCpsq(String cpid, String cpsq) {
 			Optional<Entity_ContactLt> existingEntity = repositoryContactLt.findByCpidCpsq(cpid, cpsq);
@@ -70,25 +71,36 @@ public class PostgreServiceImpl implements PostgreService{
 		
 		// SELECT CONTACTLT TABLE - MAX CPSQ 
 		@Override
+		@Transactional
 		public Integer selectMaxCpsq(String id) {
+			int res = 0;
 			try {
 				Optional<String> optionalEntity = repositoryContactLt.findMaxCpsqByCpid(id);
-				if(optionalEntity == null) {
-					return 0;
+				logger.info("maxCpsqByCpid :: " + optionalEntity);
+				if(optionalEntity.orElse(null) == null) {
+					res = 0;
 				} else {
-					return Integer.parseInt(optionalEntity.orElse(null));
+					res = Integer.parseInt(optionalEntity.orElse("0"));
 				}
+
+				return res ;
+				
 			} catch (IncorrectResultSizeDataAccessException ex) {
 				logger.error("max 'cpsq' 값을 정상적으로 불러오지 못했습니다. : {}", ex.getMessage());
 				errorLogger.error(ex.getMessage(), ex);
 				return 0;
+			} catch (Exception e) {
+				logger.error("Exception 발생 : {}", e.getMessage());
+				errorLogger.error(e.getMessage(), e);
+				return 0;
 			}
 		}
 		
+		/*
 		// UPDATE CONTACTLT TABLE - CPSQ
 		@Override
 		@Transactional
-		public void updateContactLt(Entity_ContactLt entityContactLt, String cpsq) {
+		public void updateContactLt(Entity_ContactLt entityContactLt, String cpsq) throws Exception {
 	        // 주어진 엔티티의 ID를 기준으로 기존 엔티티를 조회합니다.
 	        Entity_ContactLt existingEntity = repositoryContactLt.findById(entityContactLt.getId()).orElseThrow(() ->
 	                new EntityNotFoundException("Entity not found: " + entityContactLt.getId()));
@@ -100,5 +112,5 @@ public class PostgreServiceImpl implements PostgreService{
 	        repositoryContactLt.save(existingEntity);
 			
 		}
-		
+		*/
 }

@@ -85,14 +85,25 @@ public class ClientServiceImpl implements ClientService{
 					
 					if(dirt.equals("")) dirt = "0";
 					
-					String tkdaInitial = tkda.substring(0, 1);
+					String tkdaInitial = "";
+					if(!tkda.equals("")) {
+						tkda.substring(0, 1);
+					}
+							
 					if(tkdaInitial.equals("S") && Integer.parseInt(dirt) > 1) {
 //					if(dict.equals("2") && tkdaInitial.equals("S") && Integer.parseInt(dirt) > 1) {
-						String cnslTodoId 	= tkda.split(",")[1];		// 상담TODO ID
-						String totoInstId 	= tkda.split(",")[3];		// TODO인스턴스 ID
-						String hldrCustId 	= tkda.split(",")[4];		// 명의자 고객 ID
-						String entrId 		= tkda.split(",")[5];		// 가입 ID
-						String clbkRsltCd 	= dirt;						// 콜백결과코드
+						String[] apimData = tkda.split(",");
+						String cnslTodoId 	= apimData[1];		// 상담TODO ID
+						String totoInstId 	= apimData[3];		// TODO인스턴스 ID
+						String hldrCustId 	= apimData[4];		// 명의자 고객 ID
+						// 가입 ID가 없는 경우도 있음.
+						String entrId 	= "";					// 가입 ID
+						if(apimData.length > 5) {
+							entrId 	= apimData[5];		
+						}
+						
+						String clbkRsltCd 	= dirt;					// 콜백결과코드
+						
 						/*
 						cmpnRsltMap = new HashMap<String, Object>();
 						cmpnRsltMap.put("cnslTodoId", cnslTodoId);

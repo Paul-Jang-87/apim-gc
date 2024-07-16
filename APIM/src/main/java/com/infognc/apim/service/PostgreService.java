@@ -11,8 +11,6 @@ public interface PostgreService {
 	// 캠페인 리스트 (CONTACTLT)
 	Integer InsertContactLt(Entity_ContactLt entityContactLt);	// INSERT
 	
-	void updateContactLt(Entity_ContactLt entityContactLt, String cpsq);	// update
-	
 	Entity_ContactLt findByCpidCpsq(String cpid, String cpsq);	// select
 	
 	// 특정 캠페인리스트 MAX 
