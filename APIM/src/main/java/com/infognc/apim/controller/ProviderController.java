@@ -316,6 +316,50 @@ public class ProviderController {
 		return dsRsltInfoMap;
 	}
 	
-
+	@PostMapping("/test-contact076701")
+	public String testContact076701(@RequestBody(required=false) List<Map<String, String>> inParamList) {
+		String result = "";
+		logger.info("## testContact076701 inParamMap :: " + inParamList.toString());
+		logger.info("## testContact076701 inParamMap size :: " + inParamList.size());
+		
+		Integer resInt = 0;
+		try {
+			resInt = pvService.sendArsStafData(inParamList);
+			
+		}catch(Exception e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		
+		if(resInt != 0) {
+			result = "정상적으로 처리되었습니다.";
+		}
+		
+		return result;
+	}
+	
+	@PostMapping("/test-contact076702")
+	public String testContact076702(@RequestBody(required=false) List<Map<String, String>> inParamList) {
+		String result = "";
+		logger.info("## testContact076702 inParamMap :: " + inParamList.toString());
+		logger.info("## testContact076702 inParamMap size :: " + inParamList.size());
+		
+		Integer resInt = 0;
+		try {
+			resInt = pvService.sendCampListToGc(inParamList);
+			
+		}catch(Exception e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
+		
+		if(resInt != 0) {
+			result = "정상적으로 처리되었습니다.";
+		}
+		
+		return result;
+	}
+	
+	
 	
 }

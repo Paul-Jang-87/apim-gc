@@ -80,7 +80,6 @@ public class ProviderServiceImpl implements ProviderService {
 			String tlno = "";
 			String tkda = inParamList.get(i).get("tkda");
 			String flag = inParamList.get(i).get("flag") ;
-			LocalDateTime inDate = ApiUtil.getCurrentTime();
 			
 			contactLt.setCpid(cpid);
 			contactLt.setCpsq(Integer.parseInt(cpsq));
@@ -92,7 +91,7 @@ public class ProviderServiceImpl implements ProviderService {
 			enContactLt.setTno3(tno3);
 			enContactLt.setTkda(tkda);
 			enContactLt.setFlag(flag);
-			enContactLt.setDate(inDate);
+//			enContactLt.setDate(ApiUtil.getCurrentTime());
 			
 			// id
 			reqBody.put("id", cpsq);
@@ -202,7 +201,6 @@ public class ProviderServiceImpl implements ProviderService {
 			String tkda		= "";
 			String flag		= "";
 			String queueid 	= "";
-			LocalDateTime inDate = ApiUtil.getCurrentTime();
 			
 			clientAction.init();
 			
@@ -281,7 +279,7 @@ public class ProviderServiceImpl implements ProviderService {
 						entityContactLt.setTno3(tno3);
 						entityContactLt.setTkda(tkda);
 						entityContactLt.setFlag(flag);
-						entityContactLt.setDate(inDate);
+//						entityContactLt.setDate(ApiUtil.getCurrentTime());
 						
 						// id
 						reqBody.put("id", cpsq);

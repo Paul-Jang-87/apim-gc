@@ -1,12 +1,15 @@
 package com.infognc.apim.entities.postgre;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import com.infognc.apim.embeddable.ContactLt;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -43,8 +46,21 @@ public class Entity_ContactLt {
 	@Column(name = "FLAG")
 	private String flag;
 
-	@Column(name = "DATE")
+	@Column(name = "DATE", nullable = false, updatable = false)
 	private LocalDateTime date;
+	
+	
+	/**
+	 * Entity가 저장될때 (Insert) 직전에 호출
+	 * date를 현재 시간으로 저장
+	 */
+	@PrePersist
+	protected void onCreate() {
+		ZonedDateTime utcTime = ZonedDateTime.now(ZoneId.of("UTC"));
+		ZonedDateTime seoulTime = utcTime.withZoneSameInstant(ZoneId.of("Asia/Seoul"));
+		this.date = seoulTime.toLocalDateTime();
+		
+	}
 	
 	
 }
