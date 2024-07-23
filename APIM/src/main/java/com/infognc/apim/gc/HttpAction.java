@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -98,20 +99,22 @@ public class HttpAction {
 											entity, 
 											String.class
 											);
+			HttpStatusCode stCd = res.getStatusCode();
+			logger.info("Status Code :: {} ", stCd.toString());  
 			result = res.getBody();
 			
 		}catch(HttpClientErrorException hce) {
 			logger.error(hce.getMessage());
 			errorLogger.error(hce.getMessage(), hce);
-			return null;
+			return "";
 		}catch(HttpServerErrorException hse) {
 			logger.error(hse.getMessage());
 			errorLogger.error(hse.getMessage(), hse);
-			return null;
+			return "";
 		}catch(Exception e) {
 			logger.error(e.getMessage());
 			errorLogger.error(e.getMessage(), e);
-			return null;
+			return "";
 		}
 
 		return result;

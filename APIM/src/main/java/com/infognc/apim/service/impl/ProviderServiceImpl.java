@@ -1,5 +1,6 @@
 package com.infognc.apim.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.infognc.apim.embeddable.ContactLt;
 import com.infognc.apim.entities.postgre.Entity_ContactLt;
@@ -51,7 +53,7 @@ public class ProviderServiceImpl implements ProviderService {
 		ContactLt contactLt = new ContactLt();
 		Integer iUcnt = 0;
 		for (int i = 0; i < inParamList.size(); i++) {
-			String cpid = (String) inParamList.get(i).get("cpid");
+			String cpid = inParamList.get(i).get("cpid");
 			String queueid = "";
 			
 			String gcUrl = "/api/v2/outbound/campaigns/{campaignId}";
@@ -66,7 +68,8 @@ public class ProviderServiceImpl implements ProviderService {
 				queueid = ((JSONObject) cmpList.optJSONObject("queue", new JSONObject())).optString("id", "");	// 찾으려는 key값이 null이 아닌 경우 저장, null인경우 defaultValue(2번째 파라미터)로 세팅
 			}
 			
-			String cpsq = inParamList.get(i).get("cpsq");
+			String cpsq = inParamList.get(i).getOrDefault("cpsq", "0");
+//			String cpsq = inParamList.get(i).get("cpsq");
 			String cske = inParamList.get(i).get("cske");
 			String csna = inParamList.get(i).get("csna");
 			String tno1 = new String(Base64.decodeBase64(ApiUtil.nullToString(inParamList.get(i).get("tno1"))  ));
@@ -76,8 +79,8 @@ public class ProviderServiceImpl implements ProviderService {
 			String tno5 = "";
 			String tlno = "";
 			String tkda = inParamList.get(i).get("tkda");
-			String flag = inParamList.get(i).get("flag");
-			
+			String flag = inParamList.get(i).get("flag") ;
+			LocalDateTime inDate = ApiUtil.getCurrentTime();
 			
 			contactLt.setCpid(cpid);
 			contactLt.setCpsq(Integer.parseInt(cpsq));
@@ -89,6 +92,7 @@ public class ProviderServiceImpl implements ProviderService {
 			enContactLt.setTno3(tno3);
 			enContactLt.setTkda(tkda);
 			enContactLt.setFlag(flag);
+			enContactLt.setDate(inDate);
 			
 			// id
 			reqBody.put("id", cpsq);
@@ -164,6 +168,7 @@ public class ProviderServiceImpl implements ProviderService {
 	 * BS 고객만족도 조사 수행 ('BS', UCUBE)
 	 * 
 	 */
+	@Transactional
 	@Override
 	public Integer sendArsStafData(List<Map<String, String>> inParamList) throws Exception {
 		Integer resInt = 0;
@@ -197,6 +202,7 @@ public class ProviderServiceImpl implements ProviderService {
 			String tkda		= "";
 			String flag		= "";
 			String queueid 	= "";
+			LocalDateTime inDate = ApiUtil.getCurrentTime();
 			
 			clientAction.init();
 			
@@ -275,6 +281,7 @@ public class ProviderServiceImpl implements ProviderService {
 						entityContactLt.setTno3(tno3);
 						entityContactLt.setTkda(tkda);
 						entityContactLt.setFlag(flag);
+						entityContactLt.setDate(inDate);
 						
 						// id
 						reqBody.put("id", cpsq);
@@ -314,7 +321,6 @@ public class ProviderServiceImpl implements ProviderService {
 						String resResult = clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqList);
 						if(!"".equals(resResult)) {
 							logger.info("## Genesys Cloud API Success : {}", resResult);
-							
 							resInt = postgreService.InsertContactLt(entityContactLt);
 							if(resInt==1) {
 								logger.info("## DB INSERT SUCCESS !! , [CONTACTLT TABLE] ");

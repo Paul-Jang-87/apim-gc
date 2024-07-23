@@ -35,7 +35,8 @@ public class ProviderController {
 	
 	/*
 	 * 
-	 * [유큐브 
+	 * [유큐브 캠페인 (중식 콜백) 대상자 리스트 적재]
+	 * IF-API-076702 (IF-CCS-007, IF-CCSN-008)
 	 * 
 	 */
 	@PostMapping(value=ENDPOINT_CRM)

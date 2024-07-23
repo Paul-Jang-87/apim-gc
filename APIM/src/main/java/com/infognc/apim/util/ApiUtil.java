@@ -7,6 +7,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Base64.Decoder;
@@ -347,6 +350,18 @@ public class ApiUtil {
         }
         return paddedString.toString();
     }
+    
+    
+    /**
+     * UTC 시간 -> Asia/Seoul 시간으로 변환 하여 현재 시간 반환
+     * @return
+     */
+    public static LocalDateTime getCurrentTime() {
+        ZonedDateTime utcTime = ZonedDateTime.now(ZoneId.of("UTC"));
+        ZonedDateTime seoulTime = utcTime.withZoneSameInstant(ZoneId.of("Asia/Seoul"));
+        return seoulTime.toLocalDateTime();
+    }
+    
     
     
 }

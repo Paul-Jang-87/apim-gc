@@ -1,5 +1,7 @@
 package com.infognc.apim.entities.postgre;
 
+import java.time.LocalDateTime;
+
 import com.infognc.apim.embeddable.ContactLt;
 
 import jakarta.persistence.Column;
@@ -41,19 +43,9 @@ public class Entity_ContactLt {
 	@Column(name = "FLAG")
 	private String flag;
 
-	/*
-	public Entity_ContactLt(String cske, String tno1, String tno2, String tno3, String csna, String tkda,
-			String flag) {
-		this.id = new ContactLt();
-		this.cske = cske;
-		this.tno1 = tno1;
-		this.tno2 = tno2;
-		this.tno3 = tno3;
-		this.csna = csna;
-		this.tkda = tkda;
-		this.flag = flag;
-	}
-	*/
+	@Column(name = "DATE")
+	private LocalDateTime date;
+	
 	
 }
 	
