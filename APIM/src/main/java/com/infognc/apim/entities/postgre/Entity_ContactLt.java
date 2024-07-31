@@ -49,7 +49,6 @@ public class Entity_ContactLt {
 	@Column(name = "DATE", nullable = false, updatable = false)
 	private LocalDateTime date;
 	
-	
 	/**
 	 * Entity가 저장될때 (Insert) 직전에 호출
 	 * date를 현재 시간으로 저장

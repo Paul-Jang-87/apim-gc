@@ -2,11 +2,14 @@ package com.infognc.apim.repositories.oracle;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import com.infognc.apim.entities.oracle.Entity_IVR_SURVEY_PCUBE;
+
+import jakarta.persistence.LockModeType;
 
 @Repository
 public interface Repository_IvrSurPCUBE extends CrudRepository<Entity_IVR_SURVEY_PCUBE, Integer> {
@@ -20,6 +23,7 @@ public interface Repository_IvrSurPCUBE extends CrudRepository<Entity_IVR_SURVEY
 									+ "AND 		SUR_INPUTCODE = 'Y' "
 									+ "AND 		SUR_SURVEY1 IS NOT NULL";
 	
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query(value = QUERY_STRING, nativeQuery = true)
     List<Entity_IVR_SURVEY_PCUBE> findSurveyNative();
 	

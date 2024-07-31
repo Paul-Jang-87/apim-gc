@@ -2,6 +2,7 @@ package com.infognc.apim.repositories.oracle;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -11,9 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.infognc.apim.entities.oracle.Entity_IVR_SURVEY_UCUBE_W;
 
+import jakarta.persistence.LockModeType;
+
 @Repository
 public interface Repository_IvrSurUCUBE_W extends CrudRepository<Entity_IVR_SURVEY_UCUBE_W, String> {
 
+	@Lock(LockModeType.PESSIMISTIC_READ)
 	List<Entity_IVR_SURVEY_UCUBE_W> findAll();
 	
 	@Modifying

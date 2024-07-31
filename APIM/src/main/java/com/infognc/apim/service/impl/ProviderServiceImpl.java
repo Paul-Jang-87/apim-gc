@@ -141,7 +141,7 @@ public class ProviderServiceImpl implements ProviderService {
 			
 			// db인서트
 			try {
-				iUcnt = postgreService.InsertContactLt(enContactLt);
+				iUcnt = postgreService.insertContactLt(enContactLt);
 			} catch (DataIntegrityViolationException ex) {
 				logger.error("DataIntegrityViolationException 발생 : {}", ex.getMessage());
 				errorLogger.error("DataIntegrityViolationException 발생 : {}", ex.getMessage(), ex);
@@ -319,7 +319,7 @@ public class ProviderServiceImpl implements ProviderService {
 						String resResult = clientAction.callApiRestTemplate_POST(gcUrl, contactListId, reqList);
 						if(!"".equals(resResult)) {
 							logger.info("## Genesys Cloud API Success : {}", resResult);
-							resInt = postgreService.InsertContactLt(entityContactLt);
+							resInt = postgreService.insertContactLt(entityContactLt);
 							if(resInt==1) {
 								logger.info("## DB INSERT SUCCESS !! , [CONTACTLT TABLE] ");
 							}
