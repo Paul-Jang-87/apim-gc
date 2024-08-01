@@ -20,8 +20,9 @@ public interface Repository_ContactLt extends CrudRepository<Entity_ContactLt,  
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Entity_ContactLt> findById(ContactLt id);
 
+//    @Query(value = "SELECT MAX(c.cpsq) FROM CONTACTLT c WHERE c.cpid = :cpid", nativeQuery = true)
+    @Query("SELECT MAX(c.id.cpsq) FROM Entity_ContactLt c WHERE c.id.cpid = :cpid")
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query(value = "SELECT MAX(c.cpsq) FROM CONTACTLT c WHERE c.cpid = :cpid", nativeQuery = true)
     Optional<String> findMaxCpsqByCpid(@Param("cpid") String cpid);
     
 }

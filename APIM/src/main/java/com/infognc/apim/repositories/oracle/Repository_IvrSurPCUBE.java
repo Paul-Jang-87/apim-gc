@@ -23,7 +23,6 @@ public interface Repository_IvrSurPCUBE extends CrudRepository<Entity_IVR_SURVEY
 									+ "AND 		SUR_INPUTCODE = 'Y' "
 									+ "AND 		SUR_SURVEY1 IS NOT NULL";
 	
-	@Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query(value = QUERY_STRING, nativeQuery = true)
     List<Entity_IVR_SURVEY_PCUBE> findSurveyNative();
 	
